@@ -1,0 +1,24 @@
+# Video — host on Cloudflare R2 or any CDN; do NOT commit large binary files
+static/hero.mp4
+
+# CV PDF — contains personal info; deploy separately or add manually on server
+static/cv.pdf
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Python (if any tooling is added later)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node (if any tooling is added later)
+node_modules/

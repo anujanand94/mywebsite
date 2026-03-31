@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- TODO: Update page title if desired -->
+  <title>Anuj Anand — Investment Analyst</title>
+  <meta name="description" content="Investment Analyst | CFA Level III Candidate | Dual Qualified Attorney (NY &amp; India) | Inovestor Inc. Montreal → Toronto, June 2026" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="static/css/style.css" />
+</head>
+<body>
+
+<!-- ═══ CURSOR ═══ -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ═══════════════════════════════════════════
+     NAV
+═══════════════════════════════════════════ -->
+<nav>
+  <!-- TODO: Update initials if name changes -->
+  <a href="#hero-wrapper" class="nav-logo">A·A</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     HERO — SCROLL VIDEO SCRUB
+═══════════════════════════════════════════ -->
+<div id="hero-wrapper">
+  <div id="hero-sticky">
+
+    <!-- Video (scroll-scrubbed) -->
+    <!-- TODO: Replace HERO_VIDEO_URL with your Cloudflare R2 / CDN public video URL
+         Example: https://pub-xxxx.r2.dev/hero.mp4
+         Do NOT commit hero.mp4 to git — it's in .gitignore -->
+    <video id="hero-video" muted playsinline preload="auto">
+      <source src="HERO_VIDEO_URL" type="video/mp4">
+    </video>
+
+    <!-- Cinematic gradient overlay -->
+    <div class="hero-gradient"></div>
+
+    <!-- Hero text content -->
+    <div class="hero-content">
+      <!-- TODO: Update eyebrow line if role/credentials change -->
+      <p class="hero-eyebrow">Investment Analyst · CFA Level III Candidate · Builder</p>
+
+      <!-- TODO: Update name if needed -->
+      <h1 class="hero-name">Anuj / <em>Anand</em></h1>
+
+      <!-- TODO: Update tagline (degrees, employer) -->
+      <p class="hero-tagline">
+        LLM · MBA · Dual-Qualified Attorney (NY &amp; India)
+        <span class="sep">/</span>
+        Inovestor Inc.
+      </p>
+
+      <!-- TODO: Update hero stats to match current track record -->
+      <div class="hero-stats">
+        <div class="hero-stat-item">
+          <span class="hero-stat-val">41%</span>
+          <span class="hero-stat-label">Avg. Return</span>
+        </div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-val">72%</span>
+          <span class="hero-stat-label">Hit Rate</span>
+        </div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-val">18</span>
+          <span class="hero-stat-label">Published Picks</span>
+        </div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-val">128%</span>
+          <span class="hero-stat-label">Best Screen Return</span>
+        </div>
+      </div>
+
+      <div class="hero-ctas">
+        <a href="#experience" class="btn btn-gold">View Experience</a>
+        <a href="#contact" class="btn btn-outline">Get in Touch</a>
+      </div>
+    </div>
+
+    <!-- Gold video progress bar -->
+    <div id="vid-progress">
+      <div id="vid-progress-fill"></div>
+    </div>
+
+    <!-- Scroll hint -->
+    <div id="scroll-hint">Scroll to explore</div>
+
+  </div><!-- /hero-sticky -->
+</div><!-- /hero-wrapper -->
+
+<!-- ═══════════════════════════════════════════
+     SECTION 01 — ABOUT
+═══════════════════════════════════════════ -->
+<section id="about">
+
+  <!-- TODO: Update highlight numbers to match current track record -->
+  <div class="about-highlights reveal">
+    <div class="highlight-box">
+      <div class="highlight-num">41%</div>
+      <div class="highlight-label">Avg Return · 18 Picks</div>
+    </div>
+    <div class="highlight-box">
+      <div class="highlight-num">72%</div>
+      <div class="highlight-label">Hit Rate · G&amp;M Articles</div>
+    </div>
+    <div class="highlight-box">
+      <div class="highlight-num">4.08</div>
+      <div class="highlight-label">CGPA · Concordia MBA</div>
+    </div>
+    <div class="highlight-box">
+      <div class="highlight-num">Top 10</div>
+      <div class="highlight-label">Harvard Case Competition</div>
+    </div>
+  </div>
+
+  <p class="section-label">01 — About</p>
+  <h2 class="section-title">Finance. Law. <em>Technology.</em></h2>
+
+  <div class="about-grid">
+    <!-- Left: Bio -->
+    <!-- TODO: Update bio paragraphs to reflect any role or credential changes -->
+    <div class="about-bio reveal">
+      <p>
+        Investment Analyst at Inovestor Inc. with a track record of publishing high-performing
+        stock picks in the Globe &amp; Mail — 41% average return, 72% hit rate across 18 picks
+        covering Canadian and U.S. equities.
+      </p>
+      <p>
+        My background is unusual: a dual-qualified attorney (New York Bar, Bar Council of India)
+        who pivoted to capital markets through a top-ranked MBA at Concordia. I am a CFA Level III
+        candidate, completing the trilogy.
+      </p>
+      <p>
+        Beyond research, I build — AI-powered equity tools, quantitative backtesting platforms,
+        automated intelligence workflows. I believe the next generation of analysts will code their
+        own edge.
+      </p>
+
+      <div class="about-meta">
+        <div class="meta-row">
+          <span class="meta-label">Languages</span>
+          <span class="meta-val">English (Fluent) · Hindi (Native) · French (Intermediate)</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Interests</span>
+          <span class="meta-val">Cooking · Chess · Sci-fi · Astrophysics · AI Development</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Credential cards -->
+    <!-- TODO: Update credential cards if new certifications or achievements added -->
+    <div class="credentials reveal">
+
+      <div class="credential-card">
+        <div class="credential-icon">⚖</div>
+        <div class="credential-title">Dual-Qualified Attorney</div>
+        <div class="credential-sub">New York Bar (2019) · Bar Council of India (2021)</div>
+      </div>
+
+      <div class="credential-card">
+        <div class="credential-icon">◆</div>
+        <div class="credential-title">CFA Level III Candidate</div>
+        <div class="credential-sub">Passed Level II · Jan 2026 Exam Written</div>
+      </div>
+
+      <div class="credential-card">
+        <div class="credential-icon">🎓</div>
+        <div class="credential-title">MBA in Investment Management</div>
+        <div class="credential-sub">Concordia University · CGPA 4.08/4.3 · Top-Ranked</div>
+      </div>
+
+      <div class="credential-card">
+        <div class="credential-icon">🎓</div>
+        <div class="credential-title">Master of Laws (LLM)</div>
+        <div class="credential-sub">Fordham University, New York · IP, Tech &amp; Corporate Law</div>
+      </div>
+
+      <div class="credential-card">
+        <div class="credential-icon">📰</div>
+        <div class="credential-title">Globe &amp; Mail Contributor</div>
+        <div class="credential-sub">6 Articles · 18 Picks · 41% Avg. Return · 72% Hit Rate</div>
+      </div>
+
+      <div class="credential-card">
+        <div class="credential-icon">🏆</div>
+        <div class="credential-title">Harvard Case Competition</div>
+        <div class="credential-sub">Top 10 of 250+ Teams · M&amp;A / Private Equity Track</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 02 — EXPERIENCE
+═══════════════════════════════════════════ -->
+<section id="experience">
+  <p class="section-label">02 — Experience</p>
+  <h2 class="section-title">Where I've <em>Built</em></h2>
+
+  <div class="timeline">
+
+    <!-- TODO: Update dates, role, company, and bullets for new positions -->
+    <!-- Job 1 -->
+    <div class="timeline-item reveal">
+      <div class="timeline-meta">May 2023 – Present</div>
+      <div class="timeline-role">Investment Analyst</div>
+      <div class="timeline-company">Inovestor Inc. · Montreal, Quebec</div>
+      <ul class="timeline-bullets">
+        <li>Designed proprietary multi-factor quantitative screening models; authored content for 6 Globe &amp; Mail articles featuring 18 stock picks (published under PM's byline).</li>
+        <li>41% average return, 72% hit rate (13 of 18 positive) · U.S. picks: 47% return, 67% hit rate · Canadian picks: 35% return, 78% hit rate.</li>
+        <li>Identified four multi-baggers: Commodity screen averaged +128% return; Earnings Revision screen averaged +86% return.</li>
+        <li>Maintain Canadian model portfolio (market-weight); monthly investor updates. Strategy underlies INOC ETF ($30M AUM), NASDAQ-listed.</li>
+        <li>Developed AI-powered financial data extraction workflow using Python and Anthropic LLM API — significant cost reduction and operational efficiency gains.</li>
+        <li>Subject matter expert in client-facing sales demonstrations; answering client queries on API endpoints.</li>
+      </ul>
+    </div>
+
+    <!-- Job 2 -->
+    <div class="timeline-item reveal">
+      <div class="timeline-meta">May 2018 – Jun 2022</div>
+      <div class="timeline-role">Attorney-at-Law</div>
+      <div class="timeline-company">New York State Bar · Bar Council of India</div>
+      <ul class="timeline-bullets">
+        <li>Provided legal consultation on Wills, Estate and Tax law for a high-net-worth client in Portland, OR.</li>
+        <li>Cross-border legal research, commercial documentation drafting, and client advisory with U.S. attorney as independent contractor.</li>
+        <li>Conducted client interviews and case management; drafted legal notices, affidavits, and commercial documentation.</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 03 — PROJECTS & COMPETITIONS
+═══════════════════════════════════════════ -->
+<section id="projects">
+  <p class="section-label">03 — Projects &amp; Competitions</p>
+  <h2 class="section-title">Work That <em>Moves Markets</em></h2>
+
+  <div class="projects-grid">
+
+    <!-- TODO: Update project cards as new projects are built -->
+    <!-- Card 1 -->
+    <div class="project-card reveal">
+      <div class="project-meta">Personal Project · 2026</div>
+      <div class="project-title">AI Consult</div>
+      <p class="project-desc">
+        Rapid preliminary vetting tool for high-conviction deep research. Delivers
+        institutional-quality equity analysis on any globally listed stock — adjustable DCF
+        model (bull/base/bear), analyst consensus targets, composite fair-value signal,
+        two-pass LLM pipeline for full research reports.
+      </p>
+      <div class="project-tags">
+        <span class="tag">Python</span>
+        <span class="tag">Claude API</span>
+        <span class="tag">Claude Code</span>
+        <span class="tag">DCF Model</span>
+        <span class="tag">yfinance</span>
+      </div>
+    </div>
+
+    <!-- Card 2 — Quantodian -->
+    <div class="project-card reveal">
+      <div class="project-meta">Personal Project · 2025–2026</div>
+      <div class="project-title">Quantodian</div>
+      <p class="project-desc">
+        Institutional-grade factor research platform covering S&amp;P 500 and TSX 60.
+        Computes 20+ factors across Quality, Value, Growth, Momentum and Sentiment
+        categories using Compustat and IBES data. Quintile backtesting with IC analysis,
+        Sharpe ratios, and cumulative return charts — built to defend every design decision
+        in a systematic AM interview.
+      </p>
+      <div class="project-tags">
+        <span class="tag">Python</span>
+        <span class="tag">Flask</span>
+        <span class="tag">Compustat</span>
+        <span class="tag">IBES</span>
+        <span class="tag">Factor Research</span>
+        <span class="tag">Backtesting</span>
+      </div>
+    </div>
+
+    <!-- Card 3 — Market Intelligence Daily Report -->
+    <div class="project-card reveal">
+      <div class="project-meta">Personal Project · 2025–2026</div>
+      <div class="project-title">Market Intelligence — Daily Report</div>
+      <p class="project-desc">
+        Automated Python system that generates a comprehensive morning market briefing
+        every weekday at 7 AM and a rotating GICS sector deep-dive every Saturday.
+        Covers global equities (US, India, Canada), fixed income, FX, commodities,
+        crypto, news aggregation from 9 sources, a sector 6-Pack, and economic calendar.
+        OS-level scheduling — runs without any app open.
+      </p>
+      <div class="project-tags">
+        <span class="tag">Python</span>
+        <span class="tag">yfinance</span>
+        <span class="tag">RSS Aggregation</span>
+        <span class="tag">PDF Export</span>
+        <span class="tag">Cron Scheduling</span>
+      </div>
+    </div>
+
+    <!-- Card 4 — QuantLab LSTM/ML -->
+    <div class="project-card reveal">
+      <div class="project-meta">Personal Project · 2025</div>
+      <div class="project-title">QuantLab — ML Trading System</div>
+      <p class="project-desc">
+        FastAPI-powered backtesting and machine learning lab for systematic trading strategies.
+        Implements z-score mean reversion with configurable entry/exit thresholds, then layers
+        in ML classifiers (Random Forest, Gradient Boosting, Ridge) trained on technical
+        features. Side-by-side comparison of rules-based vs. ML equity curves with confusion
+        matrices and accuracy metrics.
+      </p>
+      <div class="project-tags">
+        <span class="tag">Python</span>
+        <span class="tag">FastAPI</span>
+        <span class="tag">scikit-learn</span>
+        <span class="tag">Random Forest</span>
+        <span class="tag">Mean Reversion</span>
+        <span class="tag">Backtesting</span>
+      </div>
+    </div>
+
+    <!-- Card 5 — Harvard -->
+    <div class="project-card reveal">
+      <div class="project-meta">Competition · Top 10 of 250+ Teams</div>
+      <div class="project-title">Harvard Global Case Competition</div>
+      <p class="project-desc">
+        Buy-Side M&amp;A Analysis — Ferrari / Pirelli. Built three DCF models, three Comps
+        models, and a synergy model. Presented recommendation to acquire Brembo instead.
+      </p>
+      <div class="project-tags">
+        <span class="tag">DCF</span>
+        <span class="tag">Comps</span>
+        <span class="tag">Synergy Model</span>
+        <span class="tag">M&amp;A Strategy</span>
+      </div>
+    </div>
+
+    <!-- Card 6 — McGill -->
+    <div class="project-card reveal">
+      <div class="project-meta">Competition · Best Presentation &amp; Analysis Award</div>
+      <div class="project-title">McGill International Portfolio Challenge</div>
+      <p class="project-desc">
+        Designed hybrid DB &amp; DC pension portfolio strategy for Florida based on
+        demographic and economic forecasting. Won Best Presentation &amp; Analysis Award
+        out of 99 teams.
+      </p>
+      <div class="project-tags">
+        <span class="tag">Asset Allocation</span>
+        <span class="tag">DB/DC Strategy</span>
+        <span class="tag">Demographic Modeling</span>
+      </div>
+    </div>
+
+    <!-- Card 7 — Full width G&M Track Record -->
+    <!-- TODO: Add new G&M articles here as they are published -->
+    <div class="project-card full-width reveal">
+      <div class="project-meta">Globe &amp; Mail · 6 Articles</div>
+      <div class="project-title">Published Stock Pick Track Record</div>
+
+      <div class="gm-stats">
+        <div>
+          <div class="gm-stat-val">41%</div>
+          <div class="gm-stat-label">Avg Return</div>
+        </div>
+        <div>
+          <div class="gm-stat-val">72%</div>
+          <div class="gm-stat-label">Hit Rate</div>
+        </div>
+        <div>
+          <div class="gm-stat-val">128%</div>
+          <div class="gm-stat-label">Best Screen Return</div>
+        </div>
+        <div>
+          <div class="gm-stat-val">18</div>
+          <div class="gm-stat-label">Total Picks</div>
+        </div>
+      </div>
+
+      <!-- TODO: Update article list as new articles are published -->
+      <ul class="gm-articles">
+        <li>
+          <div>
+            "Canadian Stocks with Positive Analyst Sentiment"
+            <span class="gm-article-screen">Earnings Revision Screen · 10 stocks · Jun 2025</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            "U.S. Mining Companies Amid Surging Commodity Prices"
+            <span class="gm-article-screen">Commodity Cycle Screen · 10 stocks · Jul 2025</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            "Industry Leaders to Weather Weaker Canadian Economy"
+            <span class="gm-article-screen">Quality/ROIC Screen · 11 stocks · Sep 2025</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            "S&amp;P 500 Stocks with Consistent Dividend Growth"
+            <span class="gm-article-screen">Dividend Growth Screen · 12 stocks · Oct 2025</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            "TSX Momentum Stocks Supported by Fundamentals"
+            <span class="gm-article-screen">Momentum Screen · 12 stocks · Nov 2025</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            "U.S. Quality Leaders for Steepening Yield Curve"
+            <span class="gm-article-screen">Cyclical Quality Screen · 12 stocks · Dec 2025</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="project-tags" style="margin-top:28px;">
+        <span class="tag">Equity Research</span>
+        <span class="tag">Quantitative Screening</span>
+        <span class="tag">Canadian Markets</span>
+        <span class="tag">U.S. Markets</span>
+        <span class="tag">Globe &amp; Mail</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 04 — EDUCATION
+═══════════════════════════════════════════ -->
+<section id="education">
+  <p class="section-label">04 — Education</p>
+  <h2 class="section-title">The <em>Foundation</em></h2>
+
+  <!-- TODO: Update education entries if new degrees/certifications added -->
+  <div class="edu-grid">
+
+    <div class="edu-card reveal">
+      <div class="edu-degree">MBA in Investment Management</div>
+      <div class="edu-school">John Molson School of Business · Concordia University</div>
+      <div class="edu-dates">2022 – 2025 · Montreal</div>
+      <div class="edu-notes">
+        Top-ranked student · CGPA 4.08/4.3 · Goodman Institute Scholarship ·
+        JMSB Exceptional Performance Award (×2) · Highest Cumulative GPA Award ·
+        Teaching Assistant · CFA Coursework integrated
+      </div>
+    </div>
+
+    <div class="edu-card reveal">
+      <div class="edu-degree">Master of Laws (LLM)</div>
+      <div class="edu-school">Fordham University · School of Law</div>
+      <div class="edu-dates">2017 – 2018 · New York, USA</div>
+      <div class="edu-notes">
+        IP, Technology &amp; Corporate Law · US Legal System · Corporate Law ·
+        IP &amp; IT Law · Qualified to New York State Bar
+      </div>
+    </div>
+
+    <div class="edu-card reveal">
+      <div class="edu-degree">BBA LLB (Hons.)</div>
+      <div class="edu-school">Christ University</div>
+      <div class="edu-dates">2012 – 2017 · Bangalore, India</div>
+      <div class="edu-notes">
+        Five-year integrated dual degree combining business administration and legal education ·
+        Qualified to Bar Council of India
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 05 — SKILLS & TOOLS
+═══════════════════════════════════════════ -->
+<section id="skills">
+  <p class="section-label">05 — Skills &amp; Tools</p>
+  <h2 class="section-title">The <em>Edge</em></h2>
+
+  <div class="skills-layout">
+
+    <!-- Left: Skill bars -->
+    <!-- TODO: Adjust skill percentages to reflect current proficiency -->
+    <div class="reveal">
+
+      <div class="skills-group">
+        <div class="skills-group-title">Investment &amp; Research</div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">Equity Analysis &amp; Valuation</span>
+            <span class="skill-pct">95%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="95"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">DCF / LBO / Comps / M&amp;A</span>
+            <span class="skill-pct">90%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="90"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">Multi-Factor Quant Screening</span>
+            <span class="skill-pct">88%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="88"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">Portfolio Management</span>
+            <span class="skill-pct">85%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="85"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">Factor Research (IC / Quintile BT)</span>
+            <span class="skill-pct">80%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="80"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">Derivatives &amp; Fixed Income</span>
+            <span class="skill-pct">72%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="72"></div></div>
+        </div>
+      </div>
+
+      <div class="skills-group">
+        <div class="skills-group-title">Technical</div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">Python (pandas, NumPy)</span>
+            <span class="skill-pct">82%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="82"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">AI / LLM Integration (Claude API)</span>
+            <span class="skill-pct">85%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="85"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">Bloomberg Terminal · FactSet</span>
+            <span class="skill-pct">80%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="80"></div></div>
+        </div>
+      </div>
+
+      <div class="skills-group">
+        <div class="skills-group-title">Legal &amp; Advisory</div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">Wills, Estate &amp; Tax Law</span>
+            <span class="skill-pct">88%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="88"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">Securities &amp; Corporate Law</span>
+            <span class="skill-pct">85%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="85"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-header">
+            <span class="skill-name">HNW Client Advisory</span>
+            <span class="skill-pct">83%</span>
+          </div>
+          <div class="skill-track"><div class="skill-fill" data-pct="83"></div></div>
+        </div>
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- Right: Certifications & Awards -->
+    <!-- TODO: Update certifications when CFA Level III result is available -->
+    <div class="reveal">
+
+      <div class="cert-section">
+        <div class="cert-section-title">Certifications</div>
+        <ul class="cert-list">
+          <li>CFA Program — Passed Level II; Level III Written Jan 2026</li>
+          <li>Wall Street Prep — LBO Modeling, M&amp;A, Private Equity</li>
+          <li>Bloomberg Market Concepts Certificate</li>
+          <li>NY Bar Admission · Bar Council of India Admission</li>
+          <li>Goodman Institute Scholarship · JMSB Performance Award ×2</li>
+        </ul>
+      </div>
+
+      <div class="cert-section">
+        <div class="cert-section-title">Competition Awards</div>
+        <ul class="cert-list">
+          <li>Harvard Global Case Competition — Top 10 of 250+ teams</li>
+          <li>McGill Portfolio Challenge — Best Presentation &amp; Analysis Award</li>
+          <li>CFA Institute Research Challenge participant</li>
+        </ul>
+      </div>
+
+    </div><!-- /right -->
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 06 — CONTACT
+═══════════════════════════════════════════ -->
+<section id="contact">
+  <p class="section-label" style="justify-content:center;">06 — Contact</p>
+
+  <h2 class="contact-heading reveal">
+    Let's build something <em>exceptional</em> together
+  </h2>
+
+  <!-- TODO: Update contact subtext (city, availability date) -->
+  <p class="contact-sub reveal">
+    Exploring buy-side analyst and investment counsellor roles in Toronto. Open to
+    conversations about equity research, portfolio management, or anything at the
+    intersection of finance and technology. Available June 2026.
+  </p>
+
+  <div class="contact-links reveal">
+    <!-- TODO: Update email address if it changes -->
+    <a href="mailto:anujanand94@gmail.com" class="btn btn-gold">Email Me</a>
+    <!-- TODO: Confirm LinkedIn URL is correct -->
+    <a href="https://www.linkedin.com/in/anuj--anand" target="_blank" rel="noopener" class="btn btn-outline">LinkedIn</a>
+    <!-- TODO: Drop your cv.pdf into static/ before deploying — it is gitignored by default -->
+    <a href="static/cv.pdf" class="btn btn-outline" download>Download CV</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<!-- TODO: Update footer year and city when relocating -->
+<footer>
+  <span class="footer-logo">A·A</span>
+  <span class="footer-copy">© 2026 Anuj Anand · Investment Analyst · Montreal → Toronto</span>
+</footer>
+
+<script src="static/js/main.js"></script>
+</body>
+</html>
