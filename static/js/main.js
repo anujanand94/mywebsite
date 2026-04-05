@@ -63,6 +63,7 @@
     { el: document.querySelector('.hero-name'),    fadeIn: 0.05, fadeOut: 0.85 },
     { el: document.querySelector('.hero-tagline'), fadeIn: 0.12, fadeOut: 0.85 },
     { el: document.querySelector('.hero-stats'),   fadeIn: 0.22, fadeOut: 0.88 },
+    { el: document.querySelector('.hero-summary'), fadeIn: 0.22, fadeOut: 0.88 },
     { el: document.querySelector('.hero-ctas'),    fadeIn: 0.32, fadeOut: 0.92 },
   ];
 
@@ -160,6 +161,31 @@
   }, { threshold: 0.5 });
   fills.forEach(f => observer.observe(f));
 })();
+
+/* ═══════════════════════════════════════════
+   GALLERY LIGHTBOX
+═══════════════════════════════════════════ */
+function openLightbox(tile) {
+  const src = tile.dataset.src;
+  const img = document.getElementById('lightbox-img');
+  const lb  = document.getElementById('lightbox');
+  if (!img || !lb || !src) return;
+  img.src = src;
+  img.alt = tile.querySelector('img') ? tile.querySelector('img').alt : '';
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  const lb  = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  if (!lb) return;
+  lb.classList.remove('open');
+  document.body.style.overflow = '';
+  if (img) img.src = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
 /* ═══════════════════════════════════════════
    SMOOTH SCROLL for nav links
