@@ -1,6 +1,3 @@
-# Video — host on Cloudflare R2 or any CDN; do NOT commit large binary files
-static/hero.mp4
-
 # CV PDF — contains personal info; deploy separately or add manually on server
 static/cv.pdf
 
