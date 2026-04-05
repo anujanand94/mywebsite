@@ -106,8 +106,18 @@
     video.addEventListener('loadedmetadata', onMetadata, { once: true });
   }
 
+  // Force load on mobile where preload is ignored
+  video.load();
+  // Play then immediately pause — unlocks currentTime scrubbing on iOS
+  const playPromise = video.play();
+  if (playPromise !== undefined) {
+    playPromise.then(() => video.pause()).catch(() => {});
+  }
+
   // Keep video paused — scroll controls currentTime manually
-  video.addEventListener('play', () => video.pause());
+  video.addEventListener('play', () => {
+    if (!video.seeking) video.pause();
+  });
 
   // Scroll scrub
   window.addEventListener('scroll', () => {
