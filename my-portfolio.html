@@ -617,10 +617,21 @@
 
       // Sort rows
       rows.sort((a, b) => {
-        let aVal = a.children[index]?.textContent.trim() || '';
-        let bVal = b.children[index]?.textContent.trim() || '';
+        const aCell = a.children[index];
+        const bCell = b.children[index];
 
-        // Extract first signed number (handles +/-, decimals, percentages)
+        let aVal = aCell?.textContent.trim() || '';
+        let bVal = bCell?.textContent.trim() || '';
+
+        // For "Return %" column (5), extract from the span specifically
+        if (index === 5) {
+          const aSpan = aCell?.querySelector('span');
+          const bSpan = bCell?.querySelector('span');
+          if (aSpan) aVal = aSpan.textContent.trim();
+          if (bSpan) bVal = bSpan.textContent.trim();
+        }
+
+        // Extract signed number
         const numRegex = /([+-]?\d+\.?\d*)/;
         const aMatch = aVal.match(numRegex);
         const bMatch = bVal.match(numRegex);
