@@ -693,6 +693,13 @@ section {
   color: var(--gold);
   margin: 0 0 4px;
 }
+.gm-byline-note {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: rgba(244,239,230,0.4);
+  line-height: 1.6;
+  margin: 8px 0 0;
+}
 
 /* ═══════════════════════════════════════════
    SECTION 04 — EDUCATION
