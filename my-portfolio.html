@@ -145,10 +145,17 @@
     .pf-table-wrap {
       overflow-x: auto;
       margin-bottom: 60px;
+      scrollbar-width: none;  /* Hide scrollbar Firefox */
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 2px;
+    }
+    .pf-table-wrap::-webkit-scrollbar {
+      display: none;  /* Hide scrollbar Chrome/Safari */
     }
     table.pf-table {
       width: 100%; border-collapse: collapse;
       font-family: var(--font-body);
+      min-width: 1200px;  /* Forces table width, enables smooth scroll */
     }
     .pf-table thead tr {
       border-bottom: 1px solid rgba(201,168,76,0.2);
@@ -274,6 +281,14 @@
     }
     @media (max-width: 480px) {
       .pf-hero-stats { grid-template-columns: 1fr; }
+
+      /* ── Tighter table on mobile ── */
+      .pf-table th { padding: 8px 10px; font-size: 0.45rem; }
+      .pf-table td { padding: 12px 10px; font-size: 0.65rem; }
+      .td-sym { font-size: 0.7rem; }
+      .td-name { font-size: 0.55rem; }
+      .td-bar { width: 40px; }
+      .ccy { font-size: 0.4rem; padding: 0px 3px; }
     }
   </style>
 </head>
@@ -315,25 +330,11 @@
     &amp; Performance
   </h1>
 
-      <div class="pf-hero-stats">
+  <div class="pf-hero-stats">
     <div class="pf-hero-stat">
-      <div class="pf-hero-stat-val g">+180.0%</div>
+      <div class="pf-hero-stat-val g">+7.2%</div>
       <div class="pf-hero-stat-label">YTD Return</div>
     </div>
-    <div class="pf-hero-stat">
-      <div class="pf-hero-stat-val">7</div>
-      <div class="pf-hero-stat-label">Active Holdings</div>
-    </div>
-    <div class="pf-hero-stat">
-      <div class="pf-hero-stat-val g">+494%</div>
-      <div class="pf-hero-stat-label">Best &middot; CMI</div>
-    </div>
-    <div class="pf-hero-stat">
-      <div class="pf-hero-stat-val r">&minus;58%</div>
-      <div class="pf-hero-stat-label">Laggard &middot; DOL</div>
-    </div>
-  </div>
-  </div>
     <div class="pf-hero-stat">
       <div class="pf-hero-stat-val">11</div>
       <div class="pf-hero-stat-label">Active Holdings</div>
@@ -357,7 +358,7 @@
   <!-- Holdings Table -->
   <div class="pf-section-head">
     <h2 class="pf-section-title">Current <em>Holdings</em></h2>
-    <span class="pf-section-tag">7 positions · Apr 15, 2026</span>
+    <span class="pf-section-tag">11 positions · Apr 15, 2026</span>
   </div>
 
   <div class="pf-table-wrap">
@@ -376,103 +377,137 @@
         </tr>
       </thead>
       <tbody>
+
         <tr>
-          <td>
-            <div class="td-sym">CMI</div>
-            <div class="td-name">Cummins Inc.</div>
-          </td>
-          <td>$601.46 <span class="ccy">USD</span></td>
+          <td><div class="td-sym">BIP.UN</div><div class="td-name">Brookfield Infrastructure Partners L.P.</div></td>
+          <td>$50.75 <span class="ccy">CAD</span></td>
+          <td>2.0499</td>
+          <td>$104.03 <span class="ccy">CAD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:7.55%;background:rgba(201,168,76,0.6);"></div></div><span>7.55%</span></div></td>
+          <td class="g">+$1.31</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:2%;background:#4ec97a;"></div></div><span class="g">+1.28%</span></div></td>
+          <td class="r">−$0.92</td>
+          <td class="r">−0.88%</td>
+        </tr>
+
+        <tr>
+          <td><div class="td-sym">CMI</div><div class="td-name">Cummins Inc.</div></td>
+          <td>$617.40 <span class="ccy">USD</span></td>
           <td>0.2532</td>
-          <td>$152.29 <span class="ccy">USD</span></td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:22.70339068366873%;background:rgba(201,168,76,0.6);"></div></div><span>22.7%</span></div></td>
-          <td class="g">+$126.67</td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:60%;background:#4ec97a;"></div></div><span class="g">+494.39%</span></div></td>
-          <td class="r">−$3.60</td>
-          <td class="r">−2.31%</td>
+          <td>$156.33 <span class="ccy">USD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:15.66%;background:rgba(201,168,76,0.6);"></div></div><span>15.66%</span></div></td>
+          <td class="g">+$55.14</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:60%;background:#4ec97a;"></div></div><span class="g">+54.49%</span></div></td>
+          <td class="g">+$4.04</td>
+          <td class="g">+2.65%</td>
         </tr>
+
         <tr>
-          <td>
-            <div class="td-sym">DOL</div>
-            <div class="td-name">Dollarama Inc.</div>
-          </td>
-          <td>$72.45 <span class="ccy">CAD</span></td>
+          <td><div class="td-sym">CSU</div><div class="td-name">Constellation Software Inc.</div></td>
+          <td>$2,631.56 <span class="ccy">CAD</span></td>
+          <td>0.0474</td>
+          <td>$124.74 <span class="ccy">CAD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:9.05%;background:rgba(201,168,76,0.6);"></div></div><span>9.05%</span></div></td>
+          <td class="r">−$75.84</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:37.81%;background:#e05252;"></div></div><span class="r">−37.81%</span></div></td>
+          <td class="g">+$5.49</td>
+          <td class="g">+4.60%</td>
+        </tr>
+
+        <tr>
+          <td><div class="td-sym">DOL</div><div class="td-name">Dollarama Inc.</div></td>
+          <td>$174.38 <span class="ccy">CAD</span></td>
           <td>0.0005</td>
-          <td>$0.04 <span class="ccy">CAD</span></td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:0.003933309255682799%;background:rgba(201,168,76,0.6);"></div></div><span>0.0%</span></div></td>
-          <td class="r">−$0.05</td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:58.45280597072933%;background:#e05252;"></div></div><span class="r">−58.45%</span></div></td>
-          <td class="r">−$0.00</td>
-          <td class="r">−0.30%</td>
+          <td>$0.09 <span class="ccy">CAD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:0.1%;background:rgba(201,168,76,0.6);"></div></div><span>0.01%</span></div></td>
+          <td class="r" style="opacity:0.45;">−$0.00</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:3.12%;background:#e05252;"></div></div><span class="r">−3.12%</span></div></td>
+          <td class="r" style="opacity:0.45;">−$0.00</td>
+          <td class="r">−1.26%</td>
         </tr>
+
         <tr>
-          <td>
-            <div class="td-sym">HCA</div>
-            <div class="td-name">HCA Healthcare Inc.</div>
-          </td>
-          <td>$488.58 <span class="ccy">USD</span></td>
+          <td><div class="td-sym">HCA</div><div class="td-name">HCA Healthcare Inc.</div></td>
+          <td>$488.14 <span class="ccy">USD</span></td>
           <td>0.2850</td>
-          <td>$139.25 <span class="ccy">USD</span></td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:20.75873040418817%;background:rgba(201,168,76,0.6);"></div></div><span>20.8%</span></div></td>
-          <td class="g">+$96.44</td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:60%;background:#4ec97a;"></div></div><span class="g">+225.33%</span></div></td>
-          <td class="r">−$3.97</td>
-          <td class="r">−2.77%</td>
-        </tr>
-        <tr>
-          <td>
-            <div class="td-sym">IDCC</div>
-            <div class="td-name">InterDigital Inc.</div>
-          </td>
-          <td>$365.50 <span class="ccy">USD</span></td>
-          <td>0.2265</td>
-          <td>$82.79 <span class="ccy">USD</span></td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:12.3417243726655%;background:rgba(201,168,76,0.6);"></div></div><span>12.3%</span></div></td>
-          <td class="g">+$54.14</td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:60%;background:#4ec97a;"></div></div><span class="g">+189.05%</span></div></td>
-          <td class="r">−$2.15</td>
-          <td class="r">−2.53%</td>
-        </tr>
-        <tr>
-          <td>
-            <div class="td-sym">MRK</div>
-            <div class="td-name">Merck & Company Inc.</div>
-          </td>
-          <td>$117.90 <span class="ccy">USD</span></td>
-          <td>1.0123</td>
-          <td>$119.35 <span class="ccy">USD</span></td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:17.792759273599394%;background:rgba(201,168,76,0.6);"></div></div><span>17.8%</span></div></td>
-          <td class="g">+$30.29</td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:34.0077307636723%;background:#4ec97a;"></div></div><span class="g">+34.01%</span></div></td>
-          <td class="r">−$2.45</td>
-          <td class="r">−2.01%</td>
-        </tr>
-        <tr>
-          <td>
-            <div class="td-sym">SBUX</div>
-            <div class="td-name">Starbucks CDR (CAD Hedged)</div>
-          </td>
-          <td>$98.34 <span class="ccy">CAD</span></td>
-          <td>1.0000</td>
-          <td>$98.34 <span class="ccy">CAD</span></td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:10.677753874191778%;background:rgba(201,168,76,0.6);"></div></div><span>10.7%</span></div></td>
-          <td class="g">+$72.04</td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:60%;background:#4ec97a;"></div></div><span class="g">+273.92%</span></div></td>
-          <td class="g">+$0.04</td>
-          <td class="g">+0.04%</td>
-        </tr>
-        <tr>
-          <td>
-            <div class="td-sym">UNH</div>
-            <div class="td-name">UnitedHealth Group Inc.</div>
-          </td>
-          <td>$314.05 <span class="ccy">USD</span></td>
-          <td>0.3358</td>
-          <td>$105.46 <span class="ccy">USD</span></td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:15.721708082430752%;background:rgba(201,168,76,0.6);"></div></div><span>15.7%</span></div></td>
-          <td class="g">+$71.27</td>
-          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:60%;background:#4ec97a;"></div></div><span class="g">+208.50%</span></div></td>
-          <td class="r">−$0.10</td>
+          <td>$139.12 <span class="ccy">USD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:13.94%;background:rgba(201,168,76,0.6);"></div></div><span>13.94%</span></div></td>
+          <td class="r">−$11.06</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:7.36%;background:#e05252;"></div></div><span class="r">−7.36%</span></div></td>
+          <td class="r">−$0.13</td>
           <td class="r">−0.09%</td>
+        </tr>
+
+        <tr>
+          <td><div class="td-sym">IDCC</div><div class="td-name">InterDigital Inc.</div></td>
+          <td>$315.91 <span class="ccy">USD</span></td>
+          <td>0.2265</td>
+          <td>$71.55 <span class="ccy">USD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:7.17%;background:rgba(201,168,76,0.6);"></div></div><span>7.17%</span></div></td>
+          <td class="r">−$8.54</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:10.66%;background:#e05252;"></div></div><span class="r">−10.66%</span></div></td>
+          <td class="r">−$11.23</td>
+          <td class="r">−13.57%</td>
+        </tr>
+
+        <tr>
+          <td><div class="td-sym">MRK</div><div class="td-name">Merck &amp; Company Inc.</div></td>
+          <td>$118.53 <span class="ccy">USD</span></td>
+          <td>1.0123</td>
+          <td>$119.99 <span class="ccy">USD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:12.02%;background:rgba(201,168,76,0.6);"></div></div><span>12.02%</span></div></td>
+          <td class="g">+$32.01</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:36.39%;background:#4ec97a;"></div></div><span class="g">+36.39%</span></div></td>
+          <td class="g">+$0.64</td>
+          <td class="g">+0.53%</td>
+        </tr>
+
+        <tr>
+          <td><div class="td-sym">RCI.B</div><div class="td-name">Rogers Communications Inc.</div></td>
+          <td>$45.73 <span class="ccy">CAD</span></td>
+          <td>2.0603</td>
+          <td>$94.22 <span class="ccy">CAD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:6.84%;background:rgba(201,168,76,0.6);"></div></div><span>6.84%</span></div></td>
+          <td class="r">−$1.23</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:1.29%;background:#e05252;"></div></div><span class="r">−1.29%</span></div></td>
+          <td class="r">−$0.19</td>
+          <td class="r">−0.20%</td>
+        </tr>
+
+        <tr>
+          <td><div class="td-sym">SBUX</div><div class="td-name">Starbucks CDR (CAD Hedged)</div></td>
+          <td>$27.38 <span class="ccy">CAD</span></td>
+          <td>1.0000</td>
+          <td>$27.38 <span class="ccy">CAD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:1.99%;background:rgba(201,168,76,0.6);"></div></div><span>1.99%</span></div></td>
+          <td class="g">+$1.08</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:4.11%;background:#4ec97a;"></div></div><span class="g">+4.11%</span></div></td>
+          <td class="g">+$0.14</td>
+          <td class="g">+0.51%</td>
+        </tr>
+
+        <tr>
+          <td><div class="td-sym">TIH</div><div class="td-name">Toromont Industries Ltd.</div></td>
+          <td>$207.70 <span class="ccy">CAD</span></td>
+          <td>1.0091</td>
+          <td>$209.59 <span class="ccy">CAD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:15.21%;background:rgba(201,168,76,0.6);"></div></div><span>15.21%</span></div></td>
+          <td class="g">+$67.01</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:47%;background:#4ec97a;"></div></div><span class="g">+47.00%</span></div></td>
+          <td class="r">−$6.92</td>
+          <td class="r">−3.20%</td>
+        </tr>
+
+        <tr>
+          <td><div class="td-sym">UNH</div><div class="td-name">UnitedHealth Group Inc.</div></td>
+          <td>$314.19 <span class="ccy">USD</span></td>
+          <td>0.3358</td>
+          <td>$105.51 <span class="ccy">USD</span></td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:10.57%;background:rgba(201,168,76,0.6);"></div></div><span>10.57%</span></div></td>
+          <td class="g">+$3.71</td>
+          <td><div class="td-bar-wrap"><div class="td-bar"><div class="td-bar-fill" style="width:3.64%;background:#4ec97a;"></div></div><span class="g">+3.64%</span></div></td>
+          <td class="g">+$0.05</td>
+          <td class="g">+0.04%</td>
         </tr>
 
       </tbody>
