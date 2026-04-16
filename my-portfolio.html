@@ -159,7 +159,18 @@
       letter-spacing: 0.2em; text-transform: uppercase;
       color: rgba(201,168,76,0.7);
       text-align: right; white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s;
     }
+    .pf-table th:hover { color: var(--gold); }
+    .pf-table th::after {
+      content: '';
+      margin-left: 6px;
+      font-size: 0.4rem;
+    }
+    .pf-table th.sort-asc::after { content: ' ↑'; }
+    .pf-table th.sort-desc::after { content: ' ↓'; }
     .pf-table th:first-child { text-align: left; padding-left: 0; }
     .pf-table tbody tr {
       border-bottom: 1px solid rgba(255,255,255,0.04);
@@ -577,5 +588,58 @@
 </div>
 
 <script src="static/js/main.js"></script>
+
+<script>
+/* ═══ TABLE SORTING ═══ */
+(function initTableSort() {
+  const table = document.querySelector('.pf-table');
+  if (!table) return;
+
+  const headers = table.querySelectorAll('thead th');
+  const tbody = table.querySelector('tbody');
+
+  headers.forEach((header, index) => {
+    header.addEventListener('click', () => {
+      const isAsc = header.classList.contains('sort-asc');
+
+      // Clear all sort indicators
+      headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+
+      // Set new sort direction
+      if (isAsc) {
+        header.classList.add('sort-desc');
+      } else {
+        header.classList.add('sort-asc');
+      }
+
+      // Get all rows
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+
+      // Sort rows
+      rows.sort((a, b) => {
+        const aVal = a.children[index]?.textContent.trim() || '';
+        const bVal = b.children[index]?.textContent.trim() || '';
+
+        // Try numeric sort first
+        const aNum = parseFloat(aVal.replace(/[^\d.-]/g, ''));
+        const bNum = parseFloat(bVal.replace(/[^\d.-]/g, ''));
+
+        let comparison = 0;
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          comparison = aNum - bNum;
+        } else {
+          comparison = aVal.localeCompare(bVal);
+        }
+
+        return isAsc ? comparison : -comparison;
+      });
+
+      // Re-insert sorted rows
+      rows.forEach(row => tbody.appendChild(row));
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
