@@ -578,10 +578,10 @@
   <!-- Disclaimer -->
   <div class="pf-disclaimer">
     <strong style="color:rgba(201,168,76,0.8);font-weight:500;">Note —</strong>
-    This is a personal research portfolio maintained to develop and test investment conviction.
-    Position sizes are intentionally small; this is not a managed account.
-    Total return (Return%) reflects the gain/loss since initial purchase for each position.
-    YTD return (+7.2%) is the overall portfolio performance on a weighted basis from January 1, 2026.
+    This is my personal WealthSimple brokerage account with real capital invested.
+    Positions are sized to build conviction and track real performance through market cycles.
+    Total Return (Return%) reflects the gain/loss since initial purchase for each position.
+    YTD return (+7.2%) reflects overall portfolio performance on a weighted basis from January 1, 2026.
     Data as of April 15, 2026. Nothing on this page constitutes investment advice.
   </div>
 
@@ -631,6 +631,10 @@
           if (bSpan) bVal = bSpan.textContent.trim();
         }
 
+        // Normalize Unicode minus (−) to regular hyphen-minus (-) so parseFloat works
+        aVal = aVal.replace(/\u2212/g, '-');
+        bVal = bVal.replace(/\u2212/g, '-');
+
         // Extract signed number
         const numRegex = /([+-]?\d+\.?\d*)/;
         const aMatch = aVal.match(numRegex);
@@ -638,12 +642,10 @@
 
         let comparison = 0;
         if (aMatch && bMatch) {
-          // Numeric sort - preserve sign
           const aNum = parseFloat(aMatch[1]);
           const bNum = parseFloat(bMatch[1]);
           comparison = aNum - bNum;
         } else {
-          // Text sort (position/symbol names)
           comparison = aVal.localeCompare(bVal);
         }
 
