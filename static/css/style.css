@@ -685,6 +685,14 @@ section {
 .gm-article-link:hover {
   color: var(--gold);
 }
+.gm-group-label {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 4px;
+}
 
 /* ═══════════════════════════════════════════
    SECTION 04 — EDUCATION
