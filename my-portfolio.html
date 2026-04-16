@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Portfolio — Anuj Anand</title>
+  <meta name="description" content="Personal investment portfolio — 11 holdings, +7.2% YTD return." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="icon" type="image/svg+xml" href="static/favicon.svg" />
+  <link rel="stylesheet" href="static/css/style.css" />
+
+  <style>
+    /* ── Page shell ── */
+    body { cursor: default; }
+    #cursor-dot, #cursor-ring { display: none; }
+
+    /* ── Hero ── */
+    .pf-hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 0 60px 72px;
+      position: relative;
+      background: radial-gradient(ellipse 80% 60% at 60% 30%, rgba(201,168,76,0.07) 0%, transparent 70%),
+                  linear-gradient(160deg, #0a0a0a 0%, #080808 100%);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+      overflow: hidden;
+    }
+
+    /* Big decorative number */
+    .pf-hero-bg-num {
+      position: absolute;
+      top: 50%; right: -40px;
+      transform: translateY(-60%);
+      font-family: var(--font-display);
+      font-size: clamp(180px, 28vw, 380px);
+      font-weight: 600;
+      color: rgba(201,168,76,0.04);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: -0.05em;
+    }
+
+    .pf-hero-label {
+      font-family: var(--font-body);
+      font-size: 0.6rem; font-weight: 600;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .pf-hero-label::before {
+      content: '';
+      display: inline-block; width: 40px; height: 1px;
+      background: var(--gold); opacity: 0.5;
+    }
+
+    .pf-hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 300; line-height: 1.05;
+      color: var(--text);
+      margin-bottom: 52px;
+    }
+    .pf-hero-title em { font-style: italic; color: var(--gold); }
+
+    /* Stats row */
+    .pf-hero-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.15);
+      max-width: 900px;
+    }
+    .pf-hero-stat {
+      background: #080808;
+      padding: 28px 32px;
+      position: relative;
+    }
+    .pf-hero-stat-val {
+      font-family: var(--font-display);
+      font-size: 2.4rem; font-weight: 600;
+      line-height: 1; margin-bottom: 6px;
+      color: var(--gold);
+    }
+    .pf-hero-stat-val.g { color: #4ec97a; }
+    .pf-hero-stat-val.r { color: #e05252; }
+    .pf-hero-stat-label {
+      font-family: var(--font-body);
+      font-size: 0.55rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text-2);
+    }
+
+    .pf-date-tag {
+      margin-top: 24px;
+      font-family: var(--font-body);
+      font-size: 0.6rem; color: rgba(244,239,230,0.35);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Back link ── */
+    .pf-back {
+      position: absolute; top: 110px; left: 60px;
+      font-family: var(--font-body); font-size: 0.62rem;
+      font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+      color: rgba(201,168,76,0.65); text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+      transition: color 0.2s;
+    }
+    .pf-back:hover { color: var(--gold); }
+    .pf-back-arrow { font-size: 1rem; }
+
+    /* ── Content ── */
+    .pf-content {
+      max-width: 1200px; margin: 0 auto;
+      padding: 72px 60px 100px;
+    }
+
+    .pf-section-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+      padding-bottom: 12px;
+    }
+    .pf-section-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem; font-weight: 300;
+      color: var(--text);
+    }
+    .pf-section-title em { font-style: italic; color: var(--gold); }
+    .pf-section-tag {
+      font-family: var(--font-body);
+      font-size: 0.55rem; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-2);
+    }
+
+    /* ── Holdings table ── */
+    .pf-table-wrap {
+      overflow-x: auto;
+      margin-bottom: 60px;
+    }
+    table.pf-table {
+      width: 100%; border-collapse: collapse;
+      font-family: var(--font-body);
+    }
+    .pf-table thead tr {
+      border-bottom: 1px solid rgba(201,168,76,0.2);
+    }
+    .pf-table th {
+      padding: 10px 14px;
+      font-size: 0.5rem; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(201,168,76,0.7);
+      text-align: right; white-space: nowrap;
+    }
+    .pf-table th:first-child { text-align: left; padding-left: 0; }
+    .pf-table tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s;
+    }
+    .pf-table tbody tr:last-child { border-bottom: none; }
+    .pf-table tbody tr:hover { background: rgba(201,168,76,0.03); }
+    .pf-table td {
+      padding: 18px 14px;
+      font-size: 0.7rem; font-weight: 300;
+      color: rgba(244,239,230,0.75);
+      text-align: right; white-space: nowrap;
+    }
+    .pf-table td:first-child { text-align: left; padding-left: 0; }
+
+    /* Position cell */
+    .td-sym {
+      font-family: var(--font-body);
+      font-size: 0.78rem; font-weight: 600;
+      color: var(--text); letter-spacing: 0.06em;
+      margin-bottom: 3px;
+    }
+    .td-name {
+      font-size: 0.6rem; color: var(--text-2);
+      font-weight: 300;
+    }
+
+    /* Return bar */
+    .td-bar-wrap {
+      display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+    }
+    .td-bar {
+      width: 48px; height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px; overflow: hidden; flex-shrink: 0;
+    }
+    .td-bar-fill { height: 100%; border-radius: 2px; }
+
+    /* Currency tag */
+    .ccy {
+      font-size: 0.44rem; font-weight: 600;
+      letter-spacing: 0.1em;
+      color: rgba(201,168,76,0.7);
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 2px;
+      padding: 1px 4px;
+      margin-left: 3px;
+      vertical-align: middle;
+    }
+
+    /* Colour classes */
+    .g { color: #4ec97a !important; }
+    .r { color: #e05252 !important; }
+
+    /* ── Performance summary ── */
+    .pf-perf-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.12);
+      margin-bottom: 60px;
+    }
+    .pf-perf-cell {
+      background: var(--surface-1);
+      padding: 32px 36px;
+    }
+    .pf-perf-num {
+      font-family: var(--font-display);
+      font-size: 3rem; font-weight: 600;
+      line-height: 1; margin-bottom: 8px;
+      color: var(--gold);
+    }
+    .pf-perf-num.g { color: #4ec97a; }
+    .pf-perf-label {
+      font-family: var(--font-body);
+      font-size: 0.58rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text-2); line-height: 1.6;
+    }
+
+    /* ── Disclaimer ── */
+    .pf-disclaimer {
+      padding: 24px 28px;
+      border-left: 2px solid rgba(201,168,76,0.3);
+      background: rgba(201,168,76,0.03);
+      font-family: var(--font-body);
+      font-size: 0.62rem; color: var(--text-2); line-height: 1.9;
+      margin-top: 60px;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .pf-hero { padding: 0 24px 60px; min-height: 90vh; }
+      .pf-back { left: 24px; top: 95px; }
+      .pf-hero-stats { grid-template-columns: repeat(2, 1fr); }
+      .pf-content { padding: 48px 24px 80px; }
+      .pf-perf-grid { grid-template-columns: 1fr; }
+      .pf-hero-bg-num { display: none; }
+    }
+    @media (max-width: 480px) {
+      .pf-hero-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ TICKER ═══ -->
+<div id="ticker-tape" aria-label="Personal portfolio daily returns">
+  <span class="ticker-label">MY PORTFOLIO</span>
+  <div class="ticker-track-wrap">
+    <div class="ticker-track" id="ticker-track"></div>
+  </div>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <a href="index.html" class="nav-logo">A·A</a>
+  <ul class="nav-links">
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#experience">Experience</a></li>
+    <li><a href="index.html#projects">Projects</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+    <li><a href="index.html#skills">Skills</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<div class="pf-hero">
+  <a href="index.html" class="pf-back">
+    <span class="pf-back-arrow">←</span> Back to main site
+  </a>
+
+  <div class="pf-hero-bg-num">7.2</div>
+
+  <p class="pf-hero-label">Personal Investment Portfolio</p>
+
+  <h1 class="pf-hero-title">
+    Live <em>Holdings</em><br>
+    &amp; Performance
+  </h1>
+
+  <div class="pf-hero-stats">
+    <div class="pf-hero-stat">
+      <div class="pf-hero-stat-val g">+7.2%</div>
+      <div class="pf-hero-stat-label">YTD Return</div>
+    </div>
+    <div class="pf-hero-stat">
+      <div class="pf-hero-stat-val">11</div>
+      <div class="pf-hero-stat-label">Active Holdings</div>
+    </div>
+    <div class="pf-hero-stat">
+      <div class="pf-hero-stat-val g">+47%</div>
+      <div class="pf-hero-stat-label">Best · TIH</div>
+    </div>
+    <div class="pf-hero-stat">
+      <div class="pf-hero-stat-val r">−38%</div>
+      <div class="pf-hero-stat-label">Laggard · CSU</div>
+    </div>
+  </div>
+
+  <p class="pf-date-tag">As of April 15, 2026 · CAD/USD positions shown in original trade currency</p>
+</div>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="pf-content">
+
+  <!-- Holdings Table -->
+  <div class="pf-section-head">
+    <h2 class="pf-section-title">Current <em>Holdings</em></h2>
+    <span class="pf-section-tag">11 positions · Apr 15, 2026</span>
+  </div>
+
+  <div class="pf-table-wrap">
+    <table class="pf-table">
+      <thead>
+        <tr>
+          <th>Position</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Market Value</th>
+          <th>Total Return</th>
+          <th>Return %</th>
+          <th>Day Return</th>
+          <th>Day %</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td>
+            <div class="td-sym">BIP.UN</div>
+            <div class="td-name">Brookfield Infrastructure Partners L.P.</div>
+          </td>
+          <td>$50.75 <span class="ccy">CAD</span></td>
+          <td>2.0499</td>
+          <td>$104.03 <span class="ccy">CAD</span></td>
+          <td class="g">+$1.31</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:3%;background:#4ec97a;"></div></div>
+              <span class="g">+1.28%</span>
+            </div>
+          </td>
+          <td class="r">−$0.92</td>
+          <td class="r">−0.88%</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="td-sym">CMI</div>
+            <div class="td-name">Cummins Inc.</div>
+          </td>
+          <td>$617.40 <span class="ccy">USD</span></td>
+          <td>0.2532</td>
+          <td>$156.33 <span class="ccy">USD</span></td>
+          <td class="g">+$55.14</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:100%;background:#4ec97a;"></div></div>
+              <span class="g">+54.49%</span>
+            </div>
+          </td>
+          <td class="g">+$4.04</td>
+          <td class="g">+2.65%</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="td-sym">CSU</div>
+            <div class="td-name">Constellation Software Inc.</div>
+          </td>
+          <td>$2,631.56 <span class="ccy">CAD</span></td>
+          <td>0.0474</td>
+          <td>$124.74 <span class="ccy">CAD</span></td>
+          <td class="r">−$75.84</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:69%;background:#e05252;"></div></div>
+              <span class="r">−37.81%</span>
+            </div>
+          </td>
+          <td class="g">+$5.49</td>
+          <td class="g">+4.60%</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="td-sym">DOL</div>
+            <div class="td-name">Dollarama Inc.</div>
+          </td>
+          <td>$174.38 <span class="ccy">CAD</span></td>
+          <td>0.0005</td>
+          <td>$0.09 <span class="ccy">CAD</span></td>
+          <td class="r" style="opacity:0.45;">−$0.00</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:6%;background:#e05252;"></div></div>
+              <span class="r">−3.12%</span>
+            </div>
+          </td>
+          <td class="r" style="opacity:0.45;">−$0.00</td>
+          <td class="r">−1.26%</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="td-sym">HCA</div>
+            <div class="td-name">HCA Healthcare Inc.</div>
+          </td>
+          <td>$488.14 <span class="ccy">USD</span></td>
+          <td>0.2850</td>
+          <td>$139.12 <span class="ccy">USD</span></td>
+          <td class="r">−$11.06</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:14%;background:#e05252;"></div></div>
+              <span class="r">−7.36%</span>
+            </div>
+          </td>
+          <td class="r">−$0.13</td>
+          <td class="r">−0.09%</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="td-sym">IDCC</div>
+            <div class="td-name">InterDigital Inc.</div>
+          </td>
+          <td>$315.91 <span class="ccy">USD</span></td>
+          <td>0.2265</td>
+          <td>$71.55 <span class="ccy">USD</span></td>
+          <td class="r">−$8.54</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:20%;background:#e05252;"></div></div>
+              <span class="r">−10.66%</span>
+            </div>
+          </td>
+          <td class="r">−$11.23</td>
+          <td class="r">−13.57%</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="td-sym">MRK</div>
+            <div class="td-name">Merck &amp; Company Inc.</div>
+          </td>
+          <td>$118.53 <span class="ccy">USD</span></td>
+          <td>1.0123</td>
+          <td>$119.99 <span class="ccy">USD</span></td>
+          <td class="g">+$32.01</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:67%;background:#4ec97a;"></div></div>
+              <span class="g">+36.39%</span>
+            </div>
+          </td>
+          <td class="g">+$0.64</td>
+          <td class="g">+0.53%</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="td-sym">RCI.B</div>
+            <div class="td-name">Rogers Communications Inc.</div>
+          </td>
+          <td>$45.73 <span class="ccy">CAD</span></td>
+          <td>2.0603</td>
+          <td>$94.22 <span class="ccy">CAD</span></td>
+          <td class="r">−$1.23</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:3%;background:#e05252;"></div></div>
+              <span class="r">−1.29%</span>
+            </div>
+          </td>
+          <td class="r">−$0.19</td>
+          <td class="r">−0.20%</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="td-sym">SBUX</div>
+            <div class="td-name">Starbucks CDR (CAD Hedged)</div>
+          </td>
+          <td>$27.38 <span class="ccy">CAD</span></td>
+          <td>1.0000</td>
+          <td>$27.38 <span class="ccy">CAD</span></td>
+          <td class="g">+$1.08</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:8%;background:#4ec97a;"></div></div>
+              <span class="g">+4.11%</span>
+            </div>
+          </td>
+          <td class="g">+$0.14</td>
+          <td class="g">+0.51%</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="td-sym">TIH</div>
+            <div class="td-name">Toromont Industries Ltd.</div>
+          </td>
+          <td>$207.70 <span class="ccy">CAD</span></td>
+          <td>1.0091</td>
+          <td>$209.59 <span class="ccy">CAD</span></td>
+          <td class="g">+$67.01</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:86%;background:#4ec97a;"></div></div>
+              <span class="g">+47.00%</span>
+            </div>
+          </td>
+          <td class="r">−$6.92</td>
+          <td class="r">−3.20%</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="td-sym">UNH</div>
+            <div class="td-name">UnitedHealth Group Inc.</div>
+          </td>
+          <td>$314.19 <span class="ccy">USD</span></td>
+          <td>0.3358</td>
+          <td>$105.51 <span class="ccy">USD</span></td>
+          <td class="g">+$3.71</td>
+          <td>
+            <div class="td-bar-wrap">
+              <div class="td-bar"><div class="td-bar-fill" style="width:7%;background:#4ec97a;"></div></div>
+              <span class="g">+3.64%</span>
+            </div>
+          </td>
+          <td class="g">+$0.05</td>
+          <td class="g">+0.04%</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Performance Highlights -->
+  <div class="pf-section-head" style="margin-top:72px;">
+    <h2 class="pf-section-title">By the <em>Numbers</em></h2>
+    <span class="pf-section-tag">Track record</span>
+  </div>
+
+  <div class="pf-perf-grid">
+    <div class="pf-perf-cell">
+      <div class="pf-perf-num g">+7.2%</div>
+      <div class="pf-perf-label">Personal Portfolio<br>YTD Return · 11 Holdings</div>
+    </div>
+    <div class="pf-perf-cell">
+      <div class="pf-perf-num">4.08</div>
+      <div class="pf-perf-label">Highest CGPA<br>Concordia MBA · Investment Management</div>
+    </div>
+    <div class="pf-perf-cell">
+      <div class="pf-perf-num">7</div>
+      <div class="pf-perf-label">Published Equity Research Articles<br>Globe &amp; Mail</div>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="pf-disclaimer">
+    <strong style="color:rgba(201,168,76,0.8);font-weight:500;">Note —</strong>
+    This is a personal research portfolio maintained to develop and test investment conviction.
+    Position sizes are intentionally small; this is not a managed account.
+    Total return (Return%) reflects the gain/loss since initial purchase for each position.
+    YTD return (+7.2%) is the overall portfolio performance on a weighted basis from January 1, 2026.
+    Data as of April 15, 2026. Nothing on this page constitutes investment advice.
+  </div>
+
+</div>
+
+<script src="static/js/main.js"></script>
+</body>
+</html>
