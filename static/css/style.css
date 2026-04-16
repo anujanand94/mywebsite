@@ -177,6 +177,7 @@ nav.scrolled {
   opacity: 0;
   transform: translateY(12px);
   transition: opacity 0.5s, transform 0.5s;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.9), 0 0 24px rgba(0,0,0,0.8);
 }
 .hero-name {
   font-family: var(--font-display);
@@ -187,6 +188,7 @@ nav.scrolled {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity 0.5s 0.06s, transform 0.5s 0.06s;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.95), 0 0 40px rgba(0,0,0,0.85);
 }
 .hero-name em {
   font-style: italic;
@@ -201,6 +203,7 @@ nav.scrolled {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 0.5s 0.12s, transform 0.5s 0.12s;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.9), 0 0 24px rgba(0,0,0,0.8);
 }
 .hero-tagline .sep {
   color: var(--gold);
