@@ -173,6 +173,42 @@
 })();
 
 /* ═══════════════════════════════════════════
+   TICKER TAPE — UPDATE DAILY RETURNS HERE
+═══════════════════════════════════════════ */
+(function initTicker() {
+  // ↓ Update these values daily (or via Python script)
+  const holdings = [
+    { sym: 'BIP.UN', day: -0.88 },
+    { sym: 'CMI',    day: +2.65 },
+    { sym: 'CSU',    day: +4.60 },
+    { sym: 'DOL',    day: -1.26 },
+    { sym: 'HCA',    day: +1.81 },
+    { sym: 'IDCC',   day: -13.57 },
+    { sym: 'MRK',    day: -0.42 },
+    { sym: 'RCI.B',  day: -0.20 },
+    { sym: 'SBUX',   day: +0.51 },
+    { sym: 'TIH',    day: -3.20 },
+    { sym: 'UNH',    day: +3.62 },
+  ];
+
+  const track = document.getElementById('ticker-track');
+  const tape  = document.getElementById('ticker-tape');
+  const nav   = document.querySelector('nav');
+  if (!track || !tape) return;
+
+  // Build ticker items (duplicated for seamless loop)
+  function buildItems() {
+    return holdings.map(h => {
+      const sign = h.day >= 0 ? '+' : '';
+      const cls  = h.day >= 0 ? 'up' : 'down';
+      return `<span class="ticker-item"><span class="ticker-sym">${h.sym}</span><span class="ticker-day ${cls}">${sign}${h.day.toFixed(2)}%</span></span><span class="ticker-sep">·</span>`;
+    }).join('');
+  }
+  const html = buildItems();
+  track.innerHTML = html + html; // duplicate for seamless loop
+})();
+
+/* ═══════════════════════════════════════════
    GALLERY LIGHTBOX
 ═══════════════════════════════════════════ */
 function openLightbox(tile) {
