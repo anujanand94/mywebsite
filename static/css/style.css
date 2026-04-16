@@ -164,7 +164,7 @@ nav.scrolled {
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  padding: 14vh 10vw 0;
+  padding: 20vh 10vw 0;
   gap: 28px;
 }
 .hero-eyebrow {
@@ -180,7 +180,7 @@ nav.scrolled {
 }
 .hero-name {
   font-family: var(--font-display);
-  font-size: clamp(4rem, 9vw, 8rem);
+  font-size: clamp(3.2rem, 7vw, 6.5rem);
   font-weight: 300;
   line-height: 1;
   color: var(--text);
