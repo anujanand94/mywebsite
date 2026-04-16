@@ -631,19 +631,26 @@
           if (bSpan) bVal = bSpan.textContent.trim();
         }
 
-        // Normalize Unicode minus (−) to regular hyphen-minus (-) so parseFloat works
+        // Normalize Unicode minus (−) to regular hyphen-minus
         aVal = aVal.replace(/\u2212/g, '-');
         bVal = bVal.replace(/\u2212/g, '-');
 
-        // Extract signed number
-        const numRegex = /([+-]?\d+\.?\d*)/;
-        const aMatch = aVal.match(numRegex);
-        const bMatch = bVal.match(numRegex);
+        // Extract number: find the first numeric value, then check if there
+        // is a minus sign ANYWHERE before it in the string (handles −$11.23 format)
+        function extractNum(str) {
+          const numMatch = str.match(/\d+\.?\d*/);
+          if (!numMatch) return NaN;
+          const magnitude = parseFloat(numMatch[0]);
+          const before = str.slice(0, numMatch.index);
+          const isNegative = before.includes('-');
+          return isNegative ? -magnitude : magnitude;
+        }
+
+        const aNum = extractNum(aVal);
+        const bNum = extractNum(bVal);
 
         let comparison = 0;
-        if (aMatch && bMatch) {
-          const aNum = parseFloat(aMatch[1]);
-          const bNum = parseFloat(bMatch[1]);
+        if (!isNaN(aNum) && !isNaN(bNum)) {
           comparison = aNum - bNum;
         } else {
           comparison = aVal.localeCompare(bVal);
