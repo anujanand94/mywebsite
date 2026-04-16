@@ -677,6 +677,14 @@ section {
   display: block;
   margin-top: 2px;
 }
+.gm-article-link {
+  color: var(--text-2);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.gm-article-link:hover {
+  color: var(--gold);
+}
 
 /* ═══════════════════════════════════════════
    SECTION 04 — EDUCATION
