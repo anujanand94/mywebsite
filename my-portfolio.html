@@ -617,17 +617,22 @@
 
       // Sort rows
       rows.sort((a, b) => {
-        const aVal = a.children[index]?.textContent.trim() || '';
-        const bVal = b.children[index]?.textContent.trim() || '';
+        let aVal = a.children[index]?.textContent.trim() || '';
+        let bVal = b.children[index]?.textContent.trim() || '';
 
-        // Try numeric sort first
-        const aNum = parseFloat(aVal.replace(/[^\d.-]/g, ''));
-        const bNum = parseFloat(bVal.replace(/[^\d.-]/g, ''));
+        // Extract first signed number (handles +/-, decimals, percentages)
+        const numRegex = /([+-]?\d+\.?\d*)/;
+        const aMatch = aVal.match(numRegex);
+        const bMatch = bVal.match(numRegex);
 
         let comparison = 0;
-        if (!isNaN(aNum) && !isNaN(bNum)) {
+        if (aMatch && bMatch) {
+          // Numeric sort - preserve sign
+          const aNum = parseFloat(aMatch[1]);
+          const bNum = parseFloat(bMatch[1]);
           comparison = aNum - bNum;
         } else {
+          // Text sort (position/symbol names)
           comparison = aVal.localeCompare(bVal);
         }
 
