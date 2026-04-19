@@ -429,9 +429,9 @@ section {
   font-size: 0.58rem;
   letter-spacing: 0.06em;
   color: rgba(244,239,230,0.35);
-  text-transform: none;
+  text-transform: none !important;
   display: block;
-  margin-top: 3px;
+  margin-top: 5px;
 }
 
 .about-grid {
