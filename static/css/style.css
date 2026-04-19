@@ -425,6 +425,14 @@ section {
   color: var(--text-2);
   margin-top: 8px;
 }
+.highlight-sub {
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  color: rgba(244,239,230,0.35);
+  text-transform: none;
+  display: block;
+  margin-top: 3px;
+}
 
 .about-grid {
   display: grid;
