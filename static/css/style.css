@@ -426,11 +426,12 @@ section {
   margin-top: 8px;
 }
 .highlight-sub {
-  font-size: 0.58rem;
-  letter-spacing: 0.06em;
+  font-size: 0.52rem;
+  letter-spacing: 0.04em;
   color: rgba(244,239,230,0.35);
   text-transform: none !important;
   display: block;
+  white-space: nowrap;
   margin-top: 5px;
 }
 
