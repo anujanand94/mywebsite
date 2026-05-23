@@ -132,7 +132,7 @@ def fetch_and_compute():
     print(f"[{datetime.now():%H:%M:%S}] Downloading {len(tickers)} tickers...")
 
     raw = yf.download(
-        tickers, period="2y", interval="1wk",
+        tickers, period="max", interval="1wk",
         auto_adjust=True, progress=False,
         group_by="ticker", threads=True,
     )
@@ -168,12 +168,12 @@ def fetch_and_compute():
             if len(combined) < 5:
                 print(f"  WARN: {ticker} insufficient data")
                 continue
-            tail = combined.tail(52)
+            # Full history — used by the time-travel scrubber in the UI.
             history = [
                 {"date": idx.strftime("%Y-%m-%d"),
                  "rs_ratio": round(float(r.rs_ratio), 3),
                  "rs_momentum": round(float(r.rs_momentum), 3)}
-                for idx, r in tail.iterrows()
+                for idx, r in combined.iterrows()
             ]
             cur = combined.iloc[-1]
             current = {"rs_ratio": round(float(cur.rs_ratio), 3),

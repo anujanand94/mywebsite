@@ -68,9 +68,10 @@
 
   /* === MASTHEAD === */
   .masthead {
-    position: sticky; top: 0; z-index: 100;
     background: linear-gradient(180deg, #0e0e15 0%, #0a0a0f 100%);
     border-bottom: 1px solid var(--border);
+    /* Note: not sticky — the time-machine bar below takes that role
+       so the giant title/regime hero can scroll away while scrubbing. */
   }
   .masthead::after {
     content: "";
@@ -182,11 +183,115 @@
   }
   .meta-row .meta-v.gold { color: var(--gold); }
 
+  /* === TIME MACHINE (date scrubber) === */
+  .time-machine {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--ink);
+    border-bottom: 1px solid var(--hairline-faint);
+    border-top: 1px solid var(--border);
+    padding: 12px 28px;
+    display: grid;
+    grid-template-columns: minmax(260px, auto) 1fr auto;
+    gap: 22px; align-items: center;
+  }
+  .time-machine::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%, var(--hairline-faint) 20%, var(--hairline) 50%,
+      var(--hairline-faint) 80%, transparent 100%);
+    pointer-events: none;
+  }
+  .tm-info { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .tm-label {
+    font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted);
+  }
+  .tm-date {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 500;
+    font-size: 22px; color: var(--gold-bright);
+    letter-spacing: -0.005em; line-height: 1; min-width: 7ch;
+  }
+  .tm-divider { color: var(--dim); font-size: 14px; padding: 0 2px; }
+  .tm-regime {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 500;
+    font-size: 17px; color: var(--text); letter-spacing: 0;
+    transition: color 200ms var(--ease);
+  }
+  .tm-regime .tm-tally {
+    font-family: 'DM Mono', monospace; font-style: normal;
+    font-size: 9.5px; letter-spacing: 0.18em; color: var(--dim);
+    margin-left: 10px;
+  }
+  .tm-regime.regime-Risk-On  { color: var(--leading); }
+  .tm-regime.regime-Risk-Off { color: var(--lagging); }
+  .tm-regime.regime-Mixed    { color: var(--gold); }
+
+  .tm-slider-wrap { position: relative; display: flex; align-items: center; }
+  #asof-slider {
+    width: 100%; min-width: 220px;
+    -webkit-appearance: none; appearance: none;
+    height: 4px; border-radius: 0;
+    background: linear-gradient(90deg,
+      rgba(201,168,76,0.12) 0%, rgba(201,168,76,0.25) 100%);
+    border: 1px solid var(--border);
+    outline: none; cursor: pointer;
+  }
+  #asof-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 14px; height: 18px; border-radius: 1px;
+    background: var(--gold-bright); border: 1px solid var(--gold);
+    box-shadow: 0 0 6px rgba(201,168,76,0.5);
+    cursor: grab; transition: transform 120ms var(--ease);
+  }
+  #asof-slider::-webkit-slider-thumb:active { cursor: grabbing; transform: scaleY(1.1); }
+  #asof-slider::-moz-range-thumb {
+    width: 14px; height: 18px; border-radius: 1px;
+    background: var(--gold-bright); border: 1px solid var(--gold);
+    box-shadow: 0 0 6px rgba(201,168,76,0.5);
+    cursor: grab;
+  }
+
+  .tm-jumps { display: flex; gap: 4px; flex-wrap: nowrap; }
+  .tm-jump {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 7px 11px; cursor: pointer; border-radius: 1px;
+    transition: all 180ms var(--ease);
+  }
+  .tm-jump:hover { color: var(--text); border-color: var(--gold-soft); }
+  .tm-jump.active {
+    color: var(--gold-bright); border-color: var(--gold);
+    background: rgba(201,168,76,0.06);
+  }
+
+  /* Rows for sectors not yet launched on the as-of date */
+  tbody tr.not-launched { opacity: 0.4; }
+  tbody tr.not-launched td { color: var(--dim); font-style: italic; }
+  tbody tr.not-launched .q-pill { opacity: 0.6; }
+
+  /* Historical-mode visual hint on the masthead */
+  body.is-historical .regime-hero::after,
+  body.is-historical .regime-hero::before {
+    background: linear-gradient(180deg, transparent 0%, var(--gold-soft) 30%, var(--gold-soft) 70%, transparent 100%);
+  }
+
+  @media (max-width: 880px) {
+    .time-machine {
+      grid-template-columns: 1fr;
+      padding: 12px 22px; gap: 12px;
+    }
+    .tm-jumps { justify-content: center; }
+  }
+
   /* === TABS === */
   .tabs {
     display: flex; padding: 0 28px;
     background: var(--ink); border-bottom: 1px solid var(--border);
-    gap: 2px; position: relative;
+    gap: 2px; position: sticky; top: 76px; z-index: 89;
   }
   .tab {
     position: relative;
@@ -590,6 +695,31 @@
   </div>
 </header>
 
+<!-- ═══ TIME MACHINE — date scrubber ═══ -->
+<div class="time-machine" role="region" aria-label="Historical date selector">
+  <div class="tm-info">
+    <span class="tm-label">As Of</span>
+    <span class="tm-date" id="asof-display">—</span>
+    <span class="tm-divider">·</span>
+    <span class="tm-label">Regime</span>
+    <span class="tm-regime regime-Mixed" id="asof-regime">
+      <span id="asof-regime-name">—</span>
+      <span class="tm-tally" id="asof-regime-tally"></span>
+    </span>
+  </div>
+  <div class="tm-slider-wrap">
+    <input type="range" id="asof-slider" min="0" max="0" value="0" step="1"
+           aria-label="Scrub through historical weeks"/>
+  </div>
+  <div class="tm-jumps">
+    <button class="tm-jump" data-jump="oldest" title="Earliest available week">Oldest</button>
+    <button class="tm-jump" data-jump="-520"   title="10 years back">10y</button>
+    <button class="tm-jump" data-jump="-260"   title="5 years back">5y</button>
+    <button class="tm-jump" data-jump="-52"    title="1 year back">1y</button>
+    <button class="tm-jump active" data-jump="latest" title="Latest week">Latest</button>
+  </div>
+</div>
+
 <nav class="tabs">
   <button class="tab active" data-tab="chart">
     <span class="roman">I.</span><span>RRG Chart</span>
@@ -737,6 +867,229 @@
     return 'IMPROVING';
   }
 
+  // ════════════════════════════════════════════════════════════════
+  // TIME MACHINE — historical date scrubber
+  // ════════════════════════════════════════════════════════════════
+
+  // Master sorted list of all weekly dates across the universe.
+  const ALL_DATES = (() => {
+    const set = new Set();
+    for (const s of Object.values(DATA.sectors)) {
+      for (const h of s.history) set.add(h.date);
+    }
+    return Array.from(set).sort();
+  })();
+
+  // 'latest' = view current week; 'historical' = view a past week.
+  let asOfMode = 'latest';
+  let asOfIdx  = ALL_DATES.length - 1;   // only relevant when asOfMode === 'historical'
+
+  function currentAsOfDate() {
+    return asOfMode === 'latest' ? null : ALL_DATES[asOfIdx];
+  }
+
+  // Find the index in a sector's history at or just before the given date.
+  // Returns -1 if the sector wasn't launched yet.
+  function findIdxAt(history, asOfDate) {
+    if (!asOfDate) return history.length - 1;
+    // Binary search since dates are sorted ascending.
+    let lo = 0, hi = history.length - 1, best = -1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (history[mid].date <= asOfDate) { best = mid; lo = mid + 1; }
+      else hi = mid - 1;
+    }
+    return best;
+  }
+
+  function signalForJS(prevQ, q) {
+    if (!prevQ || prevQ === q) return ['Holding ' + q, 'neutral'];
+    const key = prevQ + '->' + q;
+    const map = {
+      'IMPROVING->LEADING':   ['Entering LEADING',   'buy'],
+      'LAGGING->IMPROVING':   ['Entering IMPROVING', 'watch'],
+      'LEADING->WEAKENING':   ['Entering WEAKENING', 'trim'],
+      'WEAKENING->LAGGING':   ['Entering LAGGING',   'exit'],
+    };
+    return map[key] || ['Moved to ' + q, 'neutral'];
+  }
+
+  function dirArrowJS(history, endIdx) {
+    if (endIdx < 4) return '→';
+    const now  = history[endIdx];
+    const past = history[endIdx - 4];
+    const dr = now.rs_ratio    - past.rs_ratio;
+    const dm = now.rs_momentum - past.rs_momentum;
+    if (dr >= 0 && dm >= 0) return '↗';
+    if (dr >= 0 && dm <  0) return '↘';
+    if (dr <  0 && dm <  0) return '↙';
+    return '↖';
+  }
+
+  function regimeFor(counts) {
+    const riskOn  = counts.LEADING  + counts.IMPROVING;
+    const riskOff = counts.LAGGING  + counts.WEAKENING;
+    if (riskOn  >= 5) return 'Risk-On';
+    if (riskOff >= 5) return 'Risk-Off';
+    return 'Mixed';
+  }
+
+  function snapshotAt(asOfDate) {
+    const counts = { LEADING: 0, IMPROVING: 0, WEAKENING: 0, LAGGING: 0 };
+    let active = 0;
+    for (const [t, s] of Object.entries(DATA.sectors)) {
+      const idx = findIdxAt(s.history, asOfDate);
+      if (idx < 0) continue;
+      active++;
+      const h = s.history[idx];
+      counts[quadOf(h.rs_ratio, h.rs_momentum)]++;
+    }
+    return { counts, active, regime: regimeFor(counts) };
+  }
+
+  function updateAsOfDisplay() {
+    const asOfDate = currentAsOfDate();
+    const displayDate = asOfDate || ALL_DATES[ALL_DATES.length - 1];
+    document.getElementById('asof-display').innerText = displayDate;
+
+    const snap = snapshotAt(asOfDate);
+    const nameEl = document.getElementById('asof-regime-name');
+    const tallyEl = document.getElementById('asof-regime-tally');
+    const wrap = document.getElementById('asof-regime');
+    nameEl.innerText = snap.regime;
+    const activeNote = snap.active < 11 ? ` · ${snap.active}/11 active` : '';
+    tallyEl.innerText =
+      `L ${snap.counts.LEADING} · I ${snap.counts.IMPROVING} · ` +
+      `W ${snap.counts.WEAKENING} · Lg ${snap.counts.LAGGING}${activeNote}`;
+    wrap.className = 'tm-regime regime-' + snap.regime;
+
+    // Also keep the masthead regime hero in sync
+    const mhName = document.querySelector('.regime-hero .regime-name');
+    if (mhName) mhName.innerText = snap.regime;
+    const tally = document.querySelectorAll('.regime-hero .regime-tally .t b');
+    if (tally.length === 4) {
+      const fmt = n => String(n).padStart(2, '0');
+      tally[0].innerText = fmt(snap.counts.LEADING);
+      tally[1].innerText = fmt(snap.counts.IMPROVING);
+      tally[2].innerText = fmt(snap.counts.WEAKENING);
+      tally[3].innerText = fmt(snap.counts.LAGGING);
+    }
+    const mh = document.querySelector('.masthead');
+    if (mh) {
+      mh.classList.remove('regime-on', 'regime-off', 'regime-mix');
+      if (snap.regime === 'Risk-On')  mh.classList.add('regime-on');
+      else if (snap.regime === 'Risk-Off') mh.classList.add('regime-off');
+      else mh.classList.add('regime-mix');
+    }
+    document.body.classList.toggle('is-historical', asOfMode === 'historical');
+  }
+
+  function updateFlowTable() {
+    const asOfDate = currentAsOfDate();
+    document.querySelectorAll('#flow-table tbody tr').forEach(tr => {
+      const tickerCell = tr.querySelector('[data-ticker]');
+      if (!tickerCell) return;
+      const ticker = tickerCell.dataset.ticker;
+      const s = DATA.sectors[ticker];
+      if (!s) return;
+      const idx = findIdxAt(s.history, asOfDate);
+      const cells = tr.children;
+      // Columns: 0 name, 1 ticker, 2 quadrant, 3 rs_ratio, 4 rs_mom, 5 direction, 6 signal, 7 notes
+
+      if (idx < 0) {
+        tr.classList.add('not-launched');
+        cells[2].innerHTML = '<span class="q-pill q-UNKNOWN">N/A</span>';
+        cells[2].setAttribute('data-quadrant', 'UNKNOWN');
+        cells[3].innerText = '—';  cells[3].setAttribute('data-rs_ratio', '0');
+        cells[4].innerText = '—';  cells[4].setAttribute('data-rs_mom',   '0');
+        cells[5].innerText = '—';  cells[5].setAttribute('data-direction', '—');
+        cells[6].innerHTML = '<span class="signal-pill signal-neutral">Not launched</span>';
+        cells[6].setAttribute('data-signal', 'Not launched');
+        tr.setAttribute('data-quadrant', 'UNKNOWN');
+        return;
+      }
+      tr.classList.remove('not-launched');
+
+      const h = s.history[idx];
+      const q = quadOf(h.rs_ratio, h.rs_momentum);
+      const prevQ = idx >= 1
+        ? quadOf(s.history[idx - 1].rs_ratio, s.history[idx - 1].rs_momentum)
+        : null;
+      const [sigText, sigKind] = signalForJS(prevQ, q);
+      const dir = dirArrowJS(s.history, idx);
+      const drCls  = h.rs_ratio    >= 100 ? 'delta-pos' : 'delta-neg';
+      const dmCls  = h.rs_momentum >= 100 ? 'delta-pos' : 'delta-neg';
+      const dirCls = dir === '↗' ? 'dir-up' : (dir === '↘' || dir === '↙' ? 'dir-down' : 'dir-flat');
+
+      cells[2].innerHTML = `<span class="q-pill q-${q}">${q}</span>`;
+      cells[2].setAttribute('data-quadrant', q);
+      cells[3].innerText = h.rs_ratio.toFixed(2);
+      cells[3].setAttribute('data-rs_ratio', h.rs_ratio);
+      cells[3].className = 'num-col ' + drCls;
+      cells[4].innerText = h.rs_momentum.toFixed(2);
+      cells[4].setAttribute('data-rs_mom', h.rs_momentum);
+      cells[4].className = 'num-col ' + dmCls;
+      cells[5].innerText = dir;
+      cells[5].setAttribute('data-direction', dir);
+      cells[5].className = 'center-col arrow ' + dirCls;
+      cells[6].innerHTML = `<span class="signal-pill signal-${sigKind}">${sigText}</span>`;
+      cells[6].setAttribute('data-signal', sigText);
+      tr.setAttribute('data-quadrant', q);
+    });
+  }
+
+  function applyAsOf() {
+    updateAsOfDisplay();
+    if (document.getElementById('panel-chart').classList.contains('active')) renderRRG();
+    updateFlowTable();
+  }
+
+  function setActiveJump(which) {
+    document.querySelectorAll('.tm-jump').forEach(b => {
+      b.classList.toggle('active', b.dataset.jump === which);
+    });
+  }
+
+  // Slider wiring
+  const slider = document.getElementById('asof-slider');
+  slider.max   = String(ALL_DATES.length - 1);
+  slider.value = String(ALL_DATES.length - 1);
+
+  slider.addEventListener('input', () => {
+    const i = parseInt(slider.value);
+    if (i >= ALL_DATES.length - 1) {
+      asOfMode = 'latest';
+      setActiveJump('latest');
+    } else {
+      asOfMode = 'historical';
+      asOfIdx  = i;
+      setActiveJump(null);    // none of the presets active during free scrub
+    }
+    applyAsOf();
+  });
+
+  // Jump buttons
+  document.querySelectorAll('.tm-jump').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const jump = btn.dataset.jump;
+      const last = ALL_DATES.length - 1;
+      let targetIdx;
+      if (jump === 'latest')  { asOfMode = 'latest';     targetIdx = last; }
+      else if (jump === 'oldest') { asOfMode = 'historical'; targetIdx = 0; }
+      else {
+        asOfMode = 'historical';
+        targetIdx = Math.max(0, last + parseInt(jump));   // jump is negative
+      }
+      asOfIdx = targetIdx;
+      slider.value = String(targetIdx);
+      setActiveJump(jump);
+      applyAsOf();
+    });
+  });
+
+  // Initial display sync (don't rerender chart yet — that happens at end of script)
+  updateAsOfDisplay();
+
   // ===== Tabs =====
   document.querySelectorAll('.tab').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -763,18 +1116,25 @@
     const traces = [];
     let minR = 100, maxR = 100, minM = 100, maxM = 100;
 
+    const asOfDate = currentAsOfDate();
+
     for (const [ticker, s] of Object.entries(DATA.sectors)) {
-      const hist = s.history.slice(-tail);
+      // Find the as-of week in this sector's history.
+      const endIdx = findIdxAt(s.history, asOfDate);
+      if (endIdx < 0) continue;   // sector wasn't launched yet on the selected date
+      const startIdx = Math.max(0, endIdx - tail + 1);
+      const hist = s.history.slice(startIdx, endIdx + 1);
       if (!hist.length) continue;
       hist.forEach(h => {
         minR = Math.min(minR, h.rs_ratio); maxR = Math.max(maxR, h.rs_ratio);
         minM = Math.min(minM, h.rs_momentum); maxM = Math.max(maxM, h.rs_momentum);
       });
-      const cur   = hist[hist.length - 1];
-      const prev  = hist.length >= 2 ? hist[hist.length - 2] : cur;
-      const color = COLORS[s.quadrant] || '#888';
-      const dr    = cur.rs_ratio    - prev.rs_ratio;
-      const dm    = cur.rs_momentum - prev.rs_momentum;
+      const cur     = hist[hist.length - 1];
+      const prev    = hist.length >= 2 ? hist[hist.length - 2] : cur;
+      const curQuad = quadOf(cur.rs_ratio, cur.rs_momentum);
+      const color   = COLORS[curQuad] || '#888';
+      const dr      = cur.rs_ratio    - prev.rs_ratio;
+      const dm      = cur.rs_momentum - prev.rs_momentum;
 
       // tail with progressive opacity per segment (older → fainter)
       const n = hist.length;
@@ -814,9 +1174,10 @@
         textfont: { color: '#e8e6dc', family: 'DM Mono', size: 10 },
         hovertemplate:
           `<b>${ticker}</b>  ${s.name}<br>` +
+          `Week of ${cur.date}<br>` +
           `RS-Ratio &nbsp;&nbsp;${cur.rs_ratio.toFixed(2)}<br>` +
           `RS-Momentum  ${cur.rs_momentum.toFixed(2)}<br>` +
-          `Quadrant  <b>${s.quadrant}</b><br>` +
+          `Quadrant  <b>${curQuad}</b><br>` +
           `1W Δ  ratio ${dr >= 0 ? '+' : ''}${dr.toFixed(2)} · mom ${dm >= 0 ? '+' : ''}${dm.toFixed(2)}` +
           `<extra></extra>`,
         showlegend: false,
