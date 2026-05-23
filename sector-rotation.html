@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Sector Rotation Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  :root {
+    --bg:        #0a0a0f;
+    --ink:       #0e0e15;
+    --card:      #12121a;
+    --lift:      #171723;
+    --border:    #1e1e2e;
+    --hairline:  rgba(201,168,76,0.22);
+    --hairline-faint: rgba(201,168,76,0.10);
+    --text:      #e8e6dc;
+    --muted:     #8a8a9a;
+    --dim:       #5a5a6a;
+    --teal:      #00d4aa;
+    --teal-soft: rgba(0,212,170,0.18);
+    --gold:      #c9a84c;
+    --gold-bright: #e6c870;
+    --gold-soft: rgba(201,168,76,0.18);
+    --leading:   #00d4aa;
+    --weakening: #c9a84c;
+    --lagging:   #e85d75;
+    --improving: #4a90e2;
+    --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 1200px 600px at 50% -20%, rgba(201,168,76,0.04), transparent 60%),
+      radial-gradient(ellipse 800px 400px at 100% 100%, rgba(0,212,170,0.03), transparent 60%);
+    color: var(--text);
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 12px;
+    font-feature-settings: 'tnum' 1;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(201,168,76,0.35); color: var(--text); }
+
+  /* === TYPOGRAPHY === */
+  h1, h2, h3 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+    letter-spacing: 0;
+  }
+  h1 em, h2 em, h3 em {
+    font-style: italic;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  h1 { font-size: clamp(32px, 3.6vw, 48px); line-height: 1.18; letter-spacing: -0.01em; }
+  h2 { font-size: 22px; line-height: 1.1; }
+  h3 { font-size: 16px; line-height: 1.2; }
+
+  .num { font-feature-settings: 'tnum' 1; font-variant-numeric: tabular-nums; }
+
+  /* === MASTHEAD === */
+  .masthead {
+    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(180deg, #0e0e15 0%, #0a0a0f 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .masthead::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%, var(--hairline) 18%, var(--gold) 50%, var(--hairline) 82%, transparent 100%);
+  }
+  .masthead-rule {
+    padding: 8px 28px 7px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 24px; color: var(--muted);
+  }
+  .masthead-rule .brand {
+    color: var(--gold);
+    font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+  }
+  .masthead-rule .brand b { color: var(--text); font-weight: 400; }
+  .masthead-rule .rule-meta {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--dim);
+    display: flex; gap: 18px;
+  }
+  .masthead-rule .rule-meta b { color: var(--muted); font-weight: 400; margin-left: 6px; }
+
+  .masthead-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 28px;
+    padding: 20px 28px 22px;
+  }
+  .title-block { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+  .title-block h1 { padding-top: 4px; }
+  .title-block .subtitle {
+    color: var(--muted);
+    font-size: 10px; letter-spacing: 0.20em; text-transform: uppercase;
+    max-width: 38ch; line-height: 1.6;
+  }
+  .title-block .subtitle .div { color: var(--gold); margin: 0 6px; }
+
+  /* Regime hero */
+  .regime-hero {
+    text-align: center;
+    padding: 0 28px;
+    position: relative;
+    min-width: 260px;
+  }
+  .regime-hero::before, .regime-hero::after {
+    content: "";
+    position: absolute; top: 0; bottom: 0; width: 1px;
+    background: linear-gradient(180deg, transparent 0%, var(--hairline) 30%, var(--hairline) 70%, transparent 100%);
+  }
+  .regime-hero::before { left: 0; }
+  .regime-hero::after  { right: 0; }
+  .regime-hero .regime-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  .regime-hero .regime-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 500;
+    font-size: clamp(36px, 3.6vw, 52px); line-height: 1.05;
+    letter-spacing: -0.01em; margin-bottom: 12px;
+    position: relative; display: inline-block; white-space: nowrap;
+  }
+  .regime-hero .regime-name::after {
+    content: "";
+    position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: -6px; width: 36px; height: 1px;
+    background: currentColor; opacity: 0.6;
+  }
+  .regime-on   .regime-name { color: var(--leading); }
+  .regime-off  .regime-name { color: var(--lagging); }
+  .regime-mix  .regime-name { color: var(--gold); }
+  .regime-hero .regime-tally {
+    display: flex; gap: 18px; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); margin-top: 14px;
+  }
+  .regime-hero .regime-tally .t {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .regime-hero .regime-tally .t b {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 500;
+    font-size: 22px; line-height: 1; letter-spacing: 0;
+    color: var(--text);
+  }
+  .regime-hero .regime-tally .t.t-leading   b { color: var(--leading); }
+  .regime-hero .regime-tally .t.t-improving b { color: var(--improving); }
+  .regime-hero .regime-tally .t.t-weakening b { color: var(--weakening); }
+  .regime-hero .regime-tally .t.t-lagging   b { color: var(--lagging); }
+
+  .meta-stack {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 12px;
+  }
+  .meta-row {
+    display: flex; align-items: baseline; gap: 12px;
+    border: 1px solid var(--border); padding: 7px 14px;
+    background: rgba(255,255,255,0.01);
+  }
+  .meta-row .meta-k {
+    font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted);
+  }
+  .meta-row .meta-v {
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); letter-spacing: 0.05em;
+  }
+  .meta-row .meta-v.gold { color: var(--gold); }
+
+  /* === TABS === */
+  .tabs {
+    display: flex; padding: 0 28px;
+    background: var(--ink); border-bottom: 1px solid var(--border);
+    gap: 2px; position: relative;
+  }
+  .tab {
+    position: relative;
+    padding: 14px 22px 13px;
+    cursor: pointer; border: none; background: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    transition: color 200ms var(--ease);
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .tab .roman {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    font-size: 15px; letter-spacing: 0;
+    color: var(--gold); opacity: 0.7;
+    transition: opacity 200ms var(--ease);
+  }
+  .tab:hover { color: var(--text); }
+  .tab:hover .roman { opacity: 1; }
+  .tab.active { color: var(--text); }
+  .tab.active .roman { color: var(--gold-bright); opacity: 1; }
+  .tab::after {
+    content: "";
+    position: absolute; left: 16px; right: 16px; bottom: -1px; height: 2px;
+    background: var(--gold); transform: scaleX(0); transform-origin: center;
+    transition: transform 200ms var(--ease);
+  }
+  .tab.active::after { transform: scaleX(1); }
+
+  /* === PANELS === */
+  .panel {
+    display: none; padding: 28px 28px 48px;
+    animation: panel-in 240ms var(--ease);
+  }
+  .panel.active { display: block; }
+  @keyframes panel-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === VITRINE (chart frame) === */
+  .vitrine {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 10px;
+  }
+  .vitrine-inner {
+    position: relative;
+    border: 1px solid var(--hairline);
+    padding: 28px 32px 24px;
+    background:
+      linear-gradient(180deg, rgba(201,168,76,0.015), transparent 30%),
+      var(--ink);
+  }
+  .vitrine-inner::before,
+  .vitrine-inner::after,
+  .vitrine-inner > .brk-bl,
+  .vitrine-inner > .brk-br {
+    content: "";
+    position: absolute;
+    width: 14px; height: 14px;
+    border: 1px solid var(--gold);
+    pointer-events: none;
+  }
+  .vitrine-inner::before { top: -1px; left: -1px;  border-right: none; border-bottom: none; }
+  .vitrine-inner::after  { top: -1px; right: -1px; border-left:  none; border-bottom: none; }
+  .vitrine-inner > .brk-bl { bottom: -1px; left: -1px;  border-right: none; border-top: none; }
+  .vitrine-inner > .brk-br { bottom: -1px; right: -1px; border-left:  none; border-top: none; }
+
+  .vitrine-eyebrow {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 22px; gap: 18px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .vitrine-eyebrow .v-title { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .vitrine-eyebrow .v-title .roman {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    font-size: 22px; color: var(--gold); line-height: 1;
+  }
+  .vitrine-eyebrow .v-title .v-name {
+    font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text);
+  }
+  .vitrine-eyebrow .v-title .v-sub {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    border-left: 1px solid var(--border); padding-left: 14px; margin-left: 4px;
+  }
+  .vitrine-eyebrow .v-right {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    white-space: nowrap;
+  }
+  .vitrine-eyebrow .v-right b { color: var(--gold); font-weight: 400; margin-left: 8px; }
+
+  /* === CONTROLS === */
+  .controls {
+    display: flex; gap: 24px; align-items: center;
+    margin-bottom: 18px; flex-wrap: wrap;
+    padding-bottom: 16px; border-bottom: 1px dashed var(--border);
+  }
+  .controls .ctl-label {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted);
+  }
+  .controls .ctl-value {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    font-size: 20px; color: var(--gold); line-height: 1;
+    min-width: 28px; display: inline-block;
+  }
+  .controls .ctl-group { display: flex; align-items: center; gap: 12px; }
+  .tail-marks {
+    display: flex; gap: 14px;
+    font-size: 10px; letter-spacing: 0.2em; color: var(--dim);
+  }
+  .tail-marks span { cursor: pointer; transition: color 200ms var(--ease); }
+  .tail-marks span.on { color: var(--gold); }
+  .tail-marks span:hover { color: var(--text); }
+
+  select, input[type=text], input[type=range] {
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 12px; border-radius: 1px;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em;
+    transition: border-color 200ms var(--ease), background 200ms var(--ease);
+  }
+  select:hover, select:focus, input[type=text]:hover, input[type=text]:focus {
+    border-color: var(--gold-soft); outline: none;
+  }
+  input[type=range] {
+    padding: 0; accent-color: var(--gold); width: 180px;
+    background: transparent; border: none;
+  }
+
+  /* === CHART STAGE === */
+  #rrg-chart, #history-chart { width: 100%; height: 640px; position: relative; }
+  .chart-stage { position: relative; }
+  .qc-overlay { position: absolute; pointer-events: none; inset: 0; z-index: 2; }
+  .qc {
+    position: absolute;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; letter-spacing: 0.32em; text-transform: uppercase;
+    padding: 6px 10px;
+    background: rgba(10,10,15,0.65);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--border);
+  }
+  .qc::before {
+    content: ""; display: inline-block;
+    width: 6px; height: 6px; margin-right: 8px;
+    vertical-align: middle; transform: translateY(-1px);
+  }
+  .qc-tl { top: 22px;    left: 22px;    color: var(--improving); }
+  .qc-tr { top: 22px;    right: 22px;   color: var(--leading);   }
+  .qc-bl { bottom: 70px; left: 22px;    color: var(--lagging);   }
+  .qc-br { bottom: 70px; right: 22px;   color: var(--weakening); }
+  .qc-tl::before { background: var(--improving); }
+  .qc-tr::before { background: var(--leading);   }
+  .qc-bl::before { background: var(--lagging);   }
+  .qc-br::before { background: var(--weakening); }
+
+  /* === TABLE === */
+  .card {
+    background: var(--card); border: 1px solid var(--border); padding: 0;
+  }
+  .card-head {
+    padding: 22px 28px 18px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: baseline; gap: 24px;
+    flex-wrap: wrap;
+  }
+  .card-head .v-title { display: flex; align-items: baseline; gap: 14px; }
+  .card-head .v-title .roman {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    font-size: 22px; color: var(--gold); line-height: 1;
+  }
+  .card-head .v-title .v-name {
+    font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text);
+  }
+  .card-head .v-right {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    white-space: nowrap;
+  }
+  .card-head .v-right b { color: var(--gold); font-weight: 400; margin-left: 8px; }
+  .card-body { padding: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+  thead th {
+    font-family: 'DM Mono', monospace;
+    color: var(--gold); font-weight: 400;
+    font-size: 9.5px; letter-spacing: 0.24em; text-transform: uppercase;
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid var(--hairline);
+    background: var(--ink);
+    cursor: pointer; user-select: none;
+    position: sticky; top: 0; z-index: 1;
+    text-align: left;
+    transition: color 200ms var(--ease), background 200ms var(--ease);
+  }
+  thead th:hover { color: var(--gold-bright); background: #14141d; }
+  thead th.num-col { text-align: right; }
+  thead th.center-col { text-align: center; }
+  thead th .sort-arrow {
+    font-size: 9px; color: var(--gold); margin-left: 6px;
+    display: inline-block; min-width: 8px; opacity: 0.9;
+  }
+  thead th:first-child { padding-left: 28px; }
+  thead th:last-child  { padding-right: 28px; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(30,30,46,0.6);
+    transition: background 180ms var(--ease);
+    position: relative;
+  }
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+  tbody tr:hover { background: rgba(201,168,76,0.05); }
+  tbody tr:hover td:first-child { box-shadow: inset 2px 0 0 var(--gold); }
+  tbody td {
+    padding: 12px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--text); vertical-align: middle;
+    transition: color 200ms var(--ease);
+  }
+  tbody td:first-child { padding-left: 28px; }
+  tbody td:last-child  { padding-right: 28px; }
+  tbody td.num-col { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody td.center-col { text-align: center; }
+  tbody td.sector-name { color: var(--text); letter-spacing: 0.02em; }
+  tbody td.ticker { color: var(--gold); letter-spacing: 0.1em; font-weight: 500; }
+  tbody td.delta-pos { color: var(--leading); }
+  tbody td.delta-neg { color: var(--lagging); }
+  tbody td.dir-up    { color: var(--leading); }
+  tbody td.dir-down  { color: var(--lagging); }
+  tbody td.dir-flat  { color: var(--muted); }
+
+  /* === PILLS === */
+  .q-pill, .signal-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px; font-weight: 500;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    border: 1px solid currentColor; border-radius: 1px;
+    position: relative; overflow: hidden; line-height: 1.2;
+  }
+  .q-pill::before, .signal-pill::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(
+      135deg, transparent 0, transparent 6px,
+      currentColor 6px, currentColor 6.6px);
+    opacity: 0.07; pointer-events: none;
+  }
+  .q-pill::after, .signal-pill::after {
+    content: ""; position: absolute; inset: 0;
+    box-shadow: inset 0 0 8px currentColor;
+    opacity: 0.18; pointer-events: none;
+  }
+
+  .q-LEADING   { color: var(--leading);   background: rgba(0,212,170,0.06);  }
+  .q-WEAKENING { color: var(--weakening); background: rgba(201,168,76,0.06); }
+  .q-LAGGING   { color: var(--lagging);   background: rgba(232,93,117,0.06); }
+  .q-IMPROVING { color: var(--improving); background: rgba(74,144,226,0.06); }
+  .q-UNKNOWN   { color: var(--muted);     background: rgba(136,136,136,0.06); }
+
+  .signal-buy     { color: var(--leading); }
+  .signal-watch   { color: var(--improving); }
+  .signal-trim    { color: var(--gold); }
+  .signal-exit    { color: var(--lagging); }
+  .signal-neutral { color: var(--muted); }
+
+  tbody td[data-signal] .signal-pill { background: rgba(255,255,255,0.01); }
+  tbody td[data-signal] .signal-pill.signal-buy     { background: rgba(0,212,170,0.06);  }
+  tbody td[data-signal] .signal-pill.signal-watch   { background: rgba(74,144,226,0.06); }
+  tbody td[data-signal] .signal-pill.signal-trim    { background: rgba(201,168,76,0.06); }
+  tbody td[data-signal] .signal-pill.signal-exit    { background: rgba(232,93,117,0.06); }
+  tbody td[data-signal] .signal-pill.signal-neutral { background: rgba(136,136,136,0.06); }
+
+  /* Direction arrow */
+  .arrow {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 22px; line-height: 1;
+  }
+
+  /* Note input */
+  .note-input {
+    width: 100%; background: transparent;
+    border: 1px solid transparent;
+    border-bottom: 1px solid var(--border);
+    color: var(--text); padding: 6px 8px;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.02em;
+    transition: border-color 200ms var(--ease), background 200ms var(--ease);
+  }
+  .note-input::placeholder { color: var(--dim); font-style: italic; }
+  .note-input:hover { border-bottom-color: var(--gold-soft); background: rgba(255,255,255,0.02); }
+  .note-input:focus { border-bottom-color: var(--gold); background: rgba(201,168,76,0.04); outline: none; }
+  .note-saved {
+    border-bottom-color: var(--leading) !important;
+    background: rgba(0,212,170,0.06) !important;
+  }
+
+  /* History summary */
+  .summary-line {
+    color: var(--muted);
+    margin: 18px 0 22px;
+    line-height: 1.7; font-size: 12px;
+    padding: 16px 20px;
+    border-left: 1px solid var(--gold-soft);
+    background: rgba(201,168,76,0.025);
+  }
+  .summary-line strong {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    color: var(--gold); font-size: 16px; margin: 0 2px;
+  }
+  .summary-line .ticker-mono {
+    color: var(--gold); font-family: 'DM Mono', monospace; letter-spacing: 0.1em;
+    font-style: normal; font-size: 12px;
+  }
+
+  /* Error */
+  .error-screen {
+    margin: 80px auto; max-width: 520px;
+    background: var(--card); border: 1px solid var(--lagging);
+    padding: 40px; text-align: center;
+  }
+  .error-screen h2 { color: var(--lagging); }
+  .error-screen code {
+    background: var(--bg); padding: 4px 10px;
+    color: var(--gold); font-family: 'DM Mono', monospace; font-size: 11px;
+  }
+
+  /* Footer */
+  .colophon {
+    padding: 18px 28px 28px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+    color: var(--dim); font-size: 9.5px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+  }
+  .colophon b { color: var(--muted); font-weight: 400; }
+
+  @media (max-width: 880px) {
+    .masthead-grid { grid-template-columns: 1fr; gap: 24px; padding: 18px 22px; }
+    .regime-hero::before, .regime-hero::after { display: none; }
+    .regime-hero { padding: 0; }
+    .meta-stack { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+    .masthead-rule { padding: 8px 22px; }
+    .masthead-rule .rule-meta { display: none; }
+    .tabs, .panel { padding-left: 22px; padding-right: 22px; }
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+<header class="masthead regime-off">
+  <div class="masthead-rule">
+    <div class="brand"><b>RRSG</b> · Sector Intelligence · Weekly Report</div>
+    <div class="rule-meta">
+      <span>Universe <b>11</b></span>
+      <span>Benchmark <b>SPY</b></span>
+      <span>As of <b>2026-05-23</b></span>
+    </div>
+  </div>
+  <div class="masthead-grid">
+    <div class="title-block">
+      <h1>Sector<br/><em>Rotation</em></h1>
+      <div class="subtitle">
+        Relative Rotation Graph <span class="div">·</span> S&amp;P 500 GICS Sectors <span class="div">·</span> Benchmark SPY
+      </div>
+    </div>
+    <div class="regime-hero">
+      <div class="regime-label">Market Regime · Composite</div>
+      <div class="regime-name">Risk-Off</div>
+      <div class="regime-tally">
+        <div class="t t-leading"><b>01</b><span>Leading</span></div>
+        <div class="t t-improving"><b>00</b><span>Improving</span></div>
+        <div class="t t-weakening"><b>02</b><span>Weakening</span></div>
+        <div class="t t-lagging"><b>08</b><span>Lagging</span></div>
+      </div>
+    </div>
+    <div class="meta-stack">
+      <div class="meta-row">
+        <span class="meta-k">Benchmark</span>
+        <span class="meta-v gold">SPY</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-k">As of</span>
+        <span class="meta-v">2026-05-23</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="chart">
+    <span class="roman">I.</span><span>RRG Chart</span>
+  </button>
+  <button class="tab" data-tab="flow">
+    <span class="roman">II.</span><span>Sector Flow</span>
+  </button>
+  <button class="tab" data-tab="history">
+    <span class="roman">III.</span><span>History &amp; Replay</span>
+  </button>
+</nav>
+
+<section class="panel active" id="panel-chart">
+  <div class="vitrine">
+    <div class="vitrine-inner">
+      <span class="brk-bl"></span><span class="brk-br"></span>
+      <div class="vitrine-eyebrow">
+        <div class="v-title">
+          <span class="roman">I.</span>
+          <span class="v-name">Relative Rotation Graph</span>
+          <span class="v-sub">Tail window <b id="tail-value-inline" style="color:var(--gold)">8</b>w</span>
+        </div>
+        <div class="v-right">Universe <b>11</b> · Benchmark <b>SPY</b></div>
+      </div>
+      <div class="controls">
+        <div class="ctl-group">
+          <span class="ctl-label">Tail Length</span>
+          <span class="ctl-value" id="tail-value">8</span>
+          <span class="ctl-label" style="color:var(--dim)">Weeks</span>
+        </div>
+        <div class="ctl-group" style="flex:1; justify-content:flex-end;">
+          <input type="range" id="tail-slider" min="0" max="3" value="1" step="1"/>
+          <div class="tail-marks">
+            <span data-i="0">4</span>
+            <span data-i="1" class="on">8</span>
+            <span data-i="2">12</span>
+            <span data-i="3">26</span>
+          </div>
+        </div>
+      </div>
+      <div class="chart-stage">
+        <div class="qc-overlay">
+          <span class="qc qc-tl">Improving</span>
+          <span class="qc qc-tr">Leading</span>
+          <span class="qc qc-bl">Lagging</span>
+          <span class="qc qc-br">Weakening</span>
+        </div>
+        <div id="rrg-chart"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="panel-flow">
+  <div class="card">
+    <div class="card-head">
+      <div class="v-title">
+        <span class="roman">II.</span>
+        <span class="v-name">Sector Flow · Weekly Disposition</span>
+      </div>
+      <div class="v-right">Sortable · Click any header · <b>11 sectors</b></div>
+    </div>
+    <div class="card-body" style="overflow-x:auto;">
+    <table id="flow-table">
+      <thead>
+        <tr>
+          <th data-sort="name"      data-type="str">Sector <span class="sort-arrow"></span></th>
+          <th data-sort="ticker"    data-type="str">Ticker <span class="sort-arrow"></span></th>
+          <th data-sort="quadrant"  data-type="str" class="center-col">Quadrant <span class="sort-arrow"></span></th>
+          <th data-sort="rs_ratio"  data-type="num" class="num-col">RS-Ratio <span class="sort-arrow"></span></th>
+          <th data-sort="rs_mom"    data-type="num" class="num-col">RS-Momentum <span class="sort-arrow"></span></th>
+          <th data-sort="direction" data-type="str" class="center-col">4W <span class="sort-arrow"></span></th>
+          <th data-sort="signal"    data-type="str">Signal <span class="sort-arrow"></span></th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        
+        
+        
+        <tr data-quadrant="LAGGING">
+          <td class="sector-name" data-name="Materials">Materials</td>
+          <td class="ticker" data-ticker="XLB"><strong>XLB</strong></td>
+          <td class="center-col" data-quadrant="LAGGING"><span class="q-pill q-LAGGING">LAGGING</span></td>
+          <td class="num-col delta-neg" data-rs_ratio="97.542">97.54</td>
+          <td class="num-col delta-neg" data-rs_mom="89.237">89.24</td>
+          <td class="center-col arrow dir-flat" data-direction="↙">↙</td>
+          <td data-signal="Holding LAGGING"><span class="signal-pill signal-neutral">Holding LAGGING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLB" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+        
+        
+        
+        <tr data-quadrant="LAGGING">
+          <td class="sector-name" data-name="Communication Services">Communication Services</td>
+          <td class="ticker" data-ticker="XLC"><strong>XLC</strong></td>
+          <td class="center-col" data-quadrant="LAGGING"><span class="q-pill q-LAGGING">LAGGING</span></td>
+          <td class="num-col delta-neg" data-rs_ratio="94.681">94.68</td>
+          <td class="num-col delta-neg" data-rs_mom="73.618">73.62</td>
+          <td class="center-col arrow dir-flat" data-direction="↙">↙</td>
+          <td data-signal="Holding LAGGING"><span class="signal-pill signal-neutral">Holding LAGGING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLC" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+        
+        
+        
+        <tr data-quadrant="WEAKENING">
+          <td class="sector-name" data-name="Energy">Energy</td>
+          <td class="ticker" data-ticker="XLE"><strong>XLE</strong></td>
+          <td class="center-col" data-quadrant="WEAKENING"><span class="q-pill q-WEAKENING">WEAKENING</span></td>
+          <td class="num-col delta-pos" data-rs_ratio="118.34">118.34</td>
+          <td class="num-col delta-neg" data-rs_mom="94.856">94.86</td>
+          <td class="center-col arrow dir-flat" data-direction="↙">↙</td>
+          <td data-signal="Holding WEAKENING"><span class="signal-pill signal-neutral">Holding WEAKENING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLE" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+        
+        
+        
+        <tr data-quadrant="LAGGING">
+          <td class="sector-name" data-name="Financials">Financials</td>
+          <td class="ticker" data-ticker="XLF"><strong>XLF</strong></td>
+          <td class="center-col" data-quadrant="LAGGING"><span class="q-pill q-LAGGING">LAGGING</span></td>
+          <td class="num-col delta-neg" data-rs_ratio="77.703">77.70</td>
+          <td class="num-col delta-neg" data-rs_mom="86.954">86.95</td>
+          <td class="center-col arrow dir-flat" data-direction="↙">↙</td>
+          <td data-signal="Holding LAGGING"><span class="signal-pill signal-neutral">Holding LAGGING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLF" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+        
+        
+        
+        <tr data-quadrant="WEAKENING">
+          <td class="sector-name" data-name="Industrials">Industrials</td>
+          <td class="ticker" data-ticker="XLI"><strong>XLI</strong></td>
+          <td class="center-col" data-quadrant="WEAKENING"><span class="q-pill q-WEAKENING">WEAKENING</span></td>
+          <td class="num-col delta-pos" data-rs_ratio="111.536">111.54</td>
+          <td class="num-col delta-neg" data-rs_mom="79.928">79.93</td>
+          <td class="center-col arrow dir-flat" data-direction="↙">↙</td>
+          <td data-signal="Holding WEAKENING"><span class="signal-pill signal-neutral">Holding WEAKENING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLI" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+        
+        
+        
+        <tr data-quadrant="LEADING">
+          <td class="sector-name" data-name="Technology">Technology</td>
+          <td class="ticker" data-ticker="XLK"><strong>XLK</strong></td>
+          <td class="center-col" data-quadrant="LEADING"><span class="q-pill q-LEADING">LEADING</span></td>
+          <td class="num-col delta-pos" data-rs_ratio="124.368">124.37</td>
+          <td class="num-col delta-pos" data-rs_mom="127.804">127.80</td>
+          <td class="center-col arrow dir-up" data-direction="↗">↗</td>
+          <td data-signal="Holding LEADING"><span class="signal-pill signal-neutral">Holding LEADING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLK" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+        
+        
+        
+        <tr data-quadrant="LAGGING">
+          <td class="sector-name" data-name="Consumer Staples">Consumer Staples</td>
+          <td class="ticker" data-ticker="XLP"><strong>XLP</strong></td>
+          <td class="center-col" data-quadrant="LAGGING"><span class="q-pill q-LAGGING">LAGGING</span></td>
+          <td class="num-col delta-neg" data-rs_ratio="88.263">88.26</td>
+          <td class="num-col delta-neg" data-rs_mom="88.98">88.98</td>
+          <td class="center-col arrow dir-flat" data-direction="↙">↙</td>
+          <td data-signal="Holding LAGGING"><span class="signal-pill signal-neutral">Holding LAGGING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLP" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+        
+        
+        
+        <tr data-quadrant="LAGGING">
+          <td class="sector-name" data-name="Real Estate">Real Estate</td>
+          <td class="ticker" data-ticker="XLRE"><strong>XLRE</strong></td>
+          <td class="center-col" data-quadrant="LAGGING"><span class="q-pill q-LAGGING">LAGGING</span></td>
+          <td class="num-col delta-neg" data-rs_ratio="88.949">88.95</td>
+          <td class="num-col delta-neg" data-rs_mom="94.267">94.27</td>
+          <td class="center-col arrow dir-flat" data-direction="↙">↙</td>
+          <td data-signal="Holding LAGGING"><span class="signal-pill signal-neutral">Holding LAGGING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLRE" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+        
+        
+        
+        <tr data-quadrant="LAGGING">
+          <td class="sector-name" data-name="Utilities">Utilities</td>
+          <td class="ticker" data-ticker="XLU"><strong>XLU</strong></td>
+          <td class="center-col" data-quadrant="LAGGING"><span class="q-pill q-LAGGING">LAGGING</span></td>
+          <td class="num-col delta-neg" data-rs_ratio="97.917">97.92</td>
+          <td class="num-col delta-neg" data-rs_mom="82.763">82.76</td>
+          <td class="center-col arrow dir-flat" data-direction="↙">↙</td>
+          <td data-signal="Entering LAGGING"><span class="signal-pill signal-exit">Entering LAGGING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLU" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+        
+        
+        
+        <tr data-quadrant="LAGGING">
+          <td class="sector-name" data-name="Health Care">Health Care</td>
+          <td class="ticker" data-ticker="XLV"><strong>XLV</strong></td>
+          <td class="center-col" data-quadrant="LAGGING"><span class="q-pill q-LAGGING">LAGGING</span></td>
+          <td class="num-col delta-neg" data-rs_ratio="86.69">86.69</td>
+          <td class="num-col delta-neg" data-rs_mom="87.279">87.28</td>
+          <td class="center-col arrow dir-flat" data-direction="↙">↙</td>
+          <td data-signal="Holding LAGGING"><span class="signal-pill signal-neutral">Holding LAGGING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLV" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+        
+        
+        
+        <tr data-quadrant="LAGGING">
+          <td class="sector-name" data-name="Consumer Discretionary">Consumer Discretionary</td>
+          <td class="ticker" data-ticker="XLY"><strong>XLY</strong></td>
+          <td class="center-col" data-quadrant="LAGGING"><span class="q-pill q-LAGGING">LAGGING</span></td>
+          <td class="num-col delta-neg" data-rs_ratio="80.688">80.69</td>
+          <td class="num-col delta-neg" data-rs_mom="90.94">90.94</td>
+          <td class="center-col arrow dir-flat" data-direction="↙">↙</td>
+          <td data-signal="Holding LAGGING"><span class="signal-pill signal-neutral">Holding LAGGING</span></td>
+          <td><input type="text" class="note-input" data-ticker="XLY" value="" placeholder="Add note…"/></td>
+        </tr>
+        
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="panel-history">
+  <div class="card">
+    <div class="card-head">
+      <div class="v-title">
+        <span class="roman">III.</span>
+        <span class="v-name">History &amp; Replay</span>
+      </div>
+      <div class="v-right">52-week trace · transitions annotated</div>
+    </div>
+    <div class="card-body" style="padding: 22px 28px 28px;">
+      <div class="controls" style="margin-bottom: 0; padding-bottom: 0; border: none;">
+        <span class="ctl-label">Select Sector</span>
+        <select id="hist-select">
+          
+          <option value="XLB">XLB — Materials</option>
+          
+          <option value="XLC">XLC — Communication Services</option>
+          
+          <option value="XLE">XLE — Energy</option>
+          
+          <option value="XLF">XLF — Financials</option>
+          
+          <option value="XLI">XLI — Industrials</option>
+          
+          <option value="XLK">XLK — Technology</option>
+          
+          <option value="XLP">XLP — Consumer Staples</option>
+          
+          <option value="XLRE">XLRE — Real Estate</option>
+          
+          <option value="XLU">XLU — Utilities</option>
+          
+          <option value="XLV">XLV — Health Care</option>
+          
+          <option value="XLY">XLY — Consumer Discretionary</option>
+          
+        </select>
+      </div>
+      <div class="summary-line" id="hist-summary"></div>
+      <div id="history-chart"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="colophon">
+  <div>RRSG · <b>Relative Rotation Sector Gauge</b></div>
+  <div>Data <b>yfinance</b> · Computed <b>RS-Ratio &amp; RS-Momentum</b> · <span style="color:var(--gold)">v1.0</span></div>
+</footer>
+
+<script>
+  const DATA        = {"benchmark": "SPY", "last_updated": "2026-05-23", "sectors": {"XLB": {"current": {"rs_momentum": 89.237, "rs_ratio": 97.542}, "history": [{"date": "2025-05-26", "rs_momentum": 98.285, "rs_ratio": 101.514}, {"date": "2025-06-02", "rs_momentum": 96.699, "rs_ratio": 100.934}, {"date": "2025-06-09", "rs_momentum": 96.203, "rs_ratio": 100.16}, {"date": "2025-06-16", "rs_momentum": 96.002, "rs_ratio": 99.627}, {"date": "2025-06-23", "rs_momentum": 94.661, "rs_ratio": 98.542}, {"date": "2025-06-30", "rs_momentum": 95.196, "rs_ratio": 98.182}, {"date": "2025-07-07", "rs_momentum": 96.404, "rs_ratio": 97.904}, {"date": "2025-07-14", "rs_momentum": 96.301, "rs_ratio": 97.329}, {"date": "2025-07-21", "rs_momentum": 98.648, "rs_ratio": 97.209}, {"date": "2025-07-28", "rs_momentum": 97.536, "rs_ratio": 96.392}, {"date": "2025-08-04", "rs_momentum": 96.384, "rs_ratio": 95.641}, {"date": "2025-08-11", "rs_momentum": 96.258, "rs_ratio": 95.014}, {"date": "2025-08-18", "rs_momentum": 95.771, "rs_ratio": 94.693}, {"date": "2025-08-25", "rs_momentum": 97.261, "rs_ratio": 94.488}, {"date": "2025-09-01", "rs_momentum": 99.058, "rs_ratio": 94.476}, {"date": "2025-09-08", "rs_momentum": 98.966, "rs_ratio": 93.811}, {"date": "2025-09-15", "rs_momentum": 97.34, "rs_ratio": 92.822}, {"date": "2025-09-22", "rs_momentum": 95.435, "rs_ratio": 91.835}, {"date": "2025-09-29", "rs_momentum": 92.929, "rs_ratio": 90.792}, {"date": "2025-10-06", "rs_momentum": 93.034, "rs_ratio": 90.17}, {"date": "2025-10-13", "rs_momentum": 93.951, "rs_ratio": 89.559}, {"date": "2025-10-20", "rs_momentum": 94.354, "rs_ratio": 88.736}, {"date": "2025-10-27", "rs_momentum": 92.763, "rs_ratio": 87.04}, {"date": "2025-11-03", "rs_momentum": 90.655, "rs_ratio": 85.552}, {"date": "2025-11-10", "rs_momentum": 89.06, "rs_ratio": 84.284}, {"date": "2025-11-17", "rs_momentum": 89.075, "rs_ratio": 83.468}, {"date": "2025-11-24", "rs_momentum": 91.799, "rs_ratio": 82.891}, {"date": "2025-12-01", "rs_momentum": 94.202, "rs_ratio": 82.391}, {"date": "2025-12-08", "rs_momentum": 96.84, "rs_ratio": 82.208}, {"date": "2025-12-15", "rs_momentum": 98.906, "rs_ratio": 82.241}, {"date": "2025-12-22", "rs_momentum": 100.535, "rs_ratio": 82.334}, {"date": "2025-12-29", "rs_momentum": 102.698, "rs_ratio": 82.723}, {"date": "2026-01-05", "rs_momentum": 106.493, "rs_ratio": 84.1}, {"date": "2026-01-12", "rs_momentum": 109.618, "rs_ratio": 85.417}, {"date": "2026-01-19", "rs_momentum": 113.332, "rs_ratio": 87.037}, {"date": "2026-01-26", "rs_momentum": 115.232, "rs_ratio": 88.206}, {"date": "2026-02-02", "rs_momentum": 116.429, "rs_ratio": 90.075}, {"date": "2026-02-09", "rs_momentum": 120.072, "rs_ratio": 92.89}, {"date": "2026-02-16", "rs_momentum": 121.37, "rs_ratio": 95.043}, {"date": "2026-02-23", "rs_momentum": 124.058, "rs_ratio": 97.318}, {"date": "2026-03-02", "rs_momentum": 123.268, "rs_ratio": 98.862}, {"date": "2026-03-09", "rs_momentum": 119.72, "rs_ratio": 100.219}, {"date": "2026-03-16", "rs_momentum": 115.899, "rs_ratio": 100.801}, {"date": "2026-03-23", "rs_momentum": 113.557, "rs_ratio": 102.113}, {"date": "2026-03-30", "rs_momentum": 111.993, "rs_ratio": 103.014}, {"date": "2026-04-06", "rs_momentum": 111.328, "rs_ratio": 104.097}, {"date": "2026-04-13", "rs_momentum": 109.226, "rs_ratio": 103.816}, {"date": "2026-04-20", "rs_momentum": 103.425, "rs_ratio": 102.743}, {"date": "2026-04-27", "rs_momentum": 98.578, "rs_ratio": 101.652}, {"date": "2026-05-04", "rs_momentum": 92.139, "rs_ratio": 100.089}, {"date": "2026-05-11", "rs_momentum": 89.902, "rs_ratio": 98.888}, {"date": "2026-05-18", "rs_momentum": 89.237, "rs_ratio": 97.542}], "name": "Materials", "prev_quadrant": "LAGGING", "prior_quadrant": "LEADING", "quadrant": "LAGGING"}, "XLC": {"current": {"rs_momentum": 73.618, "rs_ratio": 94.681}, "history": [{"date": "2025-05-26", "rs_momentum": 97.66, "rs_ratio": 107.298}, {"date": "2025-06-02", "rs_momentum": 98.005, "rs_ratio": 107.515}, {"date": "2025-06-09", "rs_momentum": 98.909, "rs_ratio": 107.38}, {"date": "2025-06-16", "rs_momentum": 99.227, "rs_ratio": 107.732}, {"date": "2025-06-23", "rs_momentum": 101.106, "rs_ratio": 108.27}, {"date": "2025-06-30", "rs_momentum": 101.11, "rs_ratio": 108.488}, {"date": "2025-07-07", "rs_momentum": 100.59, "rs_ratio": 108.157}, {"date": "2025-07-14", "rs_momentum": 98.292, "rs_ratio": 107.644}, {"date": "2025-07-21", "rs_momentum": 95.778, "rs_ratio": 107.235}, {"date": "2025-07-28", "rs_momentum": 94.133, "rs_ratio": 106.834}, {"date": "2025-08-04", "rs_momentum": 93.59, "rs_ratio": 106.299}, {"date": "2025-08-11", "rs_momentum": 94.983, "rs_ratio": 106.31}, {"date": "2025-08-18", "rs_momentum": 96.323, "rs_ratio": 106.406}, {"date": "2025-08-25", "rs_momentum": 97.186, "rs_ratio": 106.33}, {"date": "2025-09-01", "rs_momentum": 99.714, "rs_ratio": 106.747}, {"date": "2025-09-08", "rs_momentum": 102.218, "rs_ratio": 107.701}, {"date": "2025-09-15", "rs_momentum": 106.348, "rs_ratio": 109.351}, {"date": "2025-09-22", "rs_momentum": 110.461, "rs_ratio": 110.824}, {"date": "2025-09-29", "rs_momentum": 111.617, "rs_ratio": 111.677}, {"date": "2025-10-06", "rs_momentum": 110.044, "rs_ratio": 112.038}, {"date": "2025-10-13", "rs_momentum": 107.518, "rs_ratio": 112.738}, {"date": "2025-10-20", "rs_momentum": 102.495, "rs_ratio": 112.319}, {"date": "2025-10-27", "rs_momentum": 98.445, "rs_ratio": 111.646}, {"date": "2025-11-03", "rs_momentum": 95.066, "rs_ratio": 110.735}, {"date": "2025-11-10", "rs_momentum": 88.174, "rs_ratio": 108.84}, {"date": "2025-11-17", "rs_momentum": 85.492, "rs_ratio": 107.411}, {"date": "2025-11-24", "rs_momentum": 82.443, "rs_ratio": 105.591}, {"date": "2025-12-01", "rs_momentum": 81.719, "rs_ratio": 104.407}, {"date": "2025-12-08", "rs_momentum": 85.441, "rs_ratio": 103.913}, {"date": "2025-12-15", "rs_momentum": 88.557, "rs_ratio": 103.658}, {"date": "2025-12-22", "rs_momentum": 92.239, "rs_ratio": 103.224}, {"date": "2025-12-29", "rs_momentum": 95.624, "rs_ratio": 103.314}, {"date": "2026-01-05", "rs_momentum": 97.644, "rs_ratio": 103.581}, {"date": "2026-01-12", "rs_momentum": 98.088, "rs_ratio": 103.493}, {"date": "2026-01-19", "rs_momentum": 101.035, "rs_ratio": 104.169}, {"date": "2026-01-26", "rs_momentum": 102.468, "rs_ratio": 104.799}, {"date": "2026-02-02", "rs_momentum": 101.237, "rs_ratio": 104.602}, {"date": "2026-02-09", "rs_momentum": 100.273, "rs_ratio": 104.151}, {"date": "2026-02-16", "rs_momentum": 97.82, "rs_ratio": 103.903}, {"date": "2026-02-23", "rs_momentum": 96.558, "rs_ratio": 104.058}, {"date": "2026-03-02", "rs_momentum": 99.005, "rs_ratio": 104.783}, {"date": "2026-03-09", "rs_momentum": 100.951, "rs_ratio": 105.065}, {"date": "2026-03-16", "rs_momentum": 103.008, "rs_ratio": 105.591}, {"date": "2026-03-23", "rs_momentum": 103.408, "rs_ratio": 105.897}, {"date": "2026-03-30", "rs_momentum": 101.794, "rs_ratio": 106.013}, {"date": "2026-04-06", "rs_momentum": 98.502, "rs_ratio": 105.056}, {"date": "2026-04-13", "rs_momentum": 97.181, "rs_ratio": 105.085}, {"date": "2026-04-20", "rs_momentum": 93.645, "rs_ratio": 104.059}, {"date": "2026-04-27", "rs_momentum": 90.074, "rs_ratio": 102.831}, {"date": "2026-05-04", "rs_momentum": 86.657, "rs_ratio": 100.587}, {"date": "2026-05-11", "rs_momentum": 78.806, "rs_ratio": 97.66}, {"date": "2026-05-18", "rs_momentum": 73.618, "rs_ratio": 94.681}], "name": "Communication Services", "prev_quadrant": "LAGGING", "prior_quadrant": "WEAKENING", "quadrant": "LAGGING"}, "XLE": {"current": {"rs_momentum": 94.856, "rs_ratio": 118.34}, "history": [{"date": "2025-05-26", "rs_momentum": 90.245, "rs_ratio": 99.078}, {"date": "2025-06-02", "rs_momentum": 86.994, "rs_ratio": 96.837}, {"date": "2025-06-09", "rs_momentum": 86.815, "rs_ratio": 96.117}, {"date": "2025-06-16", "rs_momentum": 90.007, "rs_ratio": 96.289}, {"date": "2025-06-23", "rs_momentum": 91.413, "rs_ratio": 94.857}, {"date": "2025-06-30", "rs_momentum": 94.101, "rs_ratio": 94.013}, {"date": "2025-07-07", "rs_momentum": 95.322, "rs_ratio": 93.927}, {"date": "2025-07-14", "rs_momentum": 93.593, "rs_ratio": 93.2}, {"date": "2025-07-21", "rs_momentum": 95.274, "rs_ratio": 92.642}, {"date": "2025-07-28", "rs_momentum": 96.364, "rs_ratio": 92.364}, {"date": "2025-08-04", "rs_momentum": 95.803, "rs_ratio": 91.987}, {"date": "2025-08-11", "rs_momentum": 96.275, "rs_ratio": 91.505}, {"date": "2025-08-18", "rs_momentum": 95.634, "rs_ratio": 90.614}, {"date": "2025-08-25", "rs_momentum": 94.687, "rs_ratio": 89.844}, {"date": "2025-09-01", "rs_momentum": 94.972, "rs_ratio": 89.615}, {"date": "2025-09-08", "rs_momentum": 95.161, "rs_ratio": 89.232}, {"date": "2025-09-15", "rs_momentum": 95.275, "rs_ratio": 88.399}, {"date": "2025-09-22", "rs_momentum": 97.032, "rs_ratio": 88.542}, {"date": "2025-09-29", "rs_momentum": 96.954, "rs_ratio": 88.273}, {"date": "2025-10-06", "rs_momentum": 96.616, "rs_ratio": 87.714}, {"date": "2025-10-13", "rs_momentum": 97.692, "rs_ratio": 87.44}, {"date": "2025-10-20", "rs_momentum": 97.05, "rs_ratio": 87.25}, {"date": "2025-10-27", "rs_momentum": 96.456, "rs_ratio": 86.672}, {"date": "2025-11-03", "rs_momentum": 96.54, "rs_ratio": 86.156}, {"date": "2025-11-10", "rs_momentum": 97.53, "rs_ratio": 86.397}, {"date": "2025-11-17", "rs_momentum": 98.18, "rs_ratio": 86.545}, {"date": "2025-11-24", "rs_momentum": 99.25, "rs_ratio": 86.522}, {"date": "2025-12-01", "rs_momentum": 99.587, "rs_ratio": 86.182}, {"date": "2025-12-08", "rs_momentum": 99.233, "rs_ratio": 86.239}, {"date": "2025-12-15", "rs_momentum": 98.811, "rs_ratio": 86.167}, {"date": "2025-12-22", "rs_momentum": 98.562, "rs_ratio": 86.015}, {"date": "2025-12-29", "rs_momentum": 99.95, "rs_ratio": 86.396}, {"date": "2026-01-05", "rs_momentum": 100.855, "rs_ratio": 86.924}, {"date": "2026-01-12", "rs_momentum": 101.874, "rs_ratio": 87.381}, {"date": "2026-01-19", "rs_momentum": 103.277, "rs_ratio": 87.958}, {"date": "2026-01-26", "rs_momentum": 104.684, "rs_ratio": 89.07}, {"date": "2026-02-02", "rs_momentum": 107.501, "rs_ratio": 91.061}, {"date": "2026-02-09", "rs_momentum": 111.073, "rs_ratio": 93.374}, {"date": "2026-02-16", "rs_momentum": 114.447, "rs_ratio": 95.704}, {"date": "2026-02-23", "rs_momentum": 118.088, "rs_ratio": 98.707}, {"date": "2026-03-02", "rs_momentum": 121.261, "rs_ratio": 102.347}, {"date": "2026-03-09", "rs_momentum": 123.697, "rs_ratio": 105.926}, {"date": "2026-03-16", "rs_momentum": 127.426, "rs_ratio": 110.194}, {"date": "2026-03-23", "rs_momentum": 131.637, "rs_ratio": 115.384}, {"date": "2026-03-30", "rs_momentum": 131.186, "rs_ratio": 118.79}, {"date": "2026-04-06", "rs_momentum": 127.807, "rs_ratio": 120.613}, {"date": "2026-04-13", "rs_momentum": 119.82, "rs_ratio": 120.731}, {"date": "2026-04-20", "rs_momentum": 109.909, "rs_ratio": 120.773}, {"date": "2026-04-27", "rs_momentum": 104.159, "rs_ratio": 121.19}, {"date": "2026-05-04", "rs_momentum": 98.708, "rs_ratio": 120.182}, {"date": "2026-05-11", "rs_momentum": 97.324, "rs_ratio": 119.581}, {"date": "2026-05-18", "rs_momentum": 94.856, "rs_ratio": 118.34}], "name": "Energy", "prev_quadrant": "WEAKENING", "prior_quadrant": "LEADING", "quadrant": "WEAKENING"}, "XLF": {"current": {"rs_momentum": 86.954, "rs_ratio": 77.703}, "history": [{"date": "2025-05-26", "rs_momentum": 102.121, "rs_ratio": 116.793}, {"date": "2025-06-02", "rs_momentum": 99.719, "rs_ratio": 116.078}, {"date": "2025-06-09", "rs_momentum": 95.731, "rs_ratio": 115.057}, {"date": "2025-06-16", "rs_momentum": 93.555, "rs_ratio": 114.338}, {"date": "2025-06-23", "rs_momentum": 91.167, "rs_ratio": 113.152}, {"date": "2025-06-30", "rs_momentum": 91.569, "rs_ratio": 112.584}, {"date": "2025-07-07", "rs_momentum": 91.327, "rs_ratio": 111.474}, {"date": "2025-07-14", "rs_momentum": 89.897, "rs_ratio": 110.236}, {"date": "2025-07-21", "rs_momentum": 91.008, "rs_ratio": 109.454}, {"date": "2025-07-28", "rs_momentum": 89.819, "rs_ratio": 108.453}, {"date": "2025-08-04", "rs_momentum": 89.127, "rs_ratio": 107.092}, {"date": "2025-08-11", "rs_momentum": 89.552, "rs_ratio": 106.009}, {"date": "2025-08-18", "rs_momentum": 91.237, "rs_ratio": 105.838}, {"date": "2025-08-25", "rs_momentum": 93.247, "rs_ratio": 105.568}, {"date": "2025-09-01", "rs_momentum": 95.371, "rs_ratio": 104.979}, {"date": "2025-09-08", "rs_momentum": 95.962, "rs_ratio": 104.11}, {"date": "2025-09-15", "rs_momentum": 95.02, "rs_ratio": 103.597}, {"date": "2025-09-22", "rs_momentum": 93.863, "rs_ratio": 102.907}, {"date": "2025-09-29", "rs_momentum": 92.839, "rs_ratio": 101.946}, {"date": "2025-10-06", "rs_momentum": 93.183, "rs_ratio": 101.202}, {"date": "2025-10-13", "rs_momentum": 92.52, "rs_ratio": 100.448}, {"date": "2025-10-20", "rs_momentum": 92.143, "rs_ratio": 99.621}, {"date": "2025-10-27", "rs_momentum": 90.193, "rs_ratio": 97.951}, {"date": "2025-11-03", "rs_momentum": 88.532, "rs_ratio": 96.604}, {"date": "2025-11-10", "rs_momentum": 87.716, "rs_ratio": 95.554}, {"date": "2025-11-17", "rs_momentum": 87.477, "rs_ratio": 94.639}, {"date": "2025-11-24", "rs_momentum": 89.355, "rs_ratio": 93.652}, {"date": "2025-12-01", "rs_momentum": 90.962, "rs_ratio": 92.889}, {"date": "2025-12-08", "rs_momentum": 94.095, "rs_ratio": 92.977}, {"date": "2025-12-15", "rs_momentum": 97.133, "rs_ratio": 93.166}, {"date": "2025-12-22", "rs_momentum": 101.184, "rs_ratio": 93.651}, {"date": "2025-12-29", "rs_momentum": 104.789, "rs_ratio": 94.198}, {"date": "2026-01-05", "rs_momentum": 107.186, "rs_ratio": 95.157}, {"date": "2026-01-12", "rs_momentum": 106.731, "rs_ratio": 95.181}, {"date": "2026-01-19", "rs_momentum": 104.641, "rs_ratio": 94.907}, {"date": "2026-01-26", "rs_momentum": 102.295, "rs_ratio": 94.601}, {"date": "2026-02-02", "rs_momentum": 100.08, "rs_ratio": 94.755}, {"date": "2026-02-09", "rs_momentum": 98.169, "rs_ratio": 94.085}, {"date": "2026-02-16", "rs_momentum": 95.641, "rs_ratio": 92.892}, {"date": "2026-02-23", "rs_momentum": 92.351, "rs_ratio": 91.391}, {"date": "2026-03-02", "rs_momentum": 88.152, "rs_ratio": 90.019}, {"date": "2026-03-09", "rs_momentum": 85.105, "rs_ratio": 88.242}, {"date": "2026-03-16", "rs_momentum": 84.958, "rs_ratio": 86.995}, {"date": "2026-03-23", "rs_momentum": 86.478, "rs_ratio": 86.046}, {"date": "2026-03-30", "rs_momentum": 89.29, "rs_ratio": 85.696}, {"date": "2026-04-06", "rs_momentum": 92.452, "rs_ratio": 85.068}, {"date": "2026-04-13", "rs_momentum": 92.498, "rs_ratio": 83.837}, {"date": "2026-04-20", "rs_momentum": 92.461, "rs_ratio": 82.875}, {"date": "2026-04-27", "rs_momentum": 90.513, "rs_ratio": 81.818}, {"date": "2026-05-04", "rs_momentum": 88.278, "rs_ratio": 80.377}, {"date": "2026-05-11", "rs_momentum": 87.272, "rs_ratio": 78.781}, {"date": "2026-05-18", "rs_momentum": 86.954, "rs_ratio": 77.703}], "name": "Financials", "prev_quadrant": "LAGGING", "prior_quadrant": "LAGGING", "quadrant": "LAGGING"}, "XLI": {"current": {"rs_momentum": 79.928, "rs_ratio": 111.536}, "history": [{"date": "2025-05-26", "rs_momentum": 107.371, "rs_ratio": 104.41}, {"date": "2025-06-02", "rs_momentum": 106.59, "rs_ratio": 105.634}, {"date": "2025-06-09", "rs_momentum": 105.813, "rs_ratio": 106.44}, {"date": "2025-06-16", "rs_momentum": 104.421, "rs_ratio": 107.054}, {"date": "2025-06-23", "rs_momentum": 102.6, "rs_ratio": 107.052}, {"date": "2025-06-30", "rs_momentum": 101.738, "rs_ratio": 107.733}, {"date": "2025-07-07", "rs_momentum": 101.248, "rs_ratio": 108.232}, {"date": "2025-07-14", "rs_momentum": 100.314, "rs_ratio": 108.258}, {"date": "2025-07-21", "rs_momentum": 100.624, "rs_ratio": 108.451}, {"date": "2025-07-28", "rs_momentum": 99.004, "rs_ratio": 108.113}, {"date": "2025-08-04", "rs_momentum": 96.917, "rs_ratio": 107.298}, {"date": "2025-08-11", "rs_momentum": 95.005, "rs_ratio": 106.121}, {"date": "2025-08-18", "rs_momentum": 94.324, "rs_ratio": 105.886}, {"date": "2025-08-25", "rs_momentum": 93.959, "rs_ratio": 105.318}, {"date": "2025-09-01", "rs_momentum": 94.139, "rs_ratio": 104.617}, {"date": "2025-09-08", "rs_momentum": 94.07, "rs_ratio": 103.396}, {"date": "2025-09-15", "rs_momentum": 92.091, "rs_ratio": 101.916}, {"date": "2025-09-22", "rs_momentum": 90.342, "rs_ratio": 100.248}, {"date": "2025-09-29", "rs_momentum": 88.62, "rs_ratio": 98.464}, {"date": "2025-10-06", "rs_momentum": 88.013, "rs_ratio": 96.861}, {"date": "2025-10-13", "rs_momentum": 88.503, "rs_ratio": 95.689}, {"date": "2025-10-20", "rs_momentum": 90.05, "rs_ratio": 94.994}, {"date": "2025-10-27", "rs_momentum": 90.645, "rs_ratio": 93.585}, {"date": "2025-11-03", "rs_momentum": 91.61, "rs_ratio": 92.589}, {"date": "2025-11-10", "rs_momentum": 91.929, "rs_ratio": 91.618}, {"date": "2025-11-17", "rs_momentum": 92.287, "rs_ratio": 91.148}, {"date": "2025-11-24", "rs_momentum": 93.25, "rs_ratio": 90.344}, {"date": "2025-12-01", "rs_momentum": 93.867, "rs_ratio": 89.737}, {"date": "2025-12-08", "rs_momentum": 95.218, "rs_ratio": 89.615}, {"date": "2025-12-15", "rs_momentum": 95.839, "rs_ratio": 89.536}, {"date": "2025-12-22", "rs_momentum": 96.812, "rs_ratio": 89.345}, {"date": "2025-12-29", "rs_momentum": 98.387, "rs_ratio": 89.728}, {"date": "2026-01-05", "rs_momentum": 99.99, "rs_ratio": 90.615}, {"date": "2026-01-12", "rs_momentum": 103.111, "rs_ratio": 92.5}, {"date": "2026-01-19", "rs_momentum": 106.236, "rs_ratio": 94.274}, {"date": "2026-01-26", "rs_momentum": 108.449, "rs_ratio": 96.05}, {"date": "2026-02-02", "rs_momentum": 113.073, "rs_ratio": 99.846}, {"date": "2026-02-09", "rs_momentum": 117.081, "rs_ratio": 104.252}, {"date": "2026-02-16", "rs_momentum": 120.596, "rs_ratio": 108.238}, {"date": "2026-02-23", "rs_momentum": 124.587, "rs_ratio": 112.525}, {"date": "2026-03-02", "rs_momentum": 124.543, "rs_ratio": 116.294}, {"date": "2026-03-09", "rs_momentum": 121.574, "rs_ratio": 118.831}, {"date": "2026-03-16", "rs_momentum": 118.948, "rs_ratio": 121.165}, {"date": "2026-03-23", "rs_momentum": 114.244, "rs_ratio": 122.493}, {"date": "2026-03-30", "rs_momentum": 110.918, "rs_ratio": 124.169}, {"date": "2026-04-06", "rs_momentum": 109.991, "rs_ratio": 126.123}, {"date": "2026-04-13", "rs_momentum": 104.792, "rs_ratio": 125.186}, {"date": "2026-04-20", "rs_momentum": 99.457, "rs_ratio": 123.157}, {"date": "2026-04-27", "rs_momentum": 92.833, "rs_ratio": 120.666}, {"date": "2026-05-04", "rs_momentum": 84.291, "rs_ratio": 117.246}, {"date": "2026-05-11", "rs_momentum": 80.937, "rs_ratio": 114.199}, {"date": "2026-05-18", "rs_momentum": 79.928, "rs_ratio": 111.536}], "name": "Industrials", "prev_quadrant": "WEAKENING", "prior_quadrant": "WEAKENING", "quadrant": "WEAKENING"}, "XLK": {"current": {"rs_momentum": 127.804, "rs_ratio": 124.368}, "history": [{"date": "2025-05-26", "rs_momentum": 103.764, "rs_ratio": 83.773}, {"date": "2025-06-02", "rs_momentum": 106.308, "rs_ratio": 85.571}, {"date": "2025-06-09", "rs_momentum": 109.182, "rs_ratio": 88.207}, {"date": "2025-06-16", "rs_momentum": 111.808, "rs_ratio": 90.417}, {"date": "2025-06-23", "rs_momentum": 115.154, "rs_ratio": 93.09}, {"date": "2025-06-30", "rs_momentum": 115.71, "rs_ratio": 95.201}, {"date": "2025-07-07", "rs_momentum": 114.275, "rs_ratio": 97.03}, {"date": "2025-07-14", "rs_momentum": 113.839, "rs_ratio": 98.995}, {"date": "2025-07-21", "rs_momentum": 110.902, "rs_ratio": 100.017}, {"date": "2025-07-28", "rs_momentum": 109.662, "rs_ratio": 101.432}, {"date": "2025-08-04", "rs_momentum": 109.364, "rs_ratio": 103.093}, {"date": "2025-08-11", "rs_momentum": 107.589, "rs_ratio": 104.061}, {"date": "2025-08-18", "rs_momentum": 106.422, "rs_ratio": 104.427}, {"date": "2025-08-25", "rs_momentum": 104.093, "rs_ratio": 104.532}, {"date": "2025-09-01", "rs_momentum": 101.017, "rs_ratio": 104.464}, {"date": "2025-09-08", "rs_momentum": 99.429, "rs_ratio": 104.539}, {"date": "2025-09-15", "rs_momentum": 99.956, "rs_ratio": 105.202}, {"date": "2025-09-22", "rs_momentum": 100.294, "rs_ratio": 105.497}, {"date": "2025-09-29", "rs_momentum": 102.02, "rs_ratio": 106.399}, {"date": "2025-10-06", "rs_momentum": 103.326, "rs_ratio": 107.208}, {"date": "2025-10-13", "rs_momentum": 103.446, "rs_ratio": 107.938}, {"date": "2025-10-20", "rs_momentum": 105.27, "rs_ratio": 109.259}, {"date": "2025-10-27", "rs_momentum": 107.622, "rs_ratio": 111.483}, {"date": "2025-11-03", "rs_momentum": 108.774, "rs_ratio": 112.939}, {"date": "2025-11-10", "rs_momentum": 110.081, "rs_ratio": 114.404}, {"date": "2025-11-17", "rs_momentum": 107.955, "rs_ratio": 114.53}, {"date": "2025-11-24", "rs_momentum": 103.757, "rs_ratio": 114.394}, {"date": "2025-12-01", "rs_momentum": 101.968, "rs_ratio": 114.845}, {"date": "2025-12-08", "rs_momentum": 98.9, "rs_ratio": 114.585}, {"date": "2025-12-15", "rs_momentum": 98.513, "rs_ratio": 114.493}, {"date": "2025-12-22", "rs_momentum": 98.083, "rs_ratio": 114.116}, {"date": "2025-12-29", "rs_momentum": 95.907, "rs_ratio": 113.344}, {"date": "2026-01-05", "rs_momentum": 93.978, "rs_ratio": 111.999}, {"date": "2026-01-12", "rs_momentum": 93.081, "rs_ratio": 111.403}, {"date": "2026-01-19", "rs_momentum": 92.76, "rs_ratio": 110.845}, {"date": "2026-01-26", "rs_momentum": 94.216, "rs_ratio": 110.892}, {"date": "2026-02-02", "rs_momentum": 95.348, "rs_ratio": 110.183}, {"date": "2026-02-09", "rs_momentum": 94.196, "rs_ratio": 108.94}, {"date": "2026-02-16", "rs_momentum": 93.607, "rs_ratio": 108.051}, {"date": "2026-02-23", "rs_momentum": 91.054, "rs_ratio": 106.663}, {"date": "2026-03-02", "rs_momentum": 90.489, "rs_ratio": 105.637}, {"date": "2026-03-09", "rs_momentum": 91.603, "rs_ratio": 105.02}, {"date": "2026-03-16", "rs_momentum": 92.721, "rs_ratio": 104.759}, {"date": "2026-03-23", "rs_momentum": 93.73, "rs_ratio": 103.938}, {"date": "2026-03-30", "rs_momentum": 94.741, "rs_ratio": 103.48}, {"date": "2026-04-06", "rs_momentum": 96.23, "rs_ratio": 103.7}, {"date": "2026-04-13", "rs_momentum": 99.678, "rs_ratio": 105.377}, {"date": "2026-04-20", "rs_momentum": 105.697, "rs_ratio": 107.94}, {"date": "2026-04-27", "rs_momentum": 111.204, "rs_ratio": 110.578}, {"date": "2026-05-04", "rs_momentum": 119.125, "rs_ratio": 115.25}, {"date": "2026-05-11", "rs_momentum": 124.124, "rs_ratio": 119.737}, {"date": "2026-05-18", "rs_momentum": 127.804, "rs_ratio": 124.368}], "name": "Technology", "prev_quadrant": "LEADING", "prior_quadrant": "LEADING", "quadrant": "LEADING"}, "XLP": {"current": {"rs_momentum": 88.98, "rs_ratio": 88.263}, "history": [{"date": "2025-05-26", "rs_momentum": 101.682, "rs_ratio": 114.016}, {"date": "2025-06-02", "rs_momentum": 98.935, "rs_ratio": 113.228}, {"date": "2025-06-09", "rs_momentum": 95.523, "rs_ratio": 111.191}, {"date": "2025-06-16", "rs_momentum": 92.144, "rs_ratio": 109.725}, {"date": "2025-06-23", "rs_momentum": 86.129, "rs_ratio": 107.145}, {"date": "2025-06-30", "rs_momentum": 84.385, "rs_ratio": 105.603}, {"date": "2025-07-07", "rs_momentum": 85.787, "rs_ratio": 104.172}, {"date": "2025-07-14", "rs_momentum": 85.829, "rs_ratio": 102.724}, {"date": "2025-07-21", "rs_momentum": 89.474, "rs_ratio": 101.72}, {"date": "2025-07-28", "rs_momentum": 90.291, "rs_ratio": 100.532}, {"date": "2025-08-04", "rs_momentum": 91.066, "rs_ratio": 99.435}, {"date": "2025-08-11", "rs_momentum": 92.407, "rs_ratio": 98.568}, {"date": "2025-08-18", "rs_momentum": 92.978, "rs_ratio": 97.81}, {"date": "2025-08-25", "rs_momentum": 93.183, "rs_ratio": 96.711}, {"date": "2025-09-01", "rs_momentum": 94.479, "rs_ratio": 96.174}, {"date": "2025-09-08", "rs_momentum": 94.264, "rs_ratio": 95.214}, {"date": "2025-09-15", "rs_momentum": 93.616, "rs_ratio": 94.176}, {"date": "2025-09-22", "rs_momentum": 93.412, "rs_ratio": 92.988}, {"date": "2025-09-29", "rs_momentum": 92.044, "rs_ratio": 91.861}, {"date": "2025-10-06", "rs_momentum": 92.138, "rs_ratio": 90.941}, {"date": "2025-10-13", "rs_momentum": 92.386, "rs_ratio": 90.01}, {"date": "2025-10-20", "rs_momentum": 92.676, "rs_ratio": 88.948}, {"date": "2025-10-27", "rs_momentum": 91.556, "rs_ratio": 87.336}, {"date": "2025-11-03", "rs_momentum": 91.173, "rs_ratio": 86.251}, {"date": "2025-11-10", "rs_momentum": 91.043, "rs_ratio": 85.263}, {"date": "2025-11-17", "rs_momentum": 92.659, "rs_ratio": 84.901}, {"date": "2025-11-24", "rs_momentum": 95.67, "rs_ratio": 84.59}, {"date": "2025-12-01", "rs_momentum": 97.559, "rs_ratio": 84.322}, {"date": "2025-12-08", "rs_momentum": 99.817, "rs_ratio": 84.311}, {"date": "2025-12-15", "rs_momentum": 99.727, "rs_ratio": 83.909}, {"date": "2025-12-22", "rs_momentum": 98.752, "rs_ratio": 83.177}, {"date": "2025-12-29", "rs_momentum": 98.772, "rs_ratio": 82.917}, {"date": "2026-01-05", "rs_momentum": 99.503, "rs_ratio": 83.222}, {"date": "2026-01-12", "rs_momentum": 101.636, "rs_ratio": 83.743}, {"date": "2026-01-19", "rs_momentum": 104.759, "rs_ratio": 84.361}, {"date": "2026-01-26", "rs_momentum": 106.105, "rs_ratio": 84.684}, {"date": "2026-02-02", "rs_momentum": 108.258, "rs_ratio": 85.919}, {"date": "2026-02-09", "rs_momentum": 111.287, "rs_ratio": 87.75}, {"date": "2026-02-16", "rs_momentum": 112.667, "rs_ratio": 88.964}, {"date": "2026-02-23", "rs_momentum": 115.813, "rs_ratio": 90.647}, {"date": "2026-03-02", "rs_momentum": 116.633, "rs_ratio": 92.237}, {"date": "2026-03-09", "rs_momentum": 115.853, "rs_ratio": 93.73}, {"date": "2026-03-16", "rs_momentum": 115.751, "rs_ratio": 94.901}, {"date": "2026-03-23", "rs_momentum": 114.262, "rs_ratio": 95.94}, {"date": "2026-03-30", "rs_momentum": 111.782, "rs_ratio": 96.458}, {"date": "2026-04-06", "rs_momentum": 108.546, "rs_ratio": 96.552}, {"date": "2026-04-13", "rs_momentum": 103.198, "rs_ratio": 95.41}, {"date": "2026-04-20", "rs_momentum": 97.304, "rs_ratio": 93.901}, {"date": "2026-04-27", "rs_momentum": 93.596, "rs_ratio": 92.816}, {"date": "2026-05-04", "rs_momentum": 89.313, "rs_ratio": 91.057}, {"date": "2026-05-11", "rs_momentum": 88.862, "rs_ratio": 89.721}, {"date": "2026-05-18", "rs_momentum": 88.98, "rs_ratio": 88.263}], "name": "Consumer Staples", "prev_quadrant": "LAGGING", "prior_quadrant": "LAGGING", "quadrant": "LAGGING"}, "XLRE": {"current": {"rs_momentum": 94.267, "rs_ratio": 88.949}, "history": [{"date": "2025-05-26", "rs_momentum": 97.819, "rs_ratio": 109.696}, {"date": "2025-06-02", "rs_momentum": 94.949, "rs_ratio": 108.87}, {"date": "2025-06-09", "rs_momentum": 92.788, "rs_ratio": 107.489}, {"date": "2025-06-16", "rs_momentum": 93.163, "rs_ratio": 106.991}, {"date": "2025-06-23", "rs_momentum": 89.193, "rs_ratio": 104.968}, {"date": "2025-06-30", "rs_momentum": 88.043, "rs_ratio": 103.703}, {"date": "2025-07-07", "rs_momentum": 88.054, "rs_ratio": 102.326}, {"date": "2025-07-14", "rs_momentum": 85.888, "rs_ratio": 101.001}, {"date": "2025-07-21", "rs_momentum": 89.557, "rs_ratio": 100.378}, {"date": "2025-07-28", "rs_momentum": 91.118, "rs_ratio": 99.709}, {"date": "2025-08-04", "rs_momentum": 91.769, "rs_ratio": 98.581}, {"date": "2025-08-11", "rs_momentum": 92.489, "rs_ratio": 97.53}, {"date": "2025-08-18", "rs_momentum": 91.953, "rs_ratio": 96.703}, {"date": "2025-08-25", "rs_momentum": 91.412, "rs_ratio": 95.828}, {"date": "2025-09-01", "rs_momentum": 93.79, "rs_ratio": 95.607}, {"date": "2025-09-08", "rs_momentum": 95.27, "rs_ratio": 95.122}, {"date": "2025-09-15", "rs_momentum": 95.547, "rs_ratio": 94.4}, {"date": "2025-09-22", "rs_momentum": 95.97, "rs_ratio": 93.687}, {"date": "2025-09-29", "rs_momentum": 94.462, "rs_ratio": 92.89}, {"date": "2025-10-06", "rs_momentum": 93.732, "rs_ratio": 92.126}, {"date": "2025-10-13", "rs_momentum": 95.016, "rs_ratio": 91.895}, {"date": "2025-10-20", "rs_momentum": 96.386, "rs_ratio": 91.704}, {"date": "2025-10-27", "rs_momentum": 95.664, "rs_ratio": 90.632}, {"date": "2025-11-03", "rs_momentum": 95.679, "rs_ratio": 89.874}, {"date": "2025-11-10", "rs_momentum": 94.224, "rs_ratio": 89.087}, {"date": "2025-11-17", "rs_momentum": 93.644, "rs_ratio": 88.675}, {"date": "2025-11-24", "rs_momentum": 95.518, "rs_ratio": 88.317}, {"date": "2025-12-01", "rs_momentum": 95.911, "rs_ratio": 87.709}, {"date": "2025-12-08", "rs_momentum": 96.334, "rs_ratio": 87.084}, {"date": "2025-12-15", "rs_momentum": 95.812, "rs_ratio": 86.473}, {"date": "2025-12-22", "rs_momentum": 94.244, "rs_ratio": 85.517}, {"date": "2025-12-29", "rs_momentum": 94.045, "rs_ratio": 84.833}, {"date": "2026-01-05", "rs_momentum": 95.078, "rs_ratio": 84.602}, {"date": "2026-01-12", "rs_momentum": 96.681, "rs_ratio": 84.603}, {"date": "2026-01-19", "rs_momentum": 98.859, "rs_ratio": 84.478}, {"date": "2026-01-26", "rs_momentum": 99.747, "rs_ratio": 84.134}, {"date": "2026-02-02", "rs_momentum": 100.516, "rs_ratio": 84.196}, {"date": "2026-02-09", "rs_momentum": 102.904, "rs_ratio": 85.108}, {"date": "2026-02-16", "rs_momentum": 105.292, "rs_ratio": 85.895}, {"date": "2026-02-23", "rs_momentum": 108.913, "rs_ratio": 86.933}, {"date": "2026-03-02", "rs_momentum": 111.792, "rs_ratio": 88.094}, {"date": "2026-03-09", "rs_momentum": 111.892, "rs_ratio": 89.045}, {"date": "2026-03-16", "rs_momentum": 112.078, "rs_ratio": 89.903}, {"date": "2026-03-23", "rs_momentum": 110.368, "rs_ratio": 90.288}, {"date": "2026-03-30", "rs_momentum": 109.372, "rs_ratio": 91.069}, {"date": "2026-04-06", "rs_momentum": 108.688, "rs_ratio": 91.758}, {"date": "2026-04-13", "rs_momentum": 107.547, "rs_ratio": 92.181}, {"date": "2026-04-20", "rs_momentum": 105.385, "rs_ratio": 91.741}, {"date": "2026-04-27", "rs_momentum": 102.576, "rs_ratio": 91.449}, {"date": "2026-05-04", "rs_momentum": 98.932, "rs_ratio": 90.747}, {"date": "2026-05-11", "rs_momentum": 95.13, "rs_ratio": 89.719}, {"date": "2026-05-18", "rs_momentum": 94.267, "rs_ratio": 88.949}], "name": "Real Estate", "prev_quadrant": "LAGGING", "prior_quadrant": "IMPROVING", "quadrant": "LAGGING"}, "XLU": {"current": {"rs_momentum": 82.763, "rs_ratio": 97.917}, "history": [{"date": "2025-05-26", "rs_momentum": 103.187, "rs_ratio": 120.38}, {"date": "2025-06-02", "rs_momentum": 99.661, "rs_ratio": 119.402}, {"date": "2025-06-09", "rs_momentum": 95.461, "rs_ratio": 116.567}, {"date": "2025-06-16", "rs_momentum": 93.486, "rs_ratio": 114.78}, {"date": "2025-06-23", "rs_momentum": 89.28, "rs_ratio": 110.737}, {"date": "2025-06-30", "rs_momentum": 87.468, "rs_ratio": 108.024}, {"date": "2025-07-07", "rs_momentum": 88.306, "rs_ratio": 105.991}, {"date": "2025-07-14", "rs_momentum": 87.987, "rs_ratio": 103.9}, {"date": "2025-07-21", "rs_momentum": 90.851, "rs_ratio": 102.597}, {"date": "2025-07-28", "rs_momentum": 93.307, "rs_ratio": 102.235}, {"date": "2025-08-04", "rs_momentum": 94.579, "rs_ratio": 101.419}, {"date": "2025-08-11", "rs_momentum": 96.254, "rs_ratio": 100.93}, {"date": "2025-08-18", "rs_momentum": 96.945, "rs_ratio": 100.288}, {"date": "2025-08-25", "rs_momentum": 96.073, "rs_ratio": 99.092}, {"date": "2025-09-01", "rs_momentum": 96.287, "rs_ratio": 98.481}, {"date": "2025-09-08", "rs_momentum": 96.579, "rs_ratio": 98.272}, {"date": "2025-09-15", "rs_momentum": 96.123, "rs_ratio": 97.192}, {"date": "2025-09-22", "rs_momentum": 96.666, "rs_ratio": 96.516}, {"date": "2025-09-29", "rs_momentum": 97.497, "rs_ratio": 96.7}, {"date": "2025-10-06", "rs_momentum": 97.894, "rs_ratio": 96.871}, {"date": "2025-10-13", "rs_momentum": 99.856, "rs_ratio": 97.669}, {"date": "2025-10-20", "rs_momentum": 101.207, "rs_ratio": 98.285}, {"date": "2025-10-27", "rs_momentum": 100.431, "rs_ratio": 97.727}, {"date": "2025-11-03", "rs_momentum": 101.183, "rs_ratio": 98.618}, {"date": "2025-11-10", "rs_momentum": 101.327, "rs_ratio": 99.553}, {"date": "2025-11-17", "rs_momentum": 101.814, "rs_ratio": 100.636}, {"date": "2025-11-24", "rs_momentum": 103.774, "rs_ratio": 101.953}, {"date": "2025-12-01", "rs_momentum": 101.77, "rs_ratio": 100.927}, {"date": "2025-12-08", "rs_momentum": 98.856, "rs_ratio": 99.073}, {"date": "2025-12-15", "rs_momentum": 94.274, "rs_ratio": 95.771}, {"date": "2025-12-22", "rs_momentum": 89.072, "rs_ratio": 92.11}, {"date": "2025-12-29", "rs_momentum": 88.007, "rs_ratio": 90.065}, {"date": "2026-01-05", "rs_momentum": 87.907, "rs_ratio": 88.116}, {"date": "2026-01-12", "rs_momentum": 89.308, "rs_ratio": 86.154}, {"date": "2026-01-19", "rs_momentum": 90.975, "rs_ratio": 84.089}, {"date": "2026-01-26", "rs_momentum": 90.914, "rs_ratio": 81.985}, {"date": "2026-02-02", "rs_momentum": 91.202, "rs_ratio": 80.312}, {"date": "2026-02-09", "rs_momentum": 96.135, "rs_ratio": 83.07}, {"date": "2026-02-16", "rs_momentum": 100.808, "rs_ratio": 85.476}, {"date": "2026-02-23", "rs_momentum": 106.902, "rs_ratio": 89.205}, {"date": "2026-03-02", "rs_momentum": 112.967, "rs_ratio": 93.336}, {"date": "2026-03-09", "rs_momentum": 114.239, "rs_ratio": 97.311}, {"date": "2026-03-16", "rs_momentum": 115.822, "rs_ratio": 101.232}, {"date": "2026-03-23", "rs_momentum": 116.764, "rs_ratio": 105.862}, {"date": "2026-03-30", "rs_momentum": 117.415, "rs_ratio": 110.615}, {"date": "2026-04-06", "rs_momentum": 116.986, "rs_ratio": 114.179}, {"date": "2026-04-13", "rs_momentum": 114.241, "rs_ratio": 115.474}, {"date": "2026-04-20", "rs_momentum": 107.65, "rs_ratio": 113.797}, {"date": "2026-04-27", "rs_momentum": 101.425, "rs_ratio": 112.593}, {"date": "2026-05-04", "rs_momentum": 93.011, "rs_ratio": 108.106}, {"date": "2026-05-11", "rs_momentum": 86.311, "rs_ratio": 102.99}, {"date": "2026-05-18", "rs_momentum": 82.763, "rs_ratio": 97.917}], "name": "Utilities", "prev_quadrant": "WEAKENING", "prior_quadrant": "LEADING", "quadrant": "LAGGING"}, "XLV": {"current": {"rs_momentum": 87.279, "rs_ratio": 86.69}, "history": [{"date": "2025-05-26", "rs_momentum": 87.711, "rs_ratio": 103.347}, {"date": "2025-06-02", "rs_momentum": 85.134, "rs_ratio": 101.63}, {"date": "2025-06-09", "rs_momentum": 84.51, "rs_ratio": 99.67}, {"date": "2025-06-16", "rs_momentum": 84.379, "rs_ratio": 98.03}, {"date": "2025-06-23", "rs_momentum": 83.644, "rs_ratio": 96.045}, {"date": "2025-06-30", "rs_momentum": 83.798, "rs_ratio": 94.385}, {"date": "2025-07-07", "rs_momentum": 85.447, "rs_ratio": 93.04}, {"date": "2025-07-14", "rs_momentum": 86.581, "rs_ratio": 91.824}, {"date": "2025-07-21", "rs_momentum": 90.664, "rs_ratio": 91.361}, {"date": "2025-07-28", "rs_momentum": 93.294, "rs_ratio": 90.682}, {"date": "2025-08-04", "rs_momentum": 94.2, "rs_ratio": 89.675}, {"date": "2025-08-11", "rs_momentum": 95.846, "rs_ratio": 89.072}, {"date": "2025-08-18", "rs_momentum": 95.297, "rs_ratio": 88.405}, {"date": "2025-08-25", "rs_momentum": 95.838, "rs_ratio": 87.926}, {"date": "2025-09-01", "rs_momentum": 98.046, "rs_ratio": 87.743}, {"date": "2025-09-08", "rs_momentum": 98.788, "rs_ratio": 87.417}, {"date": "2025-09-15", "rs_momentum": 99.261, "rs_ratio": 86.926}, {"date": "2025-09-22", "rs_momentum": 99.76, "rs_ratio": 86.634}, {"date": "2025-09-29", "rs_momentum": 100.594, "rs_ratio": 86.761}, {"date": "2025-10-06", "rs_momentum": 102.41, "rs_ratio": 87.112}, {"date": "2025-10-13", "rs_momentum": 105.285, "rs_ratio": 87.693}, {"date": "2025-10-20", "rs_momentum": 106.641, "rs_ratio": 87.907}, {"date": "2025-10-27", "rs_momentum": 106.002, "rs_ratio": 87.796}, {"date": "2025-11-03", "rs_momentum": 105.743, "rs_ratio": 88.05}, {"date": "2025-11-10", "rs_momentum": 105.949, "rs_ratio": 88.708}, {"date": "2025-11-17", "rs_momentum": 108.684, "rs_ratio": 89.941}, {"date": "2025-11-24", "rs_momentum": 112.197, "rs_ratio": 91.14}, {"date": "2025-12-01", "rs_momentum": 114.133, "rs_ratio": 92.116}, {"date": "2025-12-08", "rs_momentum": 113.64, "rs_ratio": 92.59}, {"date": "2025-12-15", "rs_momentum": 111.665, "rs_ratio": 93.087}, {"date": "2025-12-22", "rs_momentum": 109.745, "rs_ratio": 93.57}, {"date": "2025-12-29", "rs_momentum": 108.762, "rs_ratio": 94.18}, {"date": "2026-01-05", "rs_momentum": 109.543, "rs_ratio": 94.945}, {"date": "2026-01-12", "rs_momentum": 109.227, "rs_ratio": 95.324}, {"date": "2026-01-19", "rs_momentum": 108.307, "rs_ratio": 95.464}, {"date": "2026-01-26", "rs_momentum": 105.252, "rs_ratio": 94.935}, {"date": "2026-02-02", "rs_momentum": 102.93, "rs_ratio": 94.834}, {"date": "2026-02-09", "rs_momentum": 102.983, "rs_ratio": 95.233}, {"date": "2026-02-16", "rs_momentum": 102.845, "rs_ratio": 95.322}, {"date": "2026-02-23", "rs_momentum": 105.086, "rs_ratio": 95.628}, {"date": "2026-03-02", "rs_momentum": 105.623, "rs_ratio": 95.727}, {"date": "2026-03-09", "rs_momentum": 104.358, "rs_ratio": 95.655}, {"date": "2026-03-16", "rs_momentum": 103.779, "rs_ratio": 95.527}, {"date": "2026-03-23", "rs_momentum": 102.977, "rs_ratio": 95.534}, {"date": "2026-03-30", "rs_momentum": 102.135, "rs_ratio": 95.32}, {"date": "2026-04-06", "rs_momentum": 101.462, "rs_ratio": 94.997}, {"date": "2026-04-13", "rs_momentum": 99.338, "rs_ratio": 94.077}, {"date": "2026-04-20", "rs_momentum": 95.455, "rs_ratio": 92.637}, {"date": "2026-04-27", "rs_momentum": 92.604, "rs_ratio": 91.359}, {"date": "2026-05-04", "rs_momentum": 88.319, "rs_ratio": 89.438}, {"date": "2026-05-11", "rs_momentum": 86.723, "rs_ratio": 87.924}, {"date": "2026-05-18", "rs_momentum": 87.279, "rs_ratio": 86.69}], "name": "Health Care", "prev_quadrant": "LAGGING", "prior_quadrant": "LAGGING", "quadrant": "LAGGING"}, "XLY": {"current": {"rs_momentum": 90.94, "rs_ratio": 80.688}, "history": [{"date": "2025-05-26", "rs_momentum": 104.967, "rs_ratio": 104.525}, {"date": "2025-06-02", "rs_momentum": 105.735, "rs_ratio": 104.563}, {"date": "2025-06-09", "rs_momentum": 103.42, "rs_ratio": 104.02}, {"date": "2025-06-16", "rs_momentum": 101.282, "rs_ratio": 103.958}, {"date": "2025-06-23", "rs_momentum": 99.807, "rs_ratio": 104.13}, {"date": "2025-06-30", "rs_momentum": 98.965, "rs_ratio": 103.716}, {"date": "2025-07-07", "rs_momentum": 99.887, "rs_ratio": 103.668}, {"date": "2025-07-14", "rs_momentum": 99.296, "rs_ratio": 103.289}, {"date": "2025-07-21", "rs_momentum": 97.025, "rs_ratio": 102.243}, {"date": "2025-07-28", "rs_momentum": 95.444, "rs_ratio": 100.982}, {"date": "2025-08-04", "rs_momentum": 93.843, "rs_ratio": 100.075}, {"date": "2025-08-11", "rs_momentum": 94.771, "rs_ratio": 100.193}, {"date": "2025-08-18", "rs_momentum": 97.615, "rs_ratio": 100.672}, {"date": "2025-08-25", "rs_momentum": 100.603, "rs_ratio": 101.013}, {"date": "2025-09-01", "rs_momentum": 103.51, "rs_ratio": 101.665}, {"date": "2025-09-08", "rs_momentum": 104.609, "rs_ratio": 102.372}, {"date": "2025-09-15", "rs_momentum": 104.948, "rs_ratio": 103.032}, {"date": "2025-09-22", "rs_momentum": 105.339, "rs_ratio": 103.582}, {"date": "2025-09-29", "rs_momentum": 104.425, "rs_ratio": 103.744}, {"date": "2025-10-06", "rs_momentum": 103.444, "rs_ratio": 103.926}, {"date": "2025-10-13", "rs_momentum": 102.394, "rs_ratio": 104.024}, {"date": "2025-10-20", "rs_momentum": 100.598, "rs_ratio": 103.611}, {"date": "2025-10-27", "rs_momentum": 98.897, "rs_ratio": 102.861}, {"date": "2025-11-03", "rs_momentum": 97.402, "rs_ratio": 102.242}, {"date": "2025-11-10", "rs_momentum": 94.369, "rs_ratio": 100.713}, {"date": "2025-11-17", "rs_momentum": 92.119, "rs_ratio": 99.094}, {"date": "2025-11-24", "rs_momentum": 90.943, "rs_ratio": 97.714}, {"date": "2025-12-01", "rs_momentum": 90.339, "rs_ratio": 96.771}, {"date": "2025-12-08", "rs_momentum": 92.997, "rs_ratio": 96.667}, {"date": "2025-12-15", "rs_momentum": 97.127, "rs_ratio": 97.262}, {"date": "2025-12-22", "rs_momentum": 99.664, "rs_ratio": 97.241}, {"date": "2025-12-29", "rs_momentum": 100.741, "rs_ratio": 96.876}, {"date": "2026-01-05", "rs_momentum": 101.843, "rs_ratio": 97.363}, {"date": "2026-01-12", "rs_momentum": 100.987, "rs_ratio": 97.499}, {"date": "2026-01-19", "rs_momentum": 102.926, "rs_ratio": 98.518}, {"date": "2026-01-26", "rs_momentum": 104.707, "rs_ratio": 99.107}, {"date": "2026-02-02", "rs_momentum": 103.136, "rs_ratio": 98.752}, {"date": "2026-02-09", "rs_momentum": 101.637, "rs_ratio": 98.085}, {"date": "2026-02-16", "rs_momentum": 97.783, "rs_ratio": 97.037}, {"date": "2026-02-23", "rs_momentum": 94.16, "rs_ratio": 95.685}, {"date": "2026-03-02", "rs_momentum": 93.041, "rs_ratio": 94.729}, {"date": "2026-03-09", "rs_momentum": 92.62, "rs_ratio": 93.836}, {"date": "2026-03-16", "rs_momentum": 90.832, "rs_ratio": 91.831}, {"date": "2026-03-23", "rs_momentum": 90.333, "rs_ratio": 90.211}, {"date": "2026-03-30", "rs_momentum": 88.165, "rs_ratio": 88.093}, {"date": "2026-04-06", "rs_momentum": 87.243, "rs_ratio": 86.706}, {"date": "2026-04-13", "rs_momentum": 90.582, "rs_ratio": 86.491}, {"date": "2026-04-20", "rs_momentum": 92.384, "rs_ratio": 85.836}, {"date": "2026-04-27", "rs_momentum": 94.663, "rs_ratio": 84.941}, {"date": "2026-05-04", "rs_momentum": 95.11, "rs_ratio": 83.793}, {"date": "2026-05-11", "rs_momentum": 91.903, "rs_ratio": 81.859}, {"date": "2026-05-18", "rs_momentum": 90.94, "rs_ratio": 80.688}], "name": "Consumer Discretionary", "prev_quadrant": "LAGGING", "prior_quadrant": "LAGGING", "quadrant": "LAGGING"}}};
+  const CONSEC      = {"XLB": 2, "XLC": 2, "XLE": 3, "XLF": 15, "XLI": 5, "XLK": 5, "XLP": 5, "XLRE": 3, "XLU": 1, "XLV": 6, "XLY": 14};
+  const STATIC_MODE = true;
+  const NOTE_KEY    = (t) => 'rrg_note_' + t;
+  const COLORS = {
+    LEADING:   '#00d4aa',
+    WEAKENING: '#c9a84c',
+    LAGGING:   '#e85d75',
+    IMPROVING: '#4a90e2',
+  };
+  const TAIL_VALUES = [4, 8, 12, 26];
+
+  function quadOf(r, m) {
+    if (r >= 100 && m >= 100) return 'LEADING';
+    if (r >= 100 && m <  100) return 'WEAKENING';
+    if (r <  100 && m <  100) return 'LAGGING';
+    return 'IMPROVING';
+  }
+
+  // ===== Tabs =====
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'chart')   setTimeout(renderRRG,     60);
+      if (btn.dataset.tab === 'history') setTimeout(renderHistory, 60);
+    });
+  });
+
+  // ===== RRG Chart =====
+  function renderRRG() {
+    const tailIdx = parseInt(document.getElementById('tail-slider').value);
+    const tail = TAIL_VALUES[tailIdx];
+    document.getElementById('tail-value').innerText = tail;
+    const inline = document.getElementById('tail-value-inline');
+    if (inline) inline.innerText = tail;
+    document.querySelectorAll('.tail-marks span').forEach(s => {
+      s.classList.toggle('on', parseInt(s.dataset.i) === tailIdx);
+    });
+
+    const traces = [];
+    let minR = 100, maxR = 100, minM = 100, maxM = 100;
+
+    for (const [ticker, s] of Object.entries(DATA.sectors)) {
+      const hist = s.history.slice(-tail);
+      if (!hist.length) continue;
+      hist.forEach(h => {
+        minR = Math.min(minR, h.rs_ratio); maxR = Math.max(maxR, h.rs_ratio);
+        minM = Math.min(minM, h.rs_momentum); maxM = Math.max(maxM, h.rs_momentum);
+      });
+      const cur   = hist[hist.length - 1];
+      const prev  = hist.length >= 2 ? hist[hist.length - 2] : cur;
+      const color = COLORS[s.quadrant] || '#888';
+      const dr    = cur.rs_ratio    - prev.rs_ratio;
+      const dm    = cur.rs_momentum - prev.rs_momentum;
+
+      // tail with progressive opacity per segment (older → fainter)
+      const n = hist.length;
+      for (let i = 0; i < n - 1; i++) {
+        const t = i / Math.max(1, n - 1);
+        traces.push({
+          x: [hist[i].rs_ratio, hist[i+1].rs_ratio],
+          y: [hist[i].rs_momentum, hist[i+1].rs_momentum],
+          mode: 'lines',
+          line: { color, width: 1.2 + t * 0.6 },
+          opacity: 0.15 + t * 0.55,
+          hoverinfo: 'skip',
+          showlegend: false,
+        });
+      }
+      // tail point dots
+      traces.push({
+        x: hist.slice(0, -1).map(h => h.rs_ratio),
+        y: hist.slice(0, -1).map(h => h.rs_momentum),
+        mode: 'markers',
+        marker: { color, size: 3.5, opacity: 0.5 },
+        hoverinfo: 'skip',
+        showlegend: false,
+      });
+
+      // current point — diamond marker + ticker label
+      traces.push({
+        x: [cur.rs_ratio],
+        y: [cur.rs_momentum],
+        mode: 'markers+text',
+        marker: {
+          color, size: 14, symbol: 'diamond',
+          line: { color: '#0a0a0f', width: 2 },
+        },
+        text: [ticker],
+        textposition: 'top center',
+        textfont: { color: '#e8e6dc', family: 'DM Mono', size: 10 },
+        hovertemplate:
+          `<b>${ticker}</b>  ${s.name}<br>` +
+          `RS-Ratio &nbsp;&nbsp;${cur.rs_ratio.toFixed(2)}<br>` +
+          `RS-Momentum  ${cur.rs_momentum.toFixed(2)}<br>` +
+          `Quadrant  <b>${s.quadrant}</b><br>` +
+          `1W Δ  ratio ${dr >= 0 ? '+' : ''}${dr.toFixed(2)} · mom ${dm >= 0 ? '+' : ''}${dm.toFixed(2)}` +
+          `<extra></extra>`,
+        showlegend: false,
+      });
+    }
+
+    const halfR = Math.max(Math.abs(maxR - 100), Math.abs(100 - minR), 2) * 1.25;
+    const halfM = Math.max(Math.abs(maxM - 100), Math.abs(100 - minM), 2) * 1.25;
+    const xRange = [100 - halfR, 100 + halfR];
+    const yRange = [100 - halfM, 100 + halfM];
+
+    const layout = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { color: '#e8e6dc', family: 'DM Mono', size: 10 },
+      margin: { l: 56, r: 26, t: 18, b: 56 },
+      hoverlabel: {
+        bgcolor: '#12121a', bordercolor: '#c9a84c',
+        font: { color: '#e8e6dc', family: 'DM Mono', size: 11 },
+      },
+      xaxis: {
+        title: { text: 'RS-RATIO →', font: { size: 10, color: '#8a8a9a' } },
+        range: xRange, gridcolor: 'rgba(30,30,46,0.6)', zeroline: false,
+        tickfont: { size: 9, color: '#5a5a6a' },
+      },
+      yaxis: {
+        title: { text: 'RS-MOMENTUM →', font: { size: 10, color: '#8a8a9a' } },
+        range: yRange, gridcolor: 'rgba(30,30,46,0.6)', zeroline: false,
+        tickfont: { size: 9, color: '#5a5a6a' },
+      },
+      shapes: [
+        { type: 'rect', x0: 100, x1: xRange[1], y0: 100, y1: yRange[1],
+          fillcolor: 'rgba(0,212,170,0.05)',  line: { width: 0 }, layer: 'below' },
+        { type: 'rect', x0: 100, x1: xRange[1], y0: yRange[0], y1: 100,
+          fillcolor: 'rgba(201,168,76,0.05)', line: { width: 0 }, layer: 'below' },
+        { type: 'rect', x0: xRange[0], x1: 100, y0: yRange[0], y1: 100,
+          fillcolor: 'rgba(232,93,117,0.05)', line: { width: 0 }, layer: 'below' },
+        { type: 'rect', x0: xRange[0], x1: 100, y0: 100, y1: yRange[1],
+          fillcolor: 'rgba(74,144,226,0.05)', line: { width: 0 }, layer: 'below' },
+        { type: 'line', x0: 100, x1: 100, y0: yRange[0], y1: yRange[1],
+          line: { color: 'rgba(201,168,76,0.35)', width: 1, dash: 'dot' } },
+        { type: 'line', x0: xRange[0], x1: xRange[1], y0: 100, y1: 100,
+          line: { color: 'rgba(201,168,76,0.35)', width: 1, dash: 'dot' } },
+      ],
+      annotations: [],
+    };
+
+    Plotly.react('rrg-chart', traces, layout, {
+      displaylogo: false, responsive: true,
+      modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
+    });
+  }
+  document.getElementById('tail-slider').addEventListener('input', renderRRG);
+  document.querySelectorAll('.tail-marks span').forEach(mark => {
+    mark.addEventListener('click', () => {
+      document.getElementById('tail-slider').value = mark.dataset.i;
+      renderRRG();
+    });
+  });
+
+  // ===== Sortable table =====
+  const sortState = { key: null, asc: true };
+  document.querySelectorAll('#flow-table th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key  = th.dataset.sort;
+      const type = th.dataset.type;
+      if (sortState.key === key) sortState.asc = !sortState.asc;
+      else { sortState.key = key; sortState.asc = true; }
+
+      document.querySelectorAll('#flow-table th .sort-arrow').forEach(a => a.innerText = '');
+      th.querySelector('.sort-arrow').innerText = sortState.asc ? '↑' : '↓';
+
+      const tbody = document.querySelector('#flow-table tbody');
+      const rows  = Array.from(tbody.querySelectorAll('tr'));
+      const idx   = Array.from(th.parentNode.children).indexOf(th);
+
+      tbody.style.transition = 'opacity 160ms';
+      tbody.style.opacity = '0.35';
+      setTimeout(() => {
+        rows.sort((a, b) => {
+          const ac = a.children[idx];
+          const bc = b.children[idx];
+          let av = ac.getAttribute('data-' + key) || ac.innerText.trim();
+          let bv = bc.getAttribute('data-' + key) || bc.innerText.trim();
+          let cmp;
+          if (type === 'num') cmp = parseFloat(av) - parseFloat(bv);
+          else cmp = String(av).localeCompare(String(bv));
+          return sortState.asc ? cmp : -cmp;
+        });
+        rows.forEach(r => tbody.appendChild(r));
+        tbody.style.opacity = '1';
+      }, 160);
+    });
+  });
+
+  // ===== Notes auto-save =====
+  // Two modes:
+  //   Flask mode  → POST to /api/notes, notes persist in data/notes.json
+  //   STATIC_MODE → notes live in browser localStorage (per-device, no backend)
+  function flashSaved(inp) {
+    inp.classList.add('note-saved');
+    setTimeout(() => inp.classList.remove('note-saved'), 700);
+  }
+  document.querySelectorAll('.note-input').forEach(inp => {
+    const ticker = inp.dataset.ticker;
+    if (STATIC_MODE) {
+      try {
+        const stored = localStorage.getItem(NOTE_KEY(ticker));
+        if (stored != null) inp.value = stored;
+      } catch (e) { /* private browsing, etc. */ }
+    }
+    let timer;
+    inp.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (STATIC_MODE) {
+          try {
+            localStorage.setItem(NOTE_KEY(ticker), inp.value);
+            flashSaved(inp);
+          } catch (e) { /* storage full or disabled */ }
+        } else {
+          fetch('/api/notes', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ ticker, note: inp.value }),
+          }).then(r => { if (r.ok) flashSaved(inp); })
+            .catch(() => {});
+        }
+      }, 400);
+    });
+  });
+
+  // ===== History tab =====
+  function renderHistory() {
+    const ticker = document.getElementById('hist-select').value;
+    const s = DATA.sectors[ticker];
+    if (!s) return;
+    const dates  = s.history.map(h => h.date);
+    const ratios = s.history.map(h => h.rs_ratio);
+    const moms   = s.history.map(h => h.rs_momentum);
+
+    const transitions = [];
+    let prevQ = null;
+    s.history.forEach(h => {
+      const q = quadOf(h.rs_ratio, h.rs_momentum);
+      if (prevQ && q !== prevQ) transitions.push({ date: h.date, from: prevQ, to: q });
+      prevQ = q;
+    });
+
+    const transShapes = transitions.map(t => ({
+      type: 'line',
+      x0: t.date, x1: t.date,
+      y0: 0,      y1: 1, yref: 'paper',
+      line: { color: COLORS[t.to], width: 1, dash: 'dot' },
+      opacity: 0.55,
+    }));
+    const transAnnots = transitions.map((t, i) => ({
+      x: t.date, y: 1, yref: 'paper',
+      text: t.to.slice(0, 4).toUpperCase(),
+      showarrow: false,
+      font: { color: COLORS[t.to], size: 9, family: 'DM Mono' },
+      yshift: -8 - (i % 2) * 18,
+      bgcolor: 'rgba(10,10,15,0.92)',
+      bordercolor: COLORS[t.to], borderwidth: 1, borderpad: 3,
+    }));
+
+    const traces = [
+      { x: dates, y: ratios, name: 'RS-Ratio',    mode: 'lines', line: { color: '#00d4aa', width: 2 } },
+      { x: dates, y: moms,   name: 'RS-Momentum', mode: 'lines', line: { color: '#c9a84c', width: 2 } },
+    ];
+    const layout = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { color: '#e8e6dc', family: 'DM Mono', size: 10 },
+      margin: { l: 56, r: 26, t: 32, b: 56 },
+      hoverlabel: {
+        bgcolor: '#12121a', bordercolor: '#c9a84c',
+        font: { color: '#e8e6dc', family: 'DM Mono', size: 11 },
+      },
+      xaxis: { gridcolor: 'rgba(30,30,46,0.6)', tickfont: { size: 9, color: '#5a5a6a' } },
+      yaxis: {
+        gridcolor: 'rgba(30,30,46,0.6)', zeroline: false,
+        tickfont: { size: 9, color: '#5a5a6a' },
+        range: (() => {
+          const all = [...ratios, ...moms, 100];
+          const lo = Math.min(...all), hi = Math.max(...all);
+          const pad = Math.max((hi - lo) * 0.12, 0.4);
+          return [lo - pad, hi + pad];
+        })(),
+      },
+      shapes: [
+        { type: 'line', x0: dates[0], x1: dates[dates.length - 1], y0: 100, y1: 100,
+          line: { color: 'rgba(201,168,76,0.4)', width: 1, dash: 'dot' } },
+        ...transShapes,
+      ],
+      annotations: transAnnots,
+      legend: { orientation: 'h', y: -0.18, font: { size: 10, color: '#8a8a9a' } },
+    };
+    Plotly.react('history-chart', traces, layout, { displaylogo: false, responsive: true });
+
+    const n = CONSEC[ticker] || 0;
+    document.getElementById('hist-summary').innerHTML =
+      `<span class="ticker-mono">${ticker}</span> <em style="color:var(--muted);font-style:italic;">(${s.name})</em> has held the ` +
+      `<span class="q-pill q-${s.quadrant}">${s.quadrant}</span> quadrant for ` +
+      `<strong>${n}</strong> consecutive week${n === 1 ? '' : 's'}. ` +
+      `Recorded <strong>${transitions.length}</strong> quadrant transitions across the trailing 52 weeks.`;
+  }
+  document.getElementById('hist-select').addEventListener('change', renderHistory);
+
+  // Initial render
+  renderRRG();
+</script>
+
+
+</body>
+</html>
