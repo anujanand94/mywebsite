@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Sector Rotation Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  :root {
+    --bg:        #0a0a0f;
+    --ink:       #0e0e15;
+    --card:      #12121a;
+    --lift:      #171723;
+    --border:    #1e1e2e;
+    --hairline:  rgba(201,168,76,0.22);
+    --hairline-faint: rgba(201,168,76,0.10);
+    --text:      #e8e6dc;
+    --muted:     #8a8a9a;
+    --dim:       #5a5a6a;
+    --teal:      #00d4aa;
+    --teal-soft: rgba(0,212,170,0.18);
+    --gold:      #c9a84c;
+    --gold-bright: #e6c870;
+    --gold-soft: rgba(201,168,76,0.18);
+    --leading:   #00d4aa;
+    --weakening: #c9a84c;
+    --lagging:   #e85d75;
+    --improving: #4a90e2;
+    --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 1200px 600px at 50% -20%, rgba(201,168,76,0.04), transparent 60%),
+      radial-gradient(ellipse 800px 400px at 100% 100%, rgba(0,212,170,0.03), transparent 60%);
+    color: var(--text);
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 12px;
+    font-feature-settings: 'tnum' 1;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(201,168,76,0.35); color: var(--text); }
+
+  /* === TYPOGRAPHY === */
+  h1, h2, h3 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+    letter-spacing: 0;
+  }
+  h1 em, h2 em, h3 em {
+    font-style: italic;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  h1 { font-size: clamp(32px, 3.6vw, 48px); line-height: 1.18; letter-spacing: -0.01em; }
+  h2 { font-size: 22px; line-height: 1.1; }
+  h3 { font-size: 16px; line-height: 1.2; }
+
+  .num { font-feature-settings: 'tnum' 1; font-variant-numeric: tabular-nums; }
+
+  /* === MASTHEAD === */
+  .masthead {
+    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(180deg, #0e0e15 0%, #0a0a0f 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .masthead::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%, var(--hairline) 18%, var(--gold) 50%, var(--hairline) 82%, transparent 100%);
+  }
+  .masthead-rule {
+    padding: 8px 28px 7px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 24px; color: var(--muted);
+  }
+  .masthead-rule .brand {
+    color: var(--gold);
+    font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+  }
+  .masthead-rule .brand b { color: var(--text); font-weight: 400; }
+  .masthead-rule .rule-meta {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--dim);
+    display: flex; gap: 18px;
+  }
+  .masthead-rule .rule-meta b { color: var(--muted); font-weight: 400; margin-left: 6px; }
+
+  .masthead-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 28px;
+    padding: 20px 28px 22px;
+  }
+  .title-block { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+  .title-block h1 { padding-top: 4px; }
+  .title-block .subtitle {
+    color: var(--muted);
+    font-size: 10px; letter-spacing: 0.20em; text-transform: uppercase;
+    max-width: 38ch; line-height: 1.6;
+  }
+  .title-block .subtitle .div { color: var(--gold); margin: 0 6px; }
+
+  /* Regime hero */
+  .regime-hero {
+    text-align: center;
+    padding: 0 28px;
+    position: relative;
+    min-width: 260px;
+  }
+  .regime-hero::before, .regime-hero::after {
+    content: "";
+    position: absolute; top: 0; bottom: 0; width: 1px;
+    background: linear-gradient(180deg, transparent 0%, var(--hairline) 30%, var(--hairline) 70%, transparent 100%);
+  }
+  .regime-hero::before { left: 0; }
+  .regime-hero::after  { right: 0; }
+  .regime-hero .regime-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  .regime-hero .regime-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 500;
+    font-size: clamp(36px, 3.6vw, 52px); line-height: 1.05;
+    letter-spacing: -0.01em; margin-bottom: 12px;
+    position: relative; display: inline-block; white-space: nowrap;
+  }
+  .regime-hero .regime-name::after {
+    content: "";
+    position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: -6px; width: 36px; height: 1px;
+    background: currentColor; opacity: 0.6;
+  }
+  .regime-on   .regime-name { color: var(--leading); }
+  .regime-off  .regime-name { color: var(--lagging); }
+  .regime-mix  .regime-name { color: var(--gold); }
+  .regime-hero .regime-tally {
+    display: flex; gap: 18px; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); margin-top: 14px;
+  }
+  .regime-hero .regime-tally .t {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .regime-hero .regime-tally .t b {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 500;
+    font-size: 22px; line-height: 1; letter-spacing: 0;
+    color: var(--text);
+  }
+  .regime-hero .regime-tally .t.t-leading   b { color: var(--leading); }
+  .regime-hero .regime-tally .t.t-improving b { color: var(--improving); }
+  .regime-hero .regime-tally .t.t-weakening b { color: var(--weakening); }
+  .regime-hero .regime-tally .t.t-lagging   b { color: var(--lagging); }
+
+  .meta-stack {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 12px;
+  }
+  .meta-row {
+    display: flex; align-items: baseline; gap: 12px;
+    border: 1px solid var(--border); padding: 7px 14px;
+    background: rgba(255,255,255,0.01);
+  }
+  .meta-row .meta-k {
+    font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted);
+  }
+  .meta-row .meta-v {
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); letter-spacing: 0.05em;
+  }
+  .meta-row .meta-v.gold { color: var(--gold); }
+
+  /* === TABS === */
+  .tabs {
+    display: flex; padding: 0 28px;
+    background: var(--ink); border-bottom: 1px solid var(--border);
+    gap: 2px; position: relative;
+  }
+  .tab {
+    position: relative;
+    padding: 14px 22px 13px;
+    cursor: pointer; border: none; background: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    transition: color 200ms var(--ease);
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .tab .roman {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    font-size: 15px; letter-spacing: 0;
+    color: var(--gold); opacity: 0.7;
+    transition: opacity 200ms var(--ease);
+  }
+  .tab:hover { color: var(--text); }
+  .tab:hover .roman { opacity: 1; }
+  .tab.active { color: var(--text); }
+  .tab.active .roman { color: var(--gold-bright); opacity: 1; }
+  .tab::after {
+    content: "";
+    position: absolute; left: 16px; right: 16px; bottom: -1px; height: 2px;
+    background: var(--gold); transform: scaleX(0); transform-origin: center;
+    transition: transform 200ms var(--ease);
+  }
+  .tab.active::after { transform: scaleX(1); }
+
+  /* === PANELS === */
+  .panel {
+    display: none; padding: 28px 28px 48px;
+    animation: panel-in 240ms var(--ease);
+  }
+  .panel.active { display: block; }
+  @keyframes panel-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === VITRINE (chart frame) === */
+  .vitrine {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 10px;
+  }
+  .vitrine-inner {
+    position: relative;
+    border: 1px solid var(--hairline);
+    padding: 28px 32px 24px;
+    background:
+      linear-gradient(180deg, rgba(201,168,76,0.015), transparent 30%),
+      var(--ink);
+  }
+  .vitrine-inner::before,
+  .vitrine-inner::after,
+  .vitrine-inner > .brk-bl,
+  .vitrine-inner > .brk-br {
+    content: "";
+    position: absolute;
+    width: 14px; height: 14px;
+    border: 1px solid var(--gold);
+    pointer-events: none;
+  }
+  .vitrine-inner::before { top: -1px; left: -1px;  border-right: none; border-bottom: none; }
+  .vitrine-inner::after  { top: -1px; right: -1px; border-left:  none; border-bottom: none; }
+  .vitrine-inner > .brk-bl { bottom: -1px; left: -1px;  border-right: none; border-top: none; }
+  .vitrine-inner > .brk-br { bottom: -1px; right: -1px; border-left:  none; border-top: none; }
+
+  .vitrine-eyebrow {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 22px; gap: 18px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .vitrine-eyebrow .v-title { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .vitrine-eyebrow .v-title .roman {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    font-size: 22px; color: var(--gold); line-height: 1;
+  }
+  .vitrine-eyebrow .v-title .v-name {
+    font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text);
+  }
+  .vitrine-eyebrow .v-title .v-sub {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    border-left: 1px solid var(--border); padding-left: 14px; margin-left: 4px;
+  }
+  .vitrine-eyebrow .v-right {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    white-space: nowrap;
+  }
+  .vitrine-eyebrow .v-right b { color: var(--gold); font-weight: 400; margin-left: 8px; }
+
+  /* === CONTROLS === */
+  .controls {
+    display: flex; gap: 24px; align-items: center;
+    margin-bottom: 18px; flex-wrap: wrap;
+    padding-bottom: 16px; border-bottom: 1px dashed var(--border);
+  }
+  .controls .ctl-label {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted);
+  }
+  .controls .ctl-value {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    font-size: 20px; color: var(--gold); line-height: 1;
+    min-width: 28px; display: inline-block;
+  }
+  .controls .ctl-group { display: flex; align-items: center; gap: 12px; }
+  .tail-marks {
+    display: flex; gap: 14px;
+    font-size: 10px; letter-spacing: 0.2em; color: var(--dim);
+  }
+  .tail-marks span { cursor: pointer; transition: color 200ms var(--ease); }
+  .tail-marks span.on { color: var(--gold); }
+  .tail-marks span:hover { color: var(--text); }
+
+  select, input[type=text], input[type=range] {
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 12px; border-radius: 1px;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em;
+    transition: border-color 200ms var(--ease), background 200ms var(--ease);
+  }
+  select:hover, select:focus, input[type=text]:hover, input[type=text]:focus {
+    border-color: var(--gold-soft); outline: none;
+  }
+  input[type=range] {
+    padding: 0; accent-color: var(--gold); width: 180px;
+    background: transparent; border: none;
+  }
+
+  /* === CHART STAGE === */
+  #rrg-chart, #history-chart { width: 100%; height: 640px; position: relative; }
+  .chart-stage { position: relative; }
+  .qc-overlay { position: absolute; pointer-events: none; inset: 0; z-index: 2; }
+  .qc {
+    position: absolute;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; letter-spacing: 0.32em; text-transform: uppercase;
+    padding: 6px 10px;
+    background: rgba(10,10,15,0.65);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--border);
+  }
+  .qc::before {
+    content: ""; display: inline-block;
+    width: 6px; height: 6px; margin-right: 8px;
+    vertical-align: middle; transform: translateY(-1px);
+  }
+  .qc-tl { top: 22px;    left: 22px;    color: var(--improving); }
+  .qc-tr { top: 22px;    right: 22px;   color: var(--leading);   }
+  .qc-bl { bottom: 70px; left: 22px;    color: var(--lagging);   }
+  .qc-br { bottom: 70px; right: 22px;   color: var(--weakening); }
+  .qc-tl::before { background: var(--improving); }
+  .qc-tr::before { background: var(--leading);   }
+  .qc-bl::before { background: var(--lagging);   }
+  .qc-br::before { background: var(--weakening); }
+
+  /* === TABLE === */
+  .card {
+    background: var(--card); border: 1px solid var(--border); padding: 0;
+  }
+  .card-head {
+    padding: 22px 28px 18px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: baseline; gap: 24px;
+    flex-wrap: wrap;
+  }
+  .card-head .v-title { display: flex; align-items: baseline; gap: 14px; }
+  .card-head .v-title .roman {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    font-size: 22px; color: var(--gold); line-height: 1;
+  }
+  .card-head .v-title .v-name {
+    font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text);
+  }
+  .card-head .v-right {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    white-space: nowrap;
+  }
+  .card-head .v-right b { color: var(--gold); font-weight: 400; margin-left: 8px; }
+  .card-body { padding: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+  thead th {
+    font-family: 'DM Mono', monospace;
+    color: var(--gold); font-weight: 400;
+    font-size: 9.5px; letter-spacing: 0.24em; text-transform: uppercase;
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid var(--hairline);
+    background: var(--ink);
+    cursor: pointer; user-select: none;
+    position: sticky; top: 0; z-index: 1;
+    text-align: left;
+    transition: color 200ms var(--ease), background 200ms var(--ease);
+  }
+  thead th:hover { color: var(--gold-bright); background: #14141d; }
+  thead th.num-col { text-align: right; }
+  thead th.center-col { text-align: center; }
+  thead th .sort-arrow {
+    font-size: 9px; color: var(--gold); margin-left: 6px;
+    display: inline-block; min-width: 8px; opacity: 0.9;
+  }
+  thead th:first-child { padding-left: 28px; }
+  thead th:last-child  { padding-right: 28px; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(30,30,46,0.6);
+    transition: background 180ms var(--ease);
+    position: relative;
+  }
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+  tbody tr:hover { background: rgba(201,168,76,0.05); }
+  tbody tr:hover td:first-child { box-shadow: inset 2px 0 0 var(--gold); }
+  tbody td {
+    padding: 12px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--text); vertical-align: middle;
+    transition: color 200ms var(--ease);
+  }
+  tbody td:first-child { padding-left: 28px; }
+  tbody td:last-child  { padding-right: 28px; }
+  tbody td.num-col { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody td.center-col { text-align: center; }
+  tbody td.sector-name { color: var(--text); letter-spacing: 0.02em; }
+  tbody td.ticker { color: var(--gold); letter-spacing: 0.1em; font-weight: 500; }
+  tbody td.delta-pos { color: var(--leading); }
+  tbody td.delta-neg { color: var(--lagging); }
+  tbody td.dir-up    { color: var(--leading); }
+  tbody td.dir-down  { color: var(--lagging); }
+  tbody td.dir-flat  { color: var(--muted); }
+
+  /* === PILLS === */
+  .q-pill, .signal-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px; font-weight: 500;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    border: 1px solid currentColor; border-radius: 1px;
+    position: relative; overflow: hidden; line-height: 1.2;
+  }
+  .q-pill::before, .signal-pill::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(
+      135deg, transparent 0, transparent 6px,
+      currentColor 6px, currentColor 6.6px);
+    opacity: 0.07; pointer-events: none;
+  }
+  .q-pill::after, .signal-pill::after {
+    content: ""; position: absolute; inset: 0;
+    box-shadow: inset 0 0 8px currentColor;
+    opacity: 0.18; pointer-events: none;
+  }
+
+  .q-LEADING   { color: var(--leading);   background: rgba(0,212,170,0.06);  }
+  .q-WEAKENING { color: var(--weakening); background: rgba(201,168,76,0.06); }
+  .q-LAGGING   { color: var(--lagging);   background: rgba(232,93,117,0.06); }
+  .q-IMPROVING { color: var(--improving); background: rgba(74,144,226,0.06); }
+  .q-UNKNOWN   { color: var(--muted);     background: rgba(136,136,136,0.06); }
+
+  .signal-buy     { color: var(--leading); }
+  .signal-watch   { color: var(--improving); }
+  .signal-trim    { color: var(--gold); }
+  .signal-exit    { color: var(--lagging); }
+  .signal-neutral { color: var(--muted); }
+
+  tbody td[data-signal] .signal-pill { background: rgba(255,255,255,0.01); }
+  tbody td[data-signal] .signal-pill.signal-buy     { background: rgba(0,212,170,0.06);  }
+  tbody td[data-signal] .signal-pill.signal-watch   { background: rgba(74,144,226,0.06); }
+  tbody td[data-signal] .signal-pill.signal-trim    { background: rgba(201,168,76,0.06); }
+  tbody td[data-signal] .signal-pill.signal-exit    { background: rgba(232,93,117,0.06); }
+  tbody td[data-signal] .signal-pill.signal-neutral { background: rgba(136,136,136,0.06); }
+
+  /* Direction arrow */
+  .arrow {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 22px; line-height: 1;
+  }
+
+  /* Note input */
+  .note-input {
+    width: 100%; background: transparent;
+    border: 1px solid transparent;
+    border-bottom: 1px solid var(--border);
+    color: var(--text); padding: 6px 8px;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.02em;
+    transition: border-color 200ms var(--ease), background 200ms var(--ease);
+  }
+  .note-input::placeholder { color: var(--dim); font-style: italic; }
+  .note-input:hover { border-bottom-color: var(--gold-soft); background: rgba(255,255,255,0.02); }
+  .note-input:focus { border-bottom-color: var(--gold); background: rgba(201,168,76,0.04); outline: none; }
+  .note-saved {
+    border-bottom-color: var(--leading) !important;
+    background: rgba(0,212,170,0.06) !important;
+  }
+
+  /* History summary */
+  .summary-line {
+    color: var(--muted);
+    margin: 18px 0 22px;
+    line-height: 1.7; font-size: 12px;
+    padding: 16px 20px;
+    border-left: 1px solid var(--gold-soft);
+    background: rgba(201,168,76,0.025);
+  }
+  .summary-line strong {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    color: var(--gold); font-size: 16px; margin: 0 2px;
+  }
+  .summary-line .ticker-mono {
+    color: var(--gold); font-family: 'DM Mono', monospace; letter-spacing: 0.1em;
+    font-style: normal; font-size: 12px;
+  }
+
+  /* Error */
+  .error-screen {
+    margin: 80px auto; max-width: 520px;
+    background: var(--card); border: 1px solid var(--lagging);
+    padding: 40px; text-align: center;
+  }
+  .error-screen h2 { color: var(--lagging); }
+  .error-screen code {
+    background: var(--bg); padding: 4px 10px;
+    color: var(--gold); font-family: 'DM Mono', monospace; font-size: 11px;
+  }
+
+  /* Footer */
+  .colophon {
+    padding: 18px 28px 28px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+    color: var(--dim); font-size: 9.5px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+  }
+  .colophon b { color: var(--muted); font-weight: 400; }
+
+  @media (max-width: 880px) {
+    .masthead-grid { grid-template-columns: 1fr; gap: 24px; padding: 18px 22px; }
+    .regime-hero::before, .regime-hero::after { display: none; }
+    .regime-hero { padding: 0; }
+    .meta-stack { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+    .masthead-rule { padding: 8px 22px; }
+    .masthead-rule .rule-meta { display: none; }
+    .tabs, .panel { padding-left: 22px; padding-right: 22px; }
+  }
+</style>
+</head>
+<body>
+
+{% if error %}
+  <div class="error-screen">
+    <h2>No data available</h2>
+    <p>{{ error }}</p>
+    <p style="color: var(--muted); margin-top: 20px;">
+      Run <code>python fetch_data.py</code> to download fresh data, then refresh this page.
+    </p>
+  </div>
+{% else %}
+
+{% set rclass = 'regime-mix' %}
+{% if regime == 'Risk-On'  %}{% set rclass = 'regime-on'  %}{% endif %}
+{% if regime == 'Risk-Off' %}{% set rclass = 'regime-off' %}{% endif %}
+
+<header class="masthead {{ rclass }}">
+  <div class="masthead-rule">
+    <div class="brand"><b>RRSG</b> · Sector Intelligence · Weekly Report</div>
+    <div class="rule-meta">
+      <span>Universe <b>{{ sectors|length }}</b></span>
+      <span>Benchmark <b>{{ data.benchmark or 'SPY' }}</b></span>
+      <span>As of <b>{{ data.last_updated }}</b></span>
+    </div>
+  </div>
+  <div class="masthead-grid">
+    <div class="title-block">
+      <h1>Sector<br/><em>Rotation</em></h1>
+      <div class="subtitle">
+        Relative Rotation Graph <span class="div">·</span> S&amp;P 500 GICS Sectors <span class="div">·</span> Benchmark {{ data.benchmark or 'SPY' }}
+      </div>
+    </div>
+    <div class="regime-hero">
+      <div class="regime-label">Market Regime · Composite</div>
+      <div class="regime-name">{{ regime }}</div>
+      <div class="regime-tally">
+        <div class="t t-leading"><b>{{ '%02d'|format(regime_counts.LEADING) }}</b><span>Leading</span></div>
+        <div class="t t-improving"><b>{{ '%02d'|format(regime_counts.IMPROVING) }}</b><span>Improving</span></div>
+        <div class="t t-weakening"><b>{{ '%02d'|format(regime_counts.WEAKENING) }}</b><span>Weakening</span></div>
+        <div class="t t-lagging"><b>{{ '%02d'|format(regime_counts.LAGGING) }}</b><span>Lagging</span></div>
+      </div>
+    </div>
+    <div class="meta-stack">
+      <div class="meta-row">
+        <span class="meta-k">Benchmark</span>
+        <span class="meta-v gold">{{ data.benchmark or 'SPY' }}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-k">As of</span>
+        <span class="meta-v">{{ data.last_updated }}</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="chart">
+    <span class="roman">I.</span><span>RRG Chart</span>
+  </button>
+  <button class="tab" data-tab="flow">
+    <span class="roman">II.</span><span>Sector Flow</span>
+  </button>
+  <button class="tab" data-tab="history">
+    <span class="roman">III.</span><span>History &amp; Replay</span>
+  </button>
+</nav>
+
+<section class="panel active" id="panel-chart">
+  <div class="vitrine">
+    <div class="vitrine-inner">
+      <span class="brk-bl"></span><span class="brk-br"></span>
+      <div class="vitrine-eyebrow">
+        <div class="v-title">
+          <span class="roman">I.</span>
+          <span class="v-name">Relative Rotation Graph</span>
+          <span class="v-sub">Tail window <b id="tail-value-inline" style="color:var(--gold)">8</b>w</span>
+        </div>
+        <div class="v-right">Universe <b>{{ sectors|length }}</b> · Benchmark <b>{{ data.benchmark or 'SPY' }}</b></div>
+      </div>
+      <div class="controls">
+        <div class="ctl-group">
+          <span class="ctl-label">Tail Length</span>
+          <span class="ctl-value" id="tail-value">8</span>
+          <span class="ctl-label" style="color:var(--dim)">Weeks</span>
+        </div>
+        <div class="ctl-group" style="flex:1; justify-content:flex-end;">
+          <input type="range" id="tail-slider" min="0" max="3" value="1" step="1"/>
+          <div class="tail-marks">
+            <span data-i="0">4</span>
+            <span data-i="1" class="on">8</span>
+            <span data-i="2">12</span>
+            <span data-i="3">26</span>
+          </div>
+        </div>
+      </div>
+      <div class="chart-stage">
+        <div class="qc-overlay">
+          <span class="qc qc-tl">Improving</span>
+          <span class="qc qc-tr">Leading</span>
+          <span class="qc qc-bl">Lagging</span>
+          <span class="qc qc-br">Weakening</span>
+        </div>
+        <div id="rrg-chart"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="panel-flow">
+  <div class="card">
+    <div class="card-head">
+      <div class="v-title">
+        <span class="roman">II.</span>
+        <span class="v-name">Sector Flow · Weekly Disposition</span>
+      </div>
+      <div class="v-right">Sortable · Click any header · <b>{{ sectors|length }} sectors</b></div>
+    </div>
+    <div class="card-body" style="overflow-x:auto;">
+    <table id="flow-table">
+      <thead>
+        <tr>
+          <th data-sort="name"      data-type="str">Sector <span class="sort-arrow"></span></th>
+          <th data-sort="ticker"    data-type="str">Ticker <span class="sort-arrow"></span></th>
+          <th data-sort="quadrant"  data-type="str" class="center-col">Quadrant <span class="sort-arrow"></span></th>
+          <th data-sort="rs_ratio"  data-type="num" class="num-col">RS-Ratio <span class="sort-arrow"></span></th>
+          <th data-sort="rs_mom"    data-type="num" class="num-col">RS-Momentum <span class="sort-arrow"></span></th>
+          <th data-sort="direction" data-type="str" class="center-col">4W <span class="sort-arrow"></span></th>
+          <th data-sort="signal"    data-type="str">Signal <span class="sort-arrow"></span></th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in sectors %}
+        {% set dr_cls = 'delta-pos' if s.rs_ratio    >= 100 else 'delta-neg' %}
+        {% set dm_cls = 'delta-pos' if s.rs_momentum >= 100 else 'delta-neg' %}
+        {% set dir_cls = 'dir-up' if s.direction == '↗' else ('dir-down' if s.direction == '↘' else 'dir-flat') %}
+        <tr data-quadrant="{{ s.quadrant }}">
+          <td class="sector-name" data-name="{{ s.name }}">{{ s.name }}</td>
+          <td class="ticker" data-ticker="{{ s.ticker }}"><strong>{{ s.ticker }}</strong></td>
+          <td class="center-col" data-quadrant="{{ s.quadrant }}"><span class="q-pill q-{{ s.quadrant }}">{{ s.quadrant }}</span></td>
+          <td class="num-col {{ dr_cls }}" data-rs_ratio="{{ s.rs_ratio }}">{{ "%.2f"|format(s.rs_ratio) }}</td>
+          <td class="num-col {{ dm_cls }}" data-rs_mom="{{ s.rs_momentum }}">{{ "%.2f"|format(s.rs_momentum) }}</td>
+          <td class="center-col arrow {{ dir_cls }}" data-direction="{{ s.direction }}">{{ s.direction }}</td>
+          <td data-signal="{{ s.signal_text }}"><span class="signal-pill signal-{{ s.signal_kind }}">{{ s.signal_text }}</span></td>
+          <td><input type="text" class="note-input" data-ticker="{{ s.ticker }}" value="{{ s.note }}" placeholder="Add note…"/></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="panel-history">
+  <div class="card">
+    <div class="card-head">
+      <div class="v-title">
+        <span class="roman">III.</span>
+        <span class="v-name">History &amp; Replay</span>
+      </div>
+      <div class="v-right">52-week trace · transitions annotated</div>
+    </div>
+    <div class="card-body" style="padding: 22px 28px 28px;">
+      <div class="controls" style="margin-bottom: 0; padding-bottom: 0; border: none;">
+        <span class="ctl-label">Select Sector</span>
+        <select id="hist-select">
+          {% for s in sectors %}
+          <option value="{{ s.ticker }}">{{ s.ticker }} — {{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="summary-line" id="hist-summary"></div>
+      <div id="history-chart"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="colophon">
+  <div>RRSG · <b>Relative Rotation Sector Gauge</b></div>
+  <div>Data <b>yfinance</b> · Computed <b>RS-Ratio &amp; RS-Momentum</b> · <span style="color:var(--gold)">v1.0</span></div>
+</footer>
+
+<script>
+  const DATA        = {{ data       | tojson }};
+  const CONSEC      = {{ consecutive | tojson }};
+  const STATIC_MODE = {{ static_mode | default(false) | tojson }};
+  const NOTE_KEY    = (t) => 'rrg_note_' + t;
+  const COLORS = {
+    LEADING:   '#00d4aa',
+    WEAKENING: '#c9a84c',
+    LAGGING:   '#e85d75',
+    IMPROVING: '#4a90e2',
+  };
+  const TAIL_VALUES = [4, 8, 12, 26];
+
+  function quadOf(r, m) {
+    if (r >= 100 && m >= 100) return 'LEADING';
+    if (r >= 100 && m <  100) return 'WEAKENING';
+    if (r <  100 && m <  100) return 'LAGGING';
+    return 'IMPROVING';
+  }
+
+  // ===== Tabs =====
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'chart')   setTimeout(renderRRG,     60);
+      if (btn.dataset.tab === 'history') setTimeout(renderHistory, 60);
+    });
+  });
+
+  // ===== RRG Chart =====
+  function renderRRG() {
+    const tailIdx = parseInt(document.getElementById('tail-slider').value);
+    const tail = TAIL_VALUES[tailIdx];
+    document.getElementById('tail-value').innerText = tail;
+    const inline = document.getElementById('tail-value-inline');
+    if (inline) inline.innerText = tail;
+    document.querySelectorAll('.tail-marks span').forEach(s => {
+      s.classList.toggle('on', parseInt(s.dataset.i) === tailIdx);
+    });
+
+    const traces = [];
+    let minR = 100, maxR = 100, minM = 100, maxM = 100;
+
+    for (const [ticker, s] of Object.entries(DATA.sectors)) {
+      const hist = s.history.slice(-tail);
+      if (!hist.length) continue;
+      hist.forEach(h => {
+        minR = Math.min(minR, h.rs_ratio); maxR = Math.max(maxR, h.rs_ratio);
+        minM = Math.min(minM, h.rs_momentum); maxM = Math.max(maxM, h.rs_momentum);
+      });
+      const cur   = hist[hist.length - 1];
+      const prev  = hist.length >= 2 ? hist[hist.length - 2] : cur;
+      const color = COLORS[s.quadrant] || '#888';
+      const dr    = cur.rs_ratio    - prev.rs_ratio;
+      const dm    = cur.rs_momentum - prev.rs_momentum;
+
+      // tail with progressive opacity per segment (older → fainter)
+      const n = hist.length;
+      for (let i = 0; i < n - 1; i++) {
+        const t = i / Math.max(1, n - 1);
+        traces.push({
+          x: [hist[i].rs_ratio, hist[i+1].rs_ratio],
+          y: [hist[i].rs_momentum, hist[i+1].rs_momentum],
+          mode: 'lines',
+          line: { color, width: 1.2 + t * 0.6 },
+          opacity: 0.15 + t * 0.55,
+          hoverinfo: 'skip',
+          showlegend: false,
+        });
+      }
+      // tail point dots
+      traces.push({
+        x: hist.slice(0, -1).map(h => h.rs_ratio),
+        y: hist.slice(0, -1).map(h => h.rs_momentum),
+        mode: 'markers',
+        marker: { color, size: 3.5, opacity: 0.5 },
+        hoverinfo: 'skip',
+        showlegend: false,
+      });
+
+      // current point — diamond marker + ticker label
+      traces.push({
+        x: [cur.rs_ratio],
+        y: [cur.rs_momentum],
+        mode: 'markers+text',
+        marker: {
+          color, size: 14, symbol: 'diamond',
+          line: { color: '#0a0a0f', width: 2 },
+        },
+        text: [ticker],
+        textposition: 'top center',
+        textfont: { color: '#e8e6dc', family: 'DM Mono', size: 10 },
+        hovertemplate:
+          `<b>${ticker}</b>  ${s.name}<br>` +
+          `RS-Ratio &nbsp;&nbsp;${cur.rs_ratio.toFixed(2)}<br>` +
+          `RS-Momentum  ${cur.rs_momentum.toFixed(2)}<br>` +
+          `Quadrant  <b>${s.quadrant}</b><br>` +
+          `1W Δ  ratio ${dr >= 0 ? '+' : ''}${dr.toFixed(2)} · mom ${dm >= 0 ? '+' : ''}${dm.toFixed(2)}` +
+          `<extra></extra>`,
+        showlegend: false,
+      });
+    }
+
+    const halfR = Math.max(Math.abs(maxR - 100), Math.abs(100 - minR), 2) * 1.25;
+    const halfM = Math.max(Math.abs(maxM - 100), Math.abs(100 - minM), 2) * 1.25;
+    const xRange = [100 - halfR, 100 + halfR];
+    const yRange = [100 - halfM, 100 + halfM];
+
+    const layout = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { color: '#e8e6dc', family: 'DM Mono', size: 10 },
+      margin: { l: 56, r: 26, t: 18, b: 56 },
+      hoverlabel: {
+        bgcolor: '#12121a', bordercolor: '#c9a84c',
+        font: { color: '#e8e6dc', family: 'DM Mono', size: 11 },
+      },
+      xaxis: {
+        title: { text: 'RS-RATIO →', font: { size: 10, color: '#8a8a9a' } },
+        range: xRange, gridcolor: 'rgba(30,30,46,0.6)', zeroline: false,
+        tickfont: { size: 9, color: '#5a5a6a' },
+      },
+      yaxis: {
+        title: { text: 'RS-MOMENTUM →', font: { size: 10, color: '#8a8a9a' } },
+        range: yRange, gridcolor: 'rgba(30,30,46,0.6)', zeroline: false,
+        tickfont: { size: 9, color: '#5a5a6a' },
+      },
+      shapes: [
+        { type: 'rect', x0: 100, x1: xRange[1], y0: 100, y1: yRange[1],
+          fillcolor: 'rgba(0,212,170,0.05)',  line: { width: 0 }, layer: 'below' },
+        { type: 'rect', x0: 100, x1: xRange[1], y0: yRange[0], y1: 100,
+          fillcolor: 'rgba(201,168,76,0.05)', line: { width: 0 }, layer: 'below' },
+        { type: 'rect', x0: xRange[0], x1: 100, y0: yRange[0], y1: 100,
+          fillcolor: 'rgba(232,93,117,0.05)', line: { width: 0 }, layer: 'below' },
+        { type: 'rect', x0: xRange[0], x1: 100, y0: 100, y1: yRange[1],
+          fillcolor: 'rgba(74,144,226,0.05)', line: { width: 0 }, layer: 'below' },
+        { type: 'line', x0: 100, x1: 100, y0: yRange[0], y1: yRange[1],
+          line: { color: 'rgba(201,168,76,0.35)', width: 1, dash: 'dot' } },
+        { type: 'line', x0: xRange[0], x1: xRange[1], y0: 100, y1: 100,
+          line: { color: 'rgba(201,168,76,0.35)', width: 1, dash: 'dot' } },
+      ],
+      annotations: [],
+    };
+
+    Plotly.react('rrg-chart', traces, layout, {
+      displaylogo: false, responsive: true,
+      modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
+    });
+  }
+  document.getElementById('tail-slider').addEventListener('input', renderRRG);
+  document.querySelectorAll('.tail-marks span').forEach(mark => {
+    mark.addEventListener('click', () => {
+      document.getElementById('tail-slider').value = mark.dataset.i;
+      renderRRG();
+    });
+  });
+
+  // ===== Sortable table =====
+  const sortState = { key: null, asc: true };
+  document.querySelectorAll('#flow-table th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key  = th.dataset.sort;
+      const type = th.dataset.type;
+      if (sortState.key === key) sortState.asc = !sortState.asc;
+      else { sortState.key = key; sortState.asc = true; }
+
+      document.querySelectorAll('#flow-table th .sort-arrow').forEach(a => a.innerText = '');
+      th.querySelector('.sort-arrow').innerText = sortState.asc ? '↑' : '↓';
+
+      const tbody = document.querySelector('#flow-table tbody');
+      const rows  = Array.from(tbody.querySelectorAll('tr'));
+      const idx   = Array.from(th.parentNode.children).indexOf(th);
+
+      tbody.style.transition = 'opacity 160ms';
+      tbody.style.opacity = '0.35';
+      setTimeout(() => {
+        rows.sort((a, b) => {
+          const ac = a.children[idx];
+          const bc = b.children[idx];
+          let av = ac.getAttribute('data-' + key) || ac.innerText.trim();
+          let bv = bc.getAttribute('data-' + key) || bc.innerText.trim();
+          let cmp;
+          if (type === 'num') cmp = parseFloat(av) - parseFloat(bv);
+          else cmp = String(av).localeCompare(String(bv));
+          return sortState.asc ? cmp : -cmp;
+        });
+        rows.forEach(r => tbody.appendChild(r));
+        tbody.style.opacity = '1';
+      }, 160);
+    });
+  });
+
+  // ===== Notes auto-save =====
+  // Two modes:
+  //   Flask mode  → POST to /api/notes, notes persist in data/notes.json
+  //   STATIC_MODE → notes live in browser localStorage (per-device, no backend)
+  function flashSaved(inp) {
+    inp.classList.add('note-saved');
+    setTimeout(() => inp.classList.remove('note-saved'), 700);
+  }
+  document.querySelectorAll('.note-input').forEach(inp => {
+    const ticker = inp.dataset.ticker;
+    if (STATIC_MODE) {
+      try {
+        const stored = localStorage.getItem(NOTE_KEY(ticker));
+        if (stored != null) inp.value = stored;
+      } catch (e) { /* private browsing, etc. */ }
+    }
+    let timer;
+    inp.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (STATIC_MODE) {
+          try {
+            localStorage.setItem(NOTE_KEY(ticker), inp.value);
+            flashSaved(inp);
+          } catch (e) { /* storage full or disabled */ }
+        } else {
+          fetch('/api/notes', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ ticker, note: inp.value }),
+          }).then(r => { if (r.ok) flashSaved(inp); })
+            .catch(() => {});
+        }
+      }, 400);
+    });
+  });
+
+  // ===== History tab =====
+  function renderHistory() {
+    const ticker = document.getElementById('hist-select').value;
+    const s = DATA.sectors[ticker];
+    if (!s) return;
+    const dates  = s.history.map(h => h.date);
+    const ratios = s.history.map(h => h.rs_ratio);
+    const moms   = s.history.map(h => h.rs_momentum);
+
+    const transitions = [];
+    let prevQ = null;
+    s.history.forEach(h => {
+      const q = quadOf(h.rs_ratio, h.rs_momentum);
+      if (prevQ && q !== prevQ) transitions.push({ date: h.date, from: prevQ, to: q });
+      prevQ = q;
+    });
+
+    const transShapes = transitions.map(t => ({
+      type: 'line',
+      x0: t.date, x1: t.date,
+      y0: 0,      y1: 1, yref: 'paper',
+      line: { color: COLORS[t.to], width: 1, dash: 'dot' },
+      opacity: 0.55,
+    }));
+    const transAnnots = transitions.map((t, i) => ({
+      x: t.date, y: 1, yref: 'paper',
+      text: t.to.slice(0, 4).toUpperCase(),
+      showarrow: false,
+      font: { color: COLORS[t.to], size: 9, family: 'DM Mono' },
+      yshift: -8 - (i % 2) * 18,
+      bgcolor: 'rgba(10,10,15,0.92)',
+      bordercolor: COLORS[t.to], borderwidth: 1, borderpad: 3,
+    }));
+
+    const traces = [
+      { x: dates, y: ratios, name: 'RS-Ratio',    mode: 'lines', line: { color: '#00d4aa', width: 2 } },
+      { x: dates, y: moms,   name: 'RS-Momentum', mode: 'lines', line: { color: '#c9a84c', width: 2 } },
+    ];
+    const layout = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { color: '#e8e6dc', family: 'DM Mono', size: 10 },
+      margin: { l: 56, r: 26, t: 32, b: 56 },
+      hoverlabel: {
+        bgcolor: '#12121a', bordercolor: '#c9a84c',
+        font: { color: '#e8e6dc', family: 'DM Mono', size: 11 },
+      },
+      xaxis: { gridcolor: 'rgba(30,30,46,0.6)', tickfont: { size: 9, color: '#5a5a6a' } },
+      yaxis: {
+        gridcolor: 'rgba(30,30,46,0.6)', zeroline: false,
+        tickfont: { size: 9, color: '#5a5a6a' },
+        range: (() => {
+          const all = [...ratios, ...moms, 100];
+          const lo = Math.min(...all), hi = Math.max(...all);
+          const pad = Math.max((hi - lo) * 0.12, 0.4);
+          return [lo - pad, hi + pad];
+        })(),
+      },
+      shapes: [
+        { type: 'line', x0: dates[0], x1: dates[dates.length - 1], y0: 100, y1: 100,
+          line: { color: 'rgba(201,168,76,0.4)', width: 1, dash: 'dot' } },
+        ...transShapes,
+      ],
+      annotations: transAnnots,
+      legend: { orientation: 'h', y: -0.18, font: { size: 10, color: '#8a8a9a' } },
+    };
+    Plotly.react('history-chart', traces, layout, { displaylogo: false, responsive: true });
+
+    const n = CONSEC[ticker] || 0;
+    document.getElementById('hist-summary').innerHTML =
+      `<span class="ticker-mono">${ticker}</span> <em style="color:var(--muted);font-style:italic;">(${s.name})</em> has held the ` +
+      `<span class="q-pill q-${s.quadrant}">${s.quadrant}</span> quadrant for ` +
+      `<strong>${n}</strong> consecutive week${n === 1 ? '' : 's'}. ` +
+      `Recorded <strong>${transitions.length}</strong> quadrant transitions across the trailing 52 weeks.`;
+  }
+  document.getElementById('hist-select').addEventListener('change', renderHistory);
+
+  // Initial render
+  renderRRG();
+</script>
+
+{% endif %}
+</body>
+</html>
