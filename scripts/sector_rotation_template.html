@@ -484,6 +484,7 @@
     backdrop-filter: blur(4px);
     border: 1px solid var(--border);
   }
+  :root[data-theme="light"] .qc { background: rgba(255,250,235,0.85); }
   .qc::before {
     content: ""; display: inline-block;
     width: 6px; height: 6px; margin-right: 8px;
@@ -1408,13 +1409,15 @@
       line: { color: COLORS[t.to], width: 1, dash: 'dot' },
       opacity: 0.55,
     }));
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const badgeBg = isLight ? 'rgba(255,250,235,0.94)' : 'rgba(10,10,15,0.92)';
     const transAnnots = transitions.map((t, i) => ({
       x: t.date, y: 1, yref: 'paper',
       text: t.to.slice(0, 4).toUpperCase(),
       showarrow: false,
       font: { color: COLORS[t.to], size: 9, family: 'DM Mono' },
       yshift: -8 - (i % 2) * 18,
-      bgcolor: 'rgba(10,10,15,0.92)',
+      bgcolor: badgeBg,
       bordercolor: COLORS[t.to], borderwidth: 1, borderpad: 3,
     }));
 
