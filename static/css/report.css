@@ -614,32 +614,21 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-ra
 /* Soften the grain on light surfaces */
 :root[data-theme="light"] body::before { opacity: 0.10; }
 
-/* Theme toggle button — sits below the 62-px fixed nav so it never overlaps
-   the nav links (Portfolio, Contact, All Reports, …). */
+/* Theme toggle — inline icon button that lives inside the nav strip.
+   Same rounded-square aesthetic as the yield-curve dashboard's toggle. */
 .theme-toggle {
-  position: fixed;
-  top: calc(var(--nav-h) + 18px); right: 32px;
-  z-index: 1200;
-  width: 38px; height: 38px;
-  border: 1px solid var(--gold);
+  width: 34px; height: 34px; padding: 0;
+  border: 1px solid var(--gold-border);
   background: var(--gold-dim);
   color: var(--gold);
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer;
-  border-radius: 50%;
-  transition: background .25s var(--ease), border-color .25s var(--ease);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  border-radius: 9px;
+  transition: background .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease);
+  vertical-align: middle;
 }
-.theme-toggle:hover { background: var(--gold-glow-sm); }
-:root[data-theme="light"] .theme-toggle { box-shadow: 0 4px 12px rgba(80,60,20,0.10); }
-@media (max-width: 768px) {
-  .theme-toggle {
-    top: calc(var(--nav-h) + 12px); right: 14px;
-    width: 34px; height: 34px;
-  }
-}
+.theme-toggle:hover { background: var(--gold-glow-sm); border-color: var(--gold); color: var(--gold-bright); }
+.report-nav-links .theme-toggle-li { display: inline-flex; align-items: center; }
 
 /* Inline-styled bg colors (rgba(8,8,8, …)) in the nav/scrolled bar */
 :root[data-theme="light"] .report-nav {

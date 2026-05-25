@@ -58,19 +58,23 @@
       radial-gradient(ellipse 1200px 600px at 50% -20%, rgba(168,134,44,0.07), transparent 60%),
       radial-gradient(ellipse 800px 400px at 100% 100%, rgba(0,136,115,0.04), transparent 60%) !important;
   }
-  /* Theme toggle button (top-right) */
+  /* Theme toggle button — inline, rounded-square; lives inside the masthead */
   .theme-toggle {
-    position: fixed; top: 16px; right: 16px; z-index: 1100;
-    width: 36px; height: 36px;
-    border: 1px solid var(--gold);
+    width: 34px; height: 34px; padding: 0;
+    border: 1px solid var(--hairline);
     background: var(--gold-soft);
     color: var(--gold);
     display: inline-flex; align-items: center; justify-content: center;
     cursor: pointer;
-    border-radius: 50%;
-    transition: background .2s var(--ease), border-color .2s var(--ease);
+    border-radius: 9px;
+    transition: background .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease);
+    vertical-align: middle;
   }
-  .theme-toggle:hover { background: var(--hairline); }
+  .theme-toggle:hover {
+    background: var(--gold-soft);
+    border-color: var(--gold);
+    color: var(--gold-bright);
+  }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
@@ -112,6 +116,9 @@
     border-bottom: 1px solid var(--border);
     /* Note: not sticky — the time-machine bar below takes that role
        so the giant title/regime hero can scroll away while scrubbing. */
+  }
+  :root[data-theme="light"] .masthead {
+    background: linear-gradient(180deg, #fbf8ee 0%, #f4efe1 100%);
   }
   .masthead::after {
     content: "";
@@ -682,7 +689,6 @@
 </head>
 <body>
 <script src="static/js/theme.js"></script>
-<button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
 
 {% if error %}
   <div class="error-screen">
@@ -733,6 +739,8 @@
         <span class="meta-k">Last Refresh</span>
         <span class="meta-v">{{ data.last_updated }}</span>
       </div>
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"
+              style="margin-top: 8px; align-self: flex-end;"></button>
     </div>
   </div>
 </header>

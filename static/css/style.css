@@ -1307,31 +1307,31 @@ footer {
 /* Site-wide theme toggle button (top-right corner) */
 .theme-toggle {
   position: fixed;
-  /* Below the fixed nav (top: 36px + ~58px of padding+content) so it never
-     overlaps nav links. */
-  top: 116px; right: 32px;
-  z-index: 1100;
-  width: 38px; height: 38px;
-  border: 1px solid var(--gold);
+  /* Inline icon-button, drops into the nav-links UL as its own <li>. */
+  width: 34px; height: 34px; padding: 0;
+  border: 1px solid rgba(201,168,76,0.30);
   background: rgba(201,168,76,0.06);
   color: var(--gold);
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer;
-  border-radius: 50%;
-  transition: background var(--transition), border-color var(--transition), top var(--transition);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  border-radius: 9px;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  vertical-align: middle;
 }
-.theme-toggle:hover { background: rgba(201,168,76,0.16); }
+.theme-toggle:hover {
+  background: rgba(201,168,76,0.16);
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
 :root[data-theme="light"] .theme-toggle {
   background: rgba(168,134,44,0.08);
+  border-color: rgba(168,134,44,0.40);
+}
+:root[data-theme="light"] .theme-toggle:hover {
+  background: rgba(168,134,44,0.16);
   border-color: var(--gold);
-  box-shadow: 0 4px 12px rgba(80,60,20,0.10);
 }
-@media (max-width: 768px) {
-  .theme-toggle { top: 88px; right: 16px; width: 34px; height: 34px; }
-}
+.nav-links .theme-toggle-li { display: inline-flex; align-items: center; }
 
 /* ── my-portfolio.html overrides for light mode ────────────────────────────── */
 :root[data-theme="light"] .pf-hero {
@@ -1366,6 +1366,17 @@ footer {
 :root[data-theme="light"] .g                       { color: #0f7a3c !important; }
 :root[data-theme="light"] .pf-hero-stat-val.r,
 :root[data-theme="light"] .r                       { color: #b03030 !important; }
+
+/* Stat tiles — swap the hardcoded #080808 for a warm-gold tile in light mode */
+:root[data-theme="light"] .pf-hero-stat {
+  background: rgba(168,134,44,0.10);
+  border: 1px solid rgba(168,134,44,0.28);
+}
+:root[data-theme="light"] .pf-hero-stat-val { color: var(--gold); }
+:root[data-theme="light"] .pf-hero-stat-label { color: rgba(31,28,20,0.60); }
+
+/* Big decorative number behind the hero — softer in light mode */
+:root[data-theme="light"] .pf-hero-bg-num { color: rgba(168,134,44,0.12); }
 
 /* Inline bar-fills inside the portfolio table — slightly muted for light mode */
 :root[data-theme="light"] .td-bar { background: rgba(31,28,20,0.08); }
