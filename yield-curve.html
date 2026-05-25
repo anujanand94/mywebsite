@@ -294,6 +294,26 @@
   .scrubber input[type="range"] {
     position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
   }
+  /* Dual-thumb range slider: two range inputs overlaid on one track. */
+  .scrubber .slot.range input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    background: transparent; pointer-events: none;
+  }
+  .scrubber .slot.range input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; pointer-events: auto;
+    width: 18px; height: 30px; background: transparent;
+    border: 0; cursor: grab;
+  }
+  .scrubber .slot.range input[type="range"]:active::-webkit-slider-thumb { cursor: grabbing; }
+  .scrubber .slot.range input[type="range"]::-moz-range-thumb {
+    pointer-events: auto;
+    width: 18px; height: 30px; background: transparent;
+    border: 0; cursor: grab;
+  }
+  .scrubber .slot.range .thumb { transition: none; }
+  .scrubber .date-stack .range-v { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+  .scrubber .date-stack .range-v .arrow { color: var(--dim); font-family: 'DM Mono', monospace;
+                                          font-style: normal; font-size: 12px; }
   .scrubber .axis { position: absolute; bottom: -2px; left: 0; right: 0;
                     display: flex; justify-content: space-between; pointer-events: none;
                     font-size: 9px; color: var(--very-dim);
@@ -449,20 +469,26 @@
             </div>
             <div id="surfacePlot" style="width:100%;height:520px"></div>
             <div class="scrubber">
-              <button class="play" id="surfacePlay" title="Play / pause" aria-label="Play / pause">
+              <button class="play" id="surfacePlay" title="Play / pause window end" aria-label="Play / pause">
                 <svg width="11" height="11" viewBox="0 0 12 12"><polygon points="3,2 10,6 3,10" fill="#0a0a0f"/></svg>
               </button>
               <div class="date-stack">
-                <span class="k">Selected</span>
-                <span class="v" id="surfaceDate">—</span>
+                <span class="k">Range</span>
+                <span class="v range-v">
+                  <span id="surfaceDateStart">—</span>
+                  <span class="arrow">→</span>
+                  <span id="surfaceDateEnd">—</span>
+                </span>
               </div>
-              <div class="slot">
+              <div class="slot range">
                 <div class="track">
-                  <div class="fill" id="surfaceFill" style="width:0%"></div>
-                  <div class="thumb" id="surfaceThumb" style="left:calc(0% - 7px)"></div>
+                  <div class="fill" id="surfaceFill" style="left:0%;width:100%"></div>
+                  <div class="thumb" id="surfaceThumbStart" style="left:calc(0% - 7px)"></div>
+                  <div class="thumb" id="surfaceThumbEnd" style="left:calc(100% - 7px)"></div>
                 </div>
                 <div class="axis" id="surfaceAxis"></div>
-                <input type="range" id="surfaceSlider" min="0" max="0" value="0" step="1">
+                <input type="range" id="surfaceSliderMin" min="0" max="0" value="0" step="1">
+                <input type="range" id="surfaceSliderMax" min="0" max="0" value="0" step="1">
               </div>
             </div>
           </div>
@@ -901,13 +927,21 @@
   function renderSurface() {
     const p = payload();
     if (!p?.dates?.length) return;
-    const idx = Math.min(state.surfaceIdx, p.dates.length - 1);
+    const N = p.dates.length;
+    let s = Math.max(0,     Math.min(N - 1, state.surfaceStartIdx ?? 0));
+    let e = Math.max(s + 1, Math.min(N - 1, state.surfaceEndIdx   ?? N - 1));
+    state.surfaceStartIdx = s;
+    state.surfaceEndIdx   = e;
+
+    const slicedDates  = p.dates.slice(s, e + 1);
+    const slicedMatrix = p.matrix.slice(s, e + 1);
+    const sel          = e;                  // highlight = right end of window
 
     const surface = {
       type: 'surface',
       x: TENOR_YEARS,
-      y: p.dates,
-      z: p.matrix,
+      y: slicedDates,
+      z: slicedMatrix,
       cmin: 0, cmax: 16,
       colorscale: colorRamp(),
       showscale: true,
@@ -936,8 +970,8 @@
     const slice = {
       type: 'scatter3d', mode: 'lines+markers',
       x: TENOR_YEARS,
-      y: TENOR_YEARS.map(() => p.dates[idx]),
-      z: p.matrix[idx],
+      y: TENOR_YEARS.map(() => p.dates[sel]),
+      z: p.matrix[sel],
       line: { color: cssVar('--text'), width: 6 },
       marker: { size: 4, color: cssVar('--gold'), line: { color: cssVar('--text'), width: 1 } },
       hovertemplate: '%{y} · %{x:.2f}y · %{z:.2f}%<extra></extra>',
@@ -973,14 +1007,15 @@
       { displaylogo: false, responsive: true });
 
     // Scrubber + side panel
-    const slider = document.getElementById('surfaceSlider');
-    slider.max = p.dates.length - 1;
-    slider.value = idx;
-    document.getElementById('surfaceSamples').textContent = p.dates.length;
+    const sMin = document.getElementById('surfaceSliderMin');
+    const sMax = document.getElementById('surfaceSliderMax');
+    sMin.max = N - 1; sMax.max = N - 1;
+    sMin.value = s;   sMax.value = e;
+    document.getElementById('surfaceSamples').textContent = slicedDates.length;
     document.getElementById('surfaceSub').textContent =
-      `${country} · ${p.first_date?.slice(0,4)} – ${p.last_date?.slice(0,4)}`;
-    setScrubber('surface', idx, p);
-    fillSnapshot(idx, p, 'surface');
+      `${country} · ${slicedDates[0]?.slice(0,4)} – ${slicedDates[slicedDates.length - 1]?.slice(0,4)}`;
+    setSurfaceRangeScrubber(p);
+    fillSnapshot(e, p, 'surface');
   }
 
   // ============================================================
@@ -1300,16 +1335,34 @@
     document.getElementById(which + 'Fill').style.width = (pct * 100) + '%';
     document.getElementById(which + 'Thumb').style.left = `calc(${pct * 100}% - 7px)`;
     document.getElementById(which + 'Date').textContent = p.dates[idx];
-    // Axis ticks
-    const axis = document.getElementById(which + 'Axis');
-    if (axis && p.dates.length) {
-      const first = p.dates[0].slice(0, 4);
-      const mid1  = p.dates[Math.floor(p.dates.length * 0.25)].slice(0, 4);
-      const mid2  = p.dates[Math.floor(p.dates.length * 0.5)].slice(0, 4);
-      const mid3  = p.dates[Math.floor(p.dates.length * 0.75)].slice(0, 4);
-      const last  = p.dates[p.dates.length - 1].slice(0, 4);
-      axis.innerHTML = `<span>${first}</span><span>${mid1}</span><span>${mid2}</span><span>${mid3}</span><span>${last}</span>`;
-    }
+    axisTicks(which + 'Axis', p);
+  }
+
+  function setSurfaceRangeScrubber(p) {
+    const N = p.dates.length;
+    const s = state.surfaceStartIdx, e = state.surfaceEndIdx;
+    const sPct = N > 1 ? s / (N - 1) : 0;
+    const ePct = N > 1 ? e / (N - 1) : 1;
+    const fill = document.getElementById('surfaceFill');
+    fill.style.left  = `${sPct * 100}%`;
+    fill.style.width = `${Math.max(0, (ePct - sPct) * 100)}%`;
+    document.getElementById('surfaceThumbStart').style.left = `calc(${sPct * 100}% - 7px)`;
+    document.getElementById('surfaceThumbEnd').style.left   = `calc(${ePct * 100}% - 7px)`;
+    document.getElementById('surfaceDateStart').textContent = p.dates[s];
+    document.getElementById('surfaceDateEnd').textContent   = p.dates[e];
+    axisTicks('surfaceAxis', p);
+  }
+
+  function axisTicks(elId, p) {
+    const axis = document.getElementById(elId);
+    if (!axis || !p.dates.length) return;
+    const first = p.dates[0].slice(0, 4);
+    const mid1  = p.dates[Math.floor(p.dates.length * 0.25)].slice(0, 4);
+    const mid2  = p.dates[Math.floor(p.dates.length * 0.5)].slice(0, 4);
+    const mid3  = p.dates[Math.floor(p.dates.length * 0.75)].slice(0, 4);
+    const last  = p.dates[p.dates.length - 1].slice(0, 4);
+    axis.innerHTML =
+      `<span>${first}</span><span>${mid1}</span><span>${mid2}</span><span>${mid3}</span><span>${last}</span>`;
   }
 
   function bindSlider(which, render) {
@@ -1337,6 +1390,55 @@
           state[which + 'Idx'] = i;
           slider.value = i;
           render();
+        }, 60);
+      }
+    });
+  }
+
+  // Dual-thumb range slider for the 3D surface tab.
+  function bindSurfaceRangeSlider() {
+    const sMin = document.getElementById('surfaceSliderMin');
+    const sMax = document.getElementById('surfaceSliderMax');
+    const playBtn = document.getElementById('surfacePlay');
+    const MIN_GAP = 1;
+
+    function onInput() {
+      const p = payload(); if (!p) return;
+      let lo = +sMin.value, hi = +sMax.value;
+      if (lo > hi - MIN_GAP) {
+        // Decide which thumb the user is actively dragging by comparing
+        // against the previous state: whichever changed more recently wins.
+        if (this === sMin) lo = Math.max(0, hi - MIN_GAP);
+        else                hi = Math.min(p.dates.length - 1, lo + MIN_GAP);
+        sMin.value = lo;
+        sMax.value = hi;
+      }
+      state.surfaceStartIdx = lo;
+      state.surfaceEndIdx   = hi;
+      renderSurface();
+    }
+    sMin.addEventListener('input', onInput);
+    sMax.addEventListener('input', onInput);
+
+    playBtn.addEventListener('click', () => {
+      const playing = state.playing.surface;
+      if (playing) {
+        clearInterval(state.timers.surface);
+        state.timers.surface = null;
+        state.playing.surface = false;
+        playBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12"><polygon points="3,2 10,6 3,10" fill="#0a0a0f"/></svg>';
+      } else {
+        state.playing.surface = true;
+        playBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 12 12"><rect x="3" y="2" width="2.5" height="8" fill="#0a0a0f"/><rect x="6.5" y="2" width="2.5" height="8" fill="#0a0a0f"/></svg>';
+        state.timers.surface = setInterval(() => {
+          const p = payload(); if (!p) return;
+          const N = p.dates.length;
+          // Advance the end thumb; loop back to start when it reaches max.
+          let e = state.surfaceEndIdx + 1;
+          if (e > N - 1) e = Math.max(state.surfaceStartIdx + MIN_GAP, MIN_GAP);
+          state.surfaceEndIdx = e;
+          sMax.value = e;
+          renderSurface();
         }, 60);
       }
     });
@@ -1392,8 +1494,9 @@
   function initIdx() {
     const p = payload();
     if (!p) return;
-    state.surfaceIdx = Math.max(0, p.dates.length - 1);
-    state.replayIdx  = Math.max(0, p.dates.length - 1);
+    state.surfaceStartIdx = 0;
+    state.surfaceEndIdx   = Math.max(0, p.dates.length - 1);
+    state.replayIdx       = Math.max(0, p.dates.length - 1);
   }
   function renderAll() {
     if (tab === 'surface')      renderSurface();
@@ -1402,7 +1505,7 @@
   }
 
   initIdx();
-  bindSlider('surface', renderSurface);
+  bindSurfaceRangeSlider();
   bindSlider('replay',  renderReplay);
   renderRegime();
   renderAll();
