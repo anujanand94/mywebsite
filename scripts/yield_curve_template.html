@@ -1,0 +1,1420 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yield Curve — US &amp; Canada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+  :root[data-theme="dark"] {
+    --bg:            #0a0a0f;
+    --ink:           #0e0e15;
+    --panel:         #12121a;
+    --lift:          #171723;
+    --inset:         #0e0e15;
+    --border:        #1e1e2e;
+    --border-soft:   rgba(30,30,46,0.7);
+    --hairline:      rgba(201,168,76,0.22);
+    --hairline-faint:rgba(201,168,76,0.10);
+    --text:          #e8e6dc;
+    --dim:           #8a8a9a;
+    --very-dim:      #5a5a6a;
+    --gold:          #c9a84c;
+    --gold-bright:   #e6c870;
+    --gold-soft:     rgba(201,168,76,0.18);
+    --teal:          #00d4aa;
+    --rose:          #e85d75;
+    --us:            #4a90e2;
+    --ca:            #e85d75;
+    --good:          #00d4aa;
+    --bad:           #e85d75;
+    --chip:          rgba(255,255,255,0.02);
+    --icon-btn-bg:   rgba(255,255,255,0.02);
+    --shadow:        0 12px 36px rgba(0,0,0,0.55);
+    --header-grad:   linear-gradient(180deg, #0e0e15 0%, #0a0a0f 100%);
+    --bg-glow:       radial-gradient(ellipse 1200px 600px at 50% -20%, rgba(201,168,76,0.05), transparent 60%),
+                     radial-gradient(ellipse 800px 400px at 100% 100%, rgba(0,212,170,0.03), transparent 60%);
+  }
+  :root[data-theme="light"] {
+    --bg:            #f4efe1;
+    --ink:           #fbf8ee;
+    --panel:         #ffffff;
+    --lift:          #fbf9f0;
+    --inset:         #f4efe1;
+    --border:        #e3dcc6;
+    --border-soft:   rgba(60,50,30,0.08);
+    --hairline:      rgba(160,128,40,0.32);
+    --hairline-faint:rgba(160,128,40,0.14);
+    --text:          #1f1c14;
+    --dim:           #6a6358;
+    --very-dim:      #a39b8a;
+    --gold:          #a8862c;
+    --gold-bright:   #c9a84c;
+    --gold-soft:     rgba(168,134,44,0.20);
+    --teal:          #008873;
+    --rose:          #c44a62;
+    --us:            #3565b3;
+    --ca:            #c44a62;
+    --good:          #008873;
+    --bad:           #c44a62;
+    --chip:          #faf7ee;
+    --icon-btn-bg:   #faf7ee;
+    --shadow:        0 8px 18px rgba(80,60,20,0.08);
+    --header-grad:   linear-gradient(180deg, #fbf8ee 0%, #f4efe1 100%);
+    --bg-glow:       radial-gradient(ellipse 1200px 600px at 50% -20%, rgba(160,128,40,0.05), transparent 60%);
+  }
+
+  *,*::before,*::after { box-sizing: border-box; }
+  html,body { margin:0; padding:0; background: var(--bg); color: var(--text);
+              font-family: 'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+              font-feature-settings: 'tnum' 1;
+              -webkit-font-smoothing: antialiased; }
+  body { position: relative; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0; background: var(--bg-glow);
+    pointer-events: none; z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto;
+         background: var(--bg); }
+
+  /* serif italic helper */
+  .serif { font-family: 'Cormorant Garamond', Georgia, "Times New Roman", serif;
+           font-style: italic; font-weight: 500; letter-spacing: -0.01em; }
+  .mono  { font-family: 'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+  .upper { text-transform: uppercase; letter-spacing: 0.22em; font-size: 10px;
+           color: var(--dim); font-weight: 500; }
+  .upper-tight { text-transform: uppercase; letter-spacing: 0.18em; font-size: 10px;
+                 color: var(--dim); }
+  .upper-wide  { text-transform: uppercase; letter-spacing: 0.28em; font-size: 10px;
+                 color: var(--dim); }
+
+  /* ---------- Masthead ---------- */
+  header.masthead { background: var(--header-grad); border-bottom: 1px solid var(--border);
+                    position: relative; }
+  header.masthead::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--hairline) 18%,
+                                var(--gold) 50%, var(--hairline) 82%, transparent 100%);
+  }
+  .rail { padding: 8px 28px 7px; border-bottom: 1px solid var(--border);
+          display: flex; justify-content: space-between; align-items: center;
+          color: var(--dim); }
+  .rail .brand { color: var(--gold); font-size: 10px; letter-spacing: 0.28em;
+                 text-transform: uppercase; }
+  .rail .brand b { color: var(--text); font-weight: 400; }
+  .rail .stats { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+                 color: var(--very-dim); display: flex; gap: 18px; }
+  .rail .stats b { color: var(--dim); font-weight: 400; margin-left: 6px; }
+
+  .masthead-main { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+                   align-items: center; gap: 28px; padding: 22px 28px; }
+
+  .title-block { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  .title-block h1 { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif;
+                    font-weight: 600; color: var(--text); font-size: 46px;
+                    line-height: 1.05; letter-spacing: -0.01em; }
+  .title-block h1 em { font-style: italic; color: var(--gold); font-weight: 500; }
+  .title-block .sub { color: var(--dim); font-size: 10px; letter-spacing: 0.20em;
+                      text-transform: uppercase; line-height: 1.6; max-width: 40ch; }
+  .title-block .sub .dot { color: var(--gold); margin: 0 6px; }
+
+  .regime { position: relative; padding: 0 32px; text-align: center; min-width: 280px; }
+  .regime::before, .regime::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 1px;
+    background: linear-gradient(180deg, transparent 0%, var(--hairline) 30%,
+                                var(--hairline) 70%, transparent 100%);
+  }
+  .regime::before { left: 0; }
+  .regime::after  { right: 0; }
+  .regime .label { font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase;
+                   color: var(--dim); margin-bottom: 6px; }
+  .regime .value { font-family: 'Cormorant Garamond', serif; font-style: italic;
+                   font-weight: 500; font-size: 44px; line-height: 1.05;
+                   letter-spacing: -0.01em; display: inline-block; position: relative; }
+  .regime .value::after { content: ''; position: absolute; left: 50%; bottom: -6px;
+                          transform: translateX(-50%); width: 36px; height: 1px;
+                          background: currentColor; opacity: 0.55; }
+  .regime .value.inverted { color: var(--rose); }
+  .regime .value.steep    { color: var(--teal); }
+  .regime .value.normal,
+  .regime .value.flat     { color: var(--gold); }
+  .regime .counts { display: flex; gap: 22px; justify-content: center; margin-top: 16px;
+                    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+                    color: var(--dim); }
+  .regime .counts > div { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .regime .counts b { font-family: 'Cormorant Garamond', serif; font-style: italic;
+                      font-weight: 500; font-size: 22px; letter-spacing: 0; }
+
+  .meta-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+  .country-seg { display: flex; background: var(--bg); border: 1px solid var(--border);
+                 padding: 3px; gap: 2px; }
+  .country-seg button { display: flex; align-items: center; gap: 7px;
+                        padding: 6px 12px; font-family: inherit; font-size: 11px;
+                        font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
+                        background: transparent; color: var(--dim);
+                        border: 0; cursor: pointer; }
+  .country-seg button.active[data-c="US"] { background: var(--us); color: #fff; }
+  .country-seg button.active[data-c="CA"] { background: var(--ca); color: #fff; }
+
+  .as-of { display: flex; align-items: baseline; gap: 12px;
+           border: 1px solid var(--border); padding: 7px 14px; background: var(--chip); }
+  .as-of .k { font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--dim); }
+  .as-of .v { font-size: 12px; color: var(--gold); letter-spacing: 0.05em; }
+
+  .icon-btn { width: 34px; height: 34px; border: 1px solid var(--border);
+              background: var(--icon-btn-bg); cursor: pointer;
+              display: inline-flex; align-items: center; justify-content: center;
+              color: var(--gold); transition: border-color .15s ease, color .15s ease; }
+  .icon-btn:hover { border-color: var(--gold); }
+
+  /* ---------- Tab bar ---------- */
+  nav.tab-bar { display: flex; padding: 0 28px; background: var(--ink);
+                border-bottom: 1px solid var(--border); gap: 2px; }
+  nav.tab-bar button { position: relative; padding: 14px 22px 13px;
+                       color: var(--dim); font-family: inherit; font-size: 11px;
+                       letter-spacing: 0.22em; text-transform: uppercase;
+                       display: flex; align-items: baseline; gap: 10px;
+                       background: transparent; border: 0; cursor: pointer; }
+  nav.tab-bar button em { font-family: 'Cormorant Garamond', serif;
+                          font-style: italic; font-weight: 500; font-size: 15px;
+                          letter-spacing: 0; color: var(--gold); opacity: .7;
+                          text-transform: none; }
+  nav.tab-bar button:hover { color: var(--text); }
+  nav.tab-bar button.active { color: var(--text); }
+  nav.tab-bar button.active em { color: var(--gold-bright); opacity: 1; }
+  nav.tab-bar button.active::after { content: ''; position: absolute;
+                                      left: 16px; right: 16px; bottom: -1px;
+                                      height: 2px; background: var(--gold); }
+
+  /* ---------- Vitrine (corner-bracketed frame) ---------- */
+  .vitrine { position: relative; background: var(--panel);
+             border: 1px solid var(--border); padding: 10px; }
+  .vitrine > .inner { position: relative; border: 1px solid var(--hairline);
+                      padding: 28px 32px 24px;
+                      background: linear-gradient(180deg, var(--gold-soft), transparent 30%),
+                                  var(--ink);
+                      background-size: 100% 200px, auto; background-repeat: no-repeat; }
+  .vitrine .bracket { position: absolute; width: 14px; height: 14px;
+                      border: 1px solid var(--gold); pointer-events: none; }
+  .vitrine .bracket.tl { top: -1px; left: -1px;  border-right: 0; border-bottom: 0; }
+  .vitrine .bracket.tr { top: -1px; right: -1px; border-left: 0;  border-bottom: 0; }
+  .vitrine .bracket.bl { bottom: -1px; left: -1px;  border-right: 0; border-top: 0; }
+  .vitrine .bracket.br { bottom: -1px; right: -1px; border-left: 0;  border-top: 0; }
+
+  .vitrine-head { display: flex; justify-content: space-between; align-items: baseline;
+                  gap: 18px; padding-bottom: 14px; margin-bottom: 22px;
+                  border-bottom: 1px solid var(--border); }
+  .roman-label { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .roman-label .num { font-family: 'Cormorant Garamond', serif; font-style: italic;
+                      font-weight: 500; font-size: 20px; color: var(--gold);
+                      line-height: 1; letter-spacing: 0; text-transform: none; }
+  .roman-label .name { font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+                       color: var(--text); font-weight: 500; }
+  .roman-label .sub  { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+                       color: var(--dim); padding-left: 14px;
+                       border-left: 1px solid var(--border); }
+
+  .meta-row { display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+              padding-bottom: 14px; margin-bottom: 16px;
+              border-bottom: 1px dashed var(--border); }
+  .meta-row .pair { display: flex; align-items: center; gap: 12px; }
+  .meta-row .pair .k { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+                       color: var(--dim); }
+  .meta-row .pair .v { font-family: 'Cormorant Garamond', serif; font-style: italic;
+                       font-weight: 500; font-size: 20px; color: var(--gold); line-height: 1; }
+  .meta-row .pair .vs { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+                        color: var(--very-dim); }
+
+  /* ---------- Layout grids ---------- */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .pad { padding: 28px 28px 36px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 360px; gap: 18px; }
+  .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  @media (max-width: 980px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-2col { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Panel (non-vitrine card) ---------- */
+  .panel { background: var(--panel); border: 1px solid var(--border); position: relative; }
+  .panel .panel-head { padding: 16px 22px 13px; border-bottom: 1px solid var(--border);
+                       display: flex; align-items: center; justify-content: space-between; }
+  .panel .panel-body { padding: 18px; }
+
+  /* ---------- Stat tiles ---------- */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { background: var(--inset); border: 1px solid var(--border); padding: 11px 13px; }
+  .stat .k { font-size: 9px; color: var(--dim); letter-spacing: 0.22em;
+             text-transform: uppercase; font-weight: 500; }
+  .stat .v { font-family: 'Cormorant Garamond', serif; font-style: italic;
+             font-weight: 500; font-size: 26px; margin-top: 4px;
+             letter-spacing: -0.01em; line-height: 1; font-variant-numeric: tabular-nums;
+             color: var(--text); }
+  .stat .v .unit { font-family: 'DM Mono', monospace; font-style: normal; font-size: 10px;
+                   color: var(--dim); margin-left: 3px; letter-spacing: 0.06em; }
+  .stat .v.pos { color: var(--good); }
+  .stat .v.neg { color: var(--bad); }
+  .stat .pill { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+                margin-top: 4px; }
+  .stat .pill.pos { color: var(--teal); }
+  .stat .pill.neg { color: var(--rose); }
+
+  /* ---------- Scrubber ---------- */
+  .scrubber { background: var(--inset); border: 1px solid var(--border);
+              padding: 14px 18px; display: flex; align-items: center; gap: 16px;
+              margin-top: 18px; }
+  .scrubber .play { width: 32px; height: 32px; border-radius: 50%;
+                    background: var(--gold); border: 0; cursor: pointer;
+                    display: flex; align-items: center; justify-content: center; }
+  .scrubber .play svg { display: block; }
+  .scrubber .date-stack { display: flex; flex-direction: column; gap: 2px; min-width: 130px; }
+  .scrubber .date-stack .k { font-size: 9px; letter-spacing: 0.22em;
+                              text-transform: uppercase; color: var(--dim); }
+  .scrubber .date-stack .v { font-family: 'Cormorant Garamond', serif; font-style: italic;
+                              font-weight: 500; font-size: 18px; color: var(--gold);
+                              line-height: 1; font-variant-numeric: tabular-nums; }
+  .scrubber .slot { flex: 1; position: relative; height: 30px;
+                    display: flex; align-items: center; }
+  .scrubber .track { height: 2px; background: var(--border); width: 100%;
+                     position: relative; }
+  .scrubber .fill { position: absolute; left: 0; top: 0; height: 100%;
+                    background: var(--gold); }
+  .scrubber .thumb { position: absolute; top: 50%; transform: translateY(-50%);
+                     width: 14px; height: 14px; background: var(--us);
+                     border: 2px solid var(--bg); box-shadow: 0 0 0 1px var(--us);
+                     pointer-events: none; }
+  body[data-country="CA"] .scrubber .thumb { background: var(--ca); box-shadow: 0 0 0 1px var(--ca); }
+  .scrubber input[type="range"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .scrubber .axis { position: absolute; bottom: -2px; left: 0; right: 0;
+                    display: flex; justify-content: space-between; pointer-events: none;
+                    font-size: 9px; color: var(--very-dim);
+                    font-variant-numeric: tabular-nums; letter-spacing: 0.1em; }
+
+  /* ---------- Yield ramp legend ---------- */
+  .ramp { height: 12px; border: 1px solid var(--hairline);
+          background: linear-gradient(to right,
+            #0a1f2e 0%, #1f5468 28%, #c9a84c 55%, #c44a62 78%, #fbe8e6 100%); }
+  .ramp-ticks { display: flex; justify-content: space-between; margin-top: 6px;
+                font-size: 10px; color: var(--dim); font-variant-numeric: tabular-nums; }
+
+  /* ---------- Tenor table ---------- */
+  .ttable { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .ttable td { padding: 8px; }
+  .ttable .tn { color: var(--gold); letter-spacing: 0.08em; font-weight: 500;
+                width: 52px; padding-left: 18px; }
+  .ttable .bar { height: 3px; background: var(--inset); position: relative; }
+  .ttable .bar > i { position: absolute; left: 0; top: 0; height: 100%; display: block; }
+  .ttable .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text);
+                 width: 60px; }
+  .ttable .delta { text-align: right; padding-right: 18px;
+                   font-variant-numeric: tabular-nums; width: 60px; font-size: 11px; }
+  .ttable .delta.up { color: var(--teal); }
+  .ttable .delta.down { color: var(--rose); }
+  .ttable tr { border-bottom: 1px solid var(--border-soft); }
+  .ttable tr:last-child { border-bottom: 0; }
+  .ttable tr.alt { background: rgba(255,255,255,0.012); }
+  :root[data-theme="light"] .ttable tr.alt { background: rgba(0,0,0,0.012); }
+
+  /* ---------- Legend ---------- */
+  .legend-strip { display: flex; gap: 24px; align-items: center; margin-bottom: 14px;
+                  padding-bottom: 14px; border-bottom: 1px dashed var(--border);
+                  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
+  .legend-strip .dash { width: 18px; height: 2px; display: inline-block; vertical-align: middle;
+                        margin-right: 7px; }
+  .legend-strip .extra { color: var(--gold); font-family: 'Cormorant Garamond', serif;
+                         font-style: italic; font-size: 13px; letter-spacing: 0;
+                         text-transform: none; margin-left: 7px; }
+  .legend-strip .right { margin-left: auto; display: flex; gap: 22px; color: var(--very-dim); }
+
+  /* ---------- Spreads card ---------- */
+  .spread-head { padding-bottom: 12px; margin-bottom: 14px;
+                 border-bottom: 1px solid var(--border); }
+  .spread-vals { display: flex; gap: 22px; align-items: baseline; margin-top: 10px; }
+  .spread-val { display: flex; align-items: baseline; gap: 9px; }
+  .spread-val .sw { width: 9px; height: 9px; transform: translateY(1px); }
+  .spread-val .lab { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+                     color: var(--dim); font-weight: 500; }
+  .spread-val .num { font-family: 'Cormorant Garamond', serif; font-style: italic;
+                     font-weight: 500; font-size: 26px; letter-spacing: -0.01em;
+                     line-height: 1; font-variant-numeric: tabular-nums; }
+  .spread-val .num.pos { color: var(--teal); }
+  .spread-val .num.neg { color: var(--rose); }
+  .spread-val .unit { font-size: 10px; color: var(--dim); letter-spacing: 0.18em;
+                      text-transform: uppercase; }
+
+  /* ---------- Footer dock ---------- */
+  footer.dock { padding: 18px 28px 28px; border-top: 1px solid var(--border);
+                display: flex; justify-content: space-between; color: var(--very-dim);
+                font-size: 9.5px; letter-spacing: 0.22em; text-transform: uppercase; }
+  footer.dock b { color: var(--dim); font-weight: 400; }
+  footer.dock .v { color: var(--gold); }
+
+  /* ---------- Error state ---------- */
+  .err { margin: 28px; padding: 22px; border: 1px solid var(--border);
+         background: var(--panel); color: var(--dim); }
+</style>
+</head>
+<body data-theme="dark" data-country="US">
+
+<div class="app">
+
+  {% if error %}
+    <div class="err">{{ error }}</div>
+  {% else %}
+
+  <header class="masthead">
+    <div class="rail">
+      <div class="brand"><b>YC</b> · Sovereign Rates · Daily Brief</div>
+      <div class="stats">
+        <span>Tenors <b id="railTenors">—</b></span>
+        <span>History <b id="railHistory">—</b></span>
+        <span>As of <b id="railAsOf">—</b></span>
+      </div>
+    </div>
+
+    <div class="masthead-main">
+      <div class="title-block">
+        <h1>Yield<br><em>Curve</em></h1>
+        <div class="sub">US Treasuries <span class="dot">·</span>
+          Government of Canada <span class="dot">·</span> 1M – 30Y</div>
+      </div>
+
+      <div class="regime">
+        <div class="label">Curve Regime · <span id="regimeCountry">US</span></div>
+        <div class="value" id="regimeValue">—</div>
+        <div class="counts" id="regimeCounts"></div>
+      </div>
+
+      <div class="meta-stack">
+        <div class="country-seg" role="tablist" aria-label="Country">
+          <button class="active" data-c="US">
+            <svg width="11" height="8" viewBox="0 0 14 10"><rect width="14" height="10" fill="#b22234"/><g fill="#fff"><rect y="1" width="14" height="0.9"/><rect y="3" width="14" height="0.9"/><rect y="5" width="14" height="0.9"/><rect y="7" width="14" height="0.9"/><rect y="9" width="14" height="0.9"/></g><rect width="6" height="5" fill="#3c3b6e"/></svg>
+            US
+          </button>
+          <button data-c="CA">
+            <svg width="11" height="8" viewBox="0 0 14 10"><rect width="3.5" height="10" fill="#d52b1e"/><rect x="3.5" width="7" height="10" fill="#fff"/><rect x="10.5" width="3.5" height="10" fill="#d52b1e"/><path d="M7,2.5 L7.5,4 L9,3.5 L8,5 L9,6.5 L7.5,6 L7,7.5 L6.5,6 L5,6.5 L6,5 L5,3.5 L6.5,4 Z" fill="#d52b1e"/></svg>
+            CA
+          </button>
+        </div>
+        <div class="as-of">
+          <span class="k">As of</span>
+          <span class="v" id="asOfDate">—</span>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+          <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tab-bar" role="tablist">
+    <button class="active" data-tab="surface"><em>I.</em> 3D Surface</button>
+    <button             data-tab="replay"><em>II.</em> Curve Replay</button>
+    <button             data-tab="spreads"><em>III.</em> Spreads &amp; Compare</button>
+  </nav>
+
+  <!-- ============ Tab 1: 3D Surface ============ -->
+  <section class="tab-panel active" data-panel="surface">
+    <div class="pad">
+      <div class="grid-2">
+        <!-- Surface card -->
+        <div class="vitrine">
+          <span class="bracket tl"></span><span class="bracket tr"></span>
+          <span class="bracket bl"></span><span class="bracket br"></span>
+          <div class="inner">
+            <div class="vitrine-head">
+              <div class="roman-label">
+                <span class="num">I.</span>
+                <span class="name">3D Yield Surface</span>
+                <span class="sub" id="surfaceSub">—</span>
+              </div>
+              <div class="upper-tight">Camera <b style="color:var(--gold);font-weight:400;margin-left:8px">35° · 22°</b></div>
+            </div>
+            <div class="meta-row">
+              <div class="pair">
+                <span class="k">Sampling</span>
+                <span class="v">Weekly</span>
+                <span class="vs">· <span id="surfaceSamples">—</span> samples</span>
+              </div>
+            </div>
+            <div id="surfacePlot" style="width:100%;height:520px"></div>
+            <div class="scrubber">
+              <button class="play" id="surfacePlay" title="Play / pause" aria-label="Play / pause">
+                <svg width="11" height="11" viewBox="0 0 12 12"><polygon points="3,2 10,6 3,10" fill="#0a0a0f"/></svg>
+              </button>
+              <div class="date-stack">
+                <span class="k">Selected</span>
+                <span class="v" id="surfaceDate">—</span>
+              </div>
+              <div class="slot">
+                <div class="track">
+                  <div class="fill" id="surfaceFill" style="width:0%"></div>
+                  <div class="thumb" id="surfaceThumb" style="left:calc(0% - 7px)"></div>
+                </div>
+                <div class="axis" id="surfaceAxis"></div>
+                <input type="range" id="surfaceSlider" min="0" max="0" value="0" step="1">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side column -->
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head">
+              <div class="roman-label">
+                <span class="num">·</span>
+                <span class="name">Selected Snapshot</span>
+              </div>
+              <span style="font-size:10.5px;color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:0.06em" id="snapDate">—</span>
+            </div>
+            <div class="panel-body">
+              <div class="serif" style="font-size:24px;color:var(--text);line-height:1.1" id="snapCountryName">—</div>
+              <div class="upper-tight" id="snapDateLong">—</div>
+              <div class="stat-grid" style="margin-top:16px">
+                <div class="stat"><div class="k">2s10s</div><div class="v" id="snap2s10s">—</div><div class="pill" id="snap2s10sPill"></div></div>
+                <div class="stat"><div class="k">3m10y</div><div class="v" id="snap3m10y">—</div><div class="pill" id="snap3m10yPill"></div></div>
+                <div class="stat"><div class="k">Short 1Y</div><div class="v" id="snapShort">—</div></div>
+                <div class="stat"><div class="k">Long 10Y</div><div class="v" id="snapLong">—</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-body">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+                <span class="upper">Yield Colour Ramp</span>
+                <span style="font-size:9.5px;color:var(--very-dim)">%</span>
+              </div>
+              <div class="ramp"></div>
+              <div class="ramp-ticks"><span>0</span><span>4</span><span>8</span><span>12</span><span>16+</span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <span class="upper">All Tenors</span>
+              <span class="upper" style="font-size:9.5px;color:var(--very-dim)">Δ 7d</span>
+            </div>
+            <table class="ttable"><tbody id="surfaceTenorTable"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Tab 2: Curve Replay ============ -->
+  <section class="tab-panel" data-panel="replay">
+    <div class="pad">
+      <div class="grid-2">
+        <div class="vitrine">
+          <span class="bracket tl"></span><span class="bracket tr"></span>
+          <span class="bracket bl"></span><span class="bracket br"></span>
+          <div class="inner">
+            <div class="vitrine-head">
+              <div class="roman-label">
+                <span class="num">II.</span>
+                <span class="name">Curve Replay</span>
+                <span class="sub" id="replaySub">—</span>
+              </div>
+              <div class="upper-tight">Ghosts <b style="color:var(--gold);font-weight:400;margin-left:8px">16 frames</b></div>
+            </div>
+            <div class="legend-strip">
+              <span>
+                <span class="dash" id="replayLegendDash"></span>
+                <span style="color:var(--text)" id="replayLegendLabel">—</span>
+                <span class="extra" id="replayLegendDate">—</span>
+              </span>
+              <span>
+                <span class="dash" style="background:var(--dim);opacity:0.4"></span>
+                <span style="color:var(--dim)">History (fading older)</span>
+              </span>
+              <span class="right">
+                <span>X · Log Tenor</span>
+                <span>Y · Yield %</span>
+              </span>
+            </div>
+            <div id="replayPlot" style="width:100%;height:460px"></div>
+            <div class="scrubber">
+              <button class="play" id="replayPlay" title="Play / pause" aria-label="Play / pause">
+                <svg width="11" height="11" viewBox="0 0 12 12"><polygon points="3,2 10,6 3,10" fill="#0a0a0f"/></svg>
+              </button>
+              <div class="date-stack">
+                <span class="k">Selected</span>
+                <span class="v" id="replayDate">—</span>
+              </div>
+              <div class="slot">
+                <div class="track">
+                  <div class="fill" id="replayFill" style="width:0%"></div>
+                  <div class="thumb" id="replayThumb" style="left:calc(0% - 7px)"></div>
+                </div>
+                <div class="axis" id="replayAxis"></div>
+                <input type="range" id="replaySlider" min="0" max="0" value="0" step="1">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span id="replaySnapFlag"></span>
+                <span class="upper" style="color:var(--text);letter-spacing:0.26em" id="replaySnapName">—</span>
+              </div>
+              <span style="font-size:11px;color:var(--gold);font-variant-numeric:tabular-nums" id="replaySnapDate">—</span>
+            </div>
+            <div class="panel-body">
+              <div class="serif" style="font-size:22px;color:var(--text);line-height:1.1;margin-bottom:4px">Snapshot &amp; Spreads</div>
+              <div class="stat-grid" style="margin-top:14px">
+                <div class="stat"><div class="k">2s10s</div><div class="v" id="r_2s10s">—</div><div class="pill" id="r_2s10s_p"></div></div>
+                <div class="stat"><div class="k">3m10y</div><div class="v" id="r_3m10y">—</div><div class="pill" id="r_3m10y_p"></div></div>
+                <div class="stat"><div class="k">Short 1Y</div><div class="v" id="r_short">—</div></div>
+                <div class="stat"><div class="k">Long 10Y</div><div class="v" id="r_long">—</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <span class="upper">All Tenors</span>
+              <span class="upper" style="font-size:9.5px;color:var(--very-dim)">Δ 1 mo</span>
+            </div>
+            <table class="ttable"><tbody id="replayTenorTable"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Tab 3: Spreads & Compare ============ -->
+  <section class="tab-panel" data-panel="spreads">
+    <div class="pad">
+      <div class="grid-2col">
+        <div class="vitrine">
+          <span class="bracket tl"></span><span class="bracket tr"></span>
+          <span class="bracket bl"></span><span class="bracket br"></span>
+          <div class="inner" style="padding:20px 22px 16px">
+            <div class="spread-head">
+              <div class="roman-label">
+                <span class="num">III·a</span>
+                <span class="name">2s10s spread</span>
+              </div>
+              <div class="spread-vals">
+                <div class="spread-val">
+                  <span class="sw" style="background:var(--us)"></span>
+                  <span class="lab">US</span>
+                  <span class="num" id="us2s10s">—</span>
+                  <span class="unit">bps</span>
+                </div>
+                <div class="spread-val">
+                  <span class="sw" style="background:var(--ca)"></span>
+                  <span class="lab">CA</span>
+                  <span class="num" id="ca2s10s">—</span>
+                  <span class="unit">bps</span>
+                </div>
+              </div>
+            </div>
+            <div id="spread2s10sPlot" style="width:100%;height:240px"></div>
+          </div>
+        </div>
+        <div class="vitrine">
+          <span class="bracket tl"></span><span class="bracket tr"></span>
+          <span class="bracket bl"></span><span class="bracket br"></span>
+          <div class="inner" style="padding:20px 22px 16px">
+            <div class="spread-head">
+              <div class="roman-label">
+                <span class="num">III·b</span>
+                <span class="name">3m10y spread</span>
+              </div>
+              <div class="spread-vals">
+                <div class="spread-val">
+                  <span class="sw" style="background:var(--us)"></span>
+                  <span class="lab">US</span>
+                  <span class="num" id="us3m10y">—</span>
+                  <span class="unit">bps</span>
+                </div>
+                <div class="spread-val">
+                  <span class="sw" style="background:var(--ca)"></span>
+                  <span class="lab">CA</span>
+                  <span class="num" id="ca3m10y">—</span>
+                  <span class="unit">bps</span>
+                </div>
+              </div>
+            </div>
+            <div id="spread3m10yPlot" style="width:100%;height:240px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vitrine">
+        <span class="bracket tl"></span><span class="bracket tr"></span>
+        <span class="bracket bl"></span><span class="bracket br"></span>
+        <div class="inner">
+          <div class="vitrine-head">
+            <div class="roman-label">
+              <span class="num">III·c</span>
+              <span class="name">US vs CA · curve overlay</span>
+              <span class="sub" id="compareSub">—</span>
+            </div>
+            <div style="display:flex;gap:20px;align-items:center">
+              <span class="upper-tight"><span class="dash" style="background:var(--us);width:18px;height:2px;display:inline-block;vertical-align:middle;margin-right:7px"></span>US Treasuries</span>
+              <span class="upper-tight"><span class="dash" style="background:var(--ca);width:18px;height:2px;display:inline-block;vertical-align:middle;margin-right:7px"></span>Government of Canada</span>
+            </div>
+          </div>
+          <div id="comparePlot" style="width:100%;height:320px"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="dock">
+    <div>YC · <b>Yield Curve Workstation</b></div>
+    <div>Source <b>Treasury · BoC</b> · <span class="v">v0.4</span></div>
+  </footer>
+
+  {% endif %}
+</div>
+
+<script id="yc-data" type="application/json">{{ data_json|safe }}</script>
+<script>
+(function () {
+  // ===== Theme =====
+  // Priority: user's saved choice → OS preference → dark default.
+  const html = document.documentElement;
+  const storedTheme = localStorage.getItem('yc-theme');
+  if (storedTheme === 'light' || storedTheme === 'dark') {
+    html.setAttribute('data-theme', storedTheme);
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    html.setAttribute('data-theme', 'light');
+  }
+  // Follow OS changes live, but only if the user hasn't picked one explicitly.
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+      if (localStorage.getItem('yc-theme')) return;
+      html.setAttribute('data-theme', e.matches ? 'light' : 'dark');
+      if (typeof setThemeIcon === 'function') setThemeIcon();
+      if (typeof renderAll === 'function') { renderAll(); renderRegime(); }
+    });
+  }
+
+  function cssVar(n) { return getComputedStyle(html).getPropertyValue(n).trim(); }
+
+  // Cool-to-warm 5-stop ramp tuned to the editorial palette.
+  // Semantically: cool = low yields, warm = high yields.
+  function colorRamp() {
+    return [
+      [0.00, '#0a1f2e'],   // deep ink (~0%)
+      [0.28, '#1f5468'],   // teal-slate  (~4%)
+      [0.55, '#c9a84c'],   // editorial gold (~9%)
+      [0.78, '#c44a62'],   // editorial rose (~12%)
+      [1.00, '#fbe8e6'],   // cream (peak 1981 highs)
+    ];
+  }
+
+  // ===== Data (real if Flask rendered the JSON, demo otherwise) =====
+  function buildDemoData() {
+    const TENORS = ['1M','3M','6M','1Y','2Y','3Y','5Y','7Y','10Y','20Y','30Y'];
+    const TYEARS = { '1M': 1/12, '3M': 0.25, '6M': 0.5, '1Y': 1, '2Y': 2,
+                     '3Y': 3, '5Y': 5, '7Y': 7, '10Y': 10, '20Y': 20, '30Y': 30 };
+    const US_ANCHORS = [
+      [1962,2.8],[1966,4.5],[1969,7.0],[1972,4.0],[1974,8.5],[1977,5.5],
+      [1980,13.5],[1981,15.8],[1984,10.0],[1986,6.0],[1989,8.7],[1992,3.4],
+      [1995,5.7],[1998,4.8],[2000,6.1],[2003,1.0],[2006,5.0],[2007,4.9],
+      [2009,0.15],[2014,0.07],[2016,0.4],[2018,2.3],[2019,1.5],[2020,0.1],
+      [2022,2.0],[2023,5.3],[2024,5.2],[2025,4.6],[2026,4.25],
+    ];
+    const CA_ANCHORS = [
+      [1962,3.4],[1966,4.9],[1969,7.4],[1972,4.3],[1974,8.0],[1977,7.5],
+      [1980,12.5],[1981,17.7],[1984,11.2],[1986,8.5],[1989,11.7],[1992,7.0],
+      [1995,7.2],[1998,5.0],[2000,5.8],[2003,2.8],[2006,4.0],[2007,4.2],
+      [2009,0.4],[2014,0.9],[2016,0.5],[2018,1.6],[2019,1.7],[2020,0.2],
+      [2022,1.5],[2023,4.8],[2024,4.7],[2025,3.6],[2026,3.05],
+    ];
+    function interpA(a, y) {
+      if (y <= a[0][0]) return a[0][1];
+      if (y >= a[a.length-1][0]) return a[a.length-1][1];
+      for (let i = 0; i < a.length - 1; i++) {
+        if (y >= a[i][0] && y <= a[i+1][0]) {
+          const f = (y - a[i][0]) / (a[i+1][0] - a[i][0]);
+          const s = f * f * (3 - 2*f);
+          return a[i][1] + (a[i+1][1] - a[i][1]) * s;
+        }
+      }
+      return a[a.length-1][1];
+    }
+    function slope(y) {
+      let s = 0.6;
+      if (y>1978.5 && y<1982) s = -0.55 - 0.2*Math.sin((y-1978.5)*2.5);
+      else if (y>1988.5 && y<1990) s = -0.2;
+      else if (y>1999.5 && y<2001) s = -0.25;
+      else if (y>2005.8 && y<2007.6) s = -0.2;
+      else if (y>2008 && y<2015) s = 1.4;
+      else if (y>2019.7 && y<2022) s = 1.5;
+      else if (y>2022.4 && y<2025.2) s = -0.85;
+      else if (y>=2025.2 && y<2026.2) s = 0.05 + (y - 2025.2)*0.5;
+      s += Math.sin(y*5.7)*0.04 + Math.sin(y*11.3)*0.025;
+      return s;
+    }
+    function yieldAt(c, y, t) {
+      const anchors = c === 'CA' ? CA_ANCHORS : US_ANCHORS;
+      const shortY = interpA(anchors, y);
+      const bias = slope(y);
+      const lt = Math.log(Math.max(t, 1/24));
+      const ltS = Math.log(0.25);
+      const belly = -Math.pow(lt - Math.log(2), 2) * 0.08 * bias;
+      let v = shortY + bias * 1.05 * (lt - ltS) + belly;
+      v += Math.sin(y*3.1 + t*0.7) * 0.06;
+      return Math.max(0.02, +v.toFixed(2));
+    }
+    function build(c) {
+      const dates = [], matrix = [];
+      const yrStart = 1962, yrEnd = 2026 + 4/12;
+      const N = Math.round((yrEnd - yrStart) * 26); // ~biweekly
+      for (let i = 0; i < N; i++) {
+        const y = yrStart + (i / (N - 1)) * (yrEnd - yrStart);
+        const d = new Date(yrStart, 0, 1);
+        d.setDate(d.getDate() + Math.round((y - yrStart) * 365.25));
+        dates.push(d.toISOString().slice(0, 10));
+        matrix.push(TENORS.map(t => yieldAt(c, y, TYEARS[t])));
+      }
+      const lastY = matrix[matrix.length - 1];
+      return {
+        tenor_order: TENORS,
+        tenor_years: TYEARS,
+        dates, matrix,
+        latest: { date: dates[dates.length - 1],
+                  yields: Object.fromEntries(TENORS.map((t, i) => [t, lastY[i]])) },
+        n_dates: dates.length,
+        first_date: dates[0],
+        last_date:  dates[dates.length - 1],
+      };
+    }
+    return {
+      last_updated: '2026-05-22',
+      tenor_order: TENORS,
+      tenor_years: TYEARS,
+      countries: { US: build('US'), CA: build('CA') },
+      _demo: true,
+    };
+  }
+
+  let DATA = null;
+  try {
+    const raw = document.getElementById('yc-data').textContent.trim();
+    const JINJA_OPEN = '{' + '{';
+    if (raw && raw !== 'null' && !raw.startsWith(JINJA_OPEN)) DATA = JSON.parse(raw);
+  } catch (e) { /* fall through to demo */ }
+  if (!DATA) DATA = buildDemoData();
+
+  const TENORS       = DATA.tenor_order;       // ["1M","3M","6M","1Y","2Y","3Y","5Y","7Y","10Y","20Y","30Y"]
+  const TENOR_YEARS  = TENORS.map(t => DATA.tenor_years[t]);
+  const I_2Y  = TENORS.indexOf('2Y');
+  const I_10Y = TENORS.indexOf('10Y');
+  const I_3M  = TENORS.indexOf('3M');
+  const I_1Y  = TENORS.indexOf('1Y');
+
+  let country = 'US';
+  let tab = 'surface';
+
+  function payload() { return DATA.countries[country]; }
+
+  // ===== Initialize header chrome =====
+  document.getElementById('railTenors').textContent = String(TENORS.length).padStart(2, '0');
+  const minDate = ['US','CA'].map(c => DATA.countries[c]?.first_date).filter(Boolean).sort()[0] || '';
+  const maxDate = ['US','CA'].map(c => DATA.countries[c]?.last_date).filter(Boolean).sort().slice(-1)[0] || '';
+  function yearsBetween(a, b) { if (!a||!b) return ''; return (new Date(b) - new Date(a)) / (365.25 * 86400 * 1000); }
+  const hist = yearsBetween(minDate, maxDate);
+  document.getElementById('railHistory').textContent = hist ? Math.round(hist) + 'Y' : '—';
+  document.getElementById('railAsOf').textContent = DATA.last_updated || '—';
+  document.getElementById('asOfDate').textContent = DATA.last_updated || '—';
+
+  // ===== Regime computation =====
+  function classifyRegime(yields) {
+    if (!yields) return { label: '—', cls: '' };
+    const s = yields[I_10Y] - yields[I_2Y];
+    if (s == null || isNaN(s)) return { label: '—', cls: '' };
+    if (s < -0.1) return { label: 'Inverted', cls: 'inverted' };
+    if (s > 1.5)  return { label: 'Steep',    cls: 'steep'    };
+    if (s < 0.3)  return { label: 'Flat',     cls: 'flat'     };
+    return { label: 'Normal', cls: 'normal' };
+  }
+
+  // Counts of inverted / flat / normal / steep regimes across history (yearly samples)
+  function regimeCounts(p) {
+    const counts = { Inverted: 0, Flat: 0, Normal: 0, Steep: 0 };
+    if (!p?.matrix?.length) return counts;
+    const step = Math.max(1, Math.floor(p.matrix.length / 60));
+    for (let i = 0; i < p.matrix.length; i += step) {
+      const y = p.matrix[i];
+      const r = classifyRegime(y);
+      if (counts[r.label] != null) counts[r.label]++;
+    }
+    return counts;
+  }
+
+  function renderRegime() {
+    const p = payload();
+    if (!p?.latest?.yields) return;
+    const yields = TENORS.map(t => p.latest.yields[t]);
+    const reg = classifyRegime(yields);
+    const el = document.getElementById('regimeValue');
+    el.textContent = reg.label;
+    el.className = 'value ' + reg.cls;
+    document.getElementById('regimeCountry').textContent = country;
+    const counts = regimeCounts(p);
+    const colorOf = (k) => k === 'Inverted' ? 'var(--rose)'
+                        : k === 'Flat'      ? 'var(--gold)'
+                        : k === 'Steep'     ? 'var(--teal)'
+                        :                     'var(--us)';
+    document.getElementById('regimeCounts').innerHTML =
+      ['Inverted','Flat','Normal','Steep'].map(k =>
+        `<div><b style="color:${colorOf(k)}">${String(counts[k]).padStart(2,'0')}</b><span>${k}</span></div>`
+      ).join('');
+  }
+
+  // ===== Plotly base layout =====
+  function baseLayout(extra) {
+    return Object.assign({
+      paper_bgcolor: cssVar('--ink'),
+      plot_bgcolor:  cssVar('--ink'),
+      font: { color: cssVar('--text'),
+              family: '"DM Mono", ui-monospace, Menlo, monospace', size: 11 },
+      margin: { l: 56, r: 22, t: 12, b: 36 },
+      hovermode: 'closest',
+    }, extra || {});
+  }
+
+  // ============================================================
+  // Tab 1 — 3D Surface
+  // ============================================================
+  function renderSurface() {
+    const p = payload();
+    if (!p?.dates?.length) return;
+    const idx = Math.min(state.surfaceIdx, p.dates.length - 1);
+
+    const surface = {
+      type: 'surface',
+      x: TENOR_YEARS,
+      y: p.dates,
+      z: p.matrix,
+      cmin: 0, cmax: 16,
+      colorscale: colorRamp(),
+      showscale: true,
+      opacity: 1.0,
+      // No contour overlay — keeps the surface reading as a smooth blanket
+      contours: { x: { show: false }, y: { show: false }, z: { show: false } },
+      // Soft "fabric" lighting: matte, almost no specular hot-spots
+      lighting: {
+        ambient:   0.72,
+        diffuse:   0.82,
+        specular:  0.08,
+        roughness: 0.95,
+        fresnel:   0.15,
+      },
+      lightposition: { x: 100, y: -200, z: 120 },
+      hidesurface: false,
+      hovertemplate: 'Tenor %{x:.2f}y<br>%{y}<br>Yield %{z:.2f}%<extra></extra>',
+      colorbar: {
+        title: { text: 'Yield %', font: { color: cssVar('--gold'), size: 10 } },
+        tickfont: { color: cssVar('--dim'), size: 10 },
+        thickness: 10, len: 0.7, x: 1.02,
+        outlinecolor: cssVar('--hairline'),
+      },
+    };
+
+    const slice = {
+      type: 'scatter3d', mode: 'lines+markers',
+      x: TENOR_YEARS,
+      y: TENOR_YEARS.map(() => p.dates[idx]),
+      z: p.matrix[idx],
+      line: { color: cssVar('--text'), width: 6 },
+      marker: { size: 4, color: cssVar('--gold'), line: { color: cssVar('--text'), width: 1 } },
+      hovertemplate: '%{y} · %{x:.2f}y · %{z:.2f}%<extra></extra>',
+      showlegend: false,
+    };
+
+    const layout = baseLayout({
+      scene: {
+        bgcolor: cssVar('--ink'),
+        xaxis: { title: { text: 'Tenor', font: { color: cssVar('--gold') } },
+                 type: 'log',
+                 tickvals: TENOR_YEARS,
+                 ticktext: TENORS,
+                 gridcolor: cssVar('--hairline-faint'),
+                 zerolinecolor: cssVar('--hairline-faint'),
+                 backgroundcolor: cssVar('--ink'),
+                 color: cssVar('--dim') },
+        yaxis: { title: { text: 'Date', font: { color: cssVar('--gold') } },
+                 gridcolor: cssVar('--hairline-faint'),
+                 backgroundcolor: cssVar('--ink'),
+                 color: cssVar('--dim') },
+        zaxis: { title: { text: 'Yield %', font: { color: cssVar('--gold') } },
+                 gridcolor: cssVar('--hairline-faint'),
+                 backgroundcolor: cssVar('--ink'),
+                 color: cssVar('--dim') },
+        camera: { eye: { x: 1.55, y: -1.85, z: 0.85 } },
+      },
+      margin: { l: 0, r: 0, t: 0, b: 0 },
+    });
+
+    Plotly.react('surfacePlot', [surface, slice], layout,
+      { displaylogo: false, responsive: true });
+
+    // Scrubber + side panel
+    const slider = document.getElementById('surfaceSlider');
+    slider.max = p.dates.length - 1;
+    slider.value = idx;
+    document.getElementById('surfaceSamples').textContent = p.dates.length;
+    document.getElementById('surfaceSub').textContent =
+      `${country} · ${p.first_date?.slice(0,4)} – ${p.last_date?.slice(0,4)}`;
+    setScrubber('surface', idx, p);
+    fillSnapshot(idx, p, 'surface');
+  }
+
+  // ============================================================
+  // Tab 2 — Curve Replay (2D + ghost history)
+  // ============================================================
+  function renderReplay() {
+    const p = payload();
+    if (!p?.dates?.length) return;
+    const idx = Math.min(state.replayIdx, p.dates.length - 1);
+    const accent = country === 'US' ? cssVar('--us') : cssVar('--ca');
+
+    // Ghost backdrop — sample 16 prior frames
+    const ghosts = [];
+    const N_GHOSTS = 16;
+    const step = Math.max(1, Math.floor(idx / N_GHOSTS));
+    for (let i = 0; i < idx; i += step) {
+      const age = (idx - i) / Math.max(1, idx);
+      ghosts.push({
+        type: 'scatter', mode: 'lines',
+        x: TENOR_YEARS, y: p.matrix[i],
+        line: { color: accent, width: 1, shape: 'spline' },
+        opacity: 0.08 + (1 - age) * 0.20,
+        hoverinfo: 'skip', showlegend: false,
+      });
+    }
+
+    const main = {
+      type: 'scatter', mode: 'lines+markers',
+      x: TENOR_YEARS, y: p.matrix[idx],
+      line: { color: accent, width: 2.8, shape: 'spline' },
+      marker: { size: 8, color: accent,
+                line: { color: cssVar('--panel'), width: 2 } },
+      hovertemplate: '%{x:.2f}y · %{y:.2f}%<extra></extra>',
+      showlegend: false,
+    };
+
+    const layout = baseLayout({
+      xaxis: { title: '', type: 'log',
+               tickvals: TENOR_YEARS, ticktext: TENORS,
+               gridcolor: cssVar('--border-soft'),
+               zerolinecolor: cssVar('--border-soft'),
+               color: cssVar('--gold'),
+               tickfont: { color: cssVar('--gold'), size: 10 } },
+      yaxis: { title: { text: '% yield', font: { color: cssVar('--gold'), size: 10 } },
+               gridcolor: cssVar('--border-soft'),
+               zerolinecolor: cssVar('--hairline-faint'),
+               color: cssVar('--very-dim'),
+               tickfont: { color: cssVar('--very-dim'), size: 10 } },
+      margin: { l: 56, r: 22, t: 18, b: 36 },
+    });
+
+    Plotly.react('replayPlot', ghosts.concat([main]), layout,
+      { displaylogo: false, responsive: true });
+
+    // Side panel
+    document.getElementById('replayLegendDash').style.background = accent;
+    document.getElementById('replayLegendLabel').textContent =
+      country === 'US' ? 'US · ' : 'CA · ';
+    document.getElementById('replayLegendDate').textContent = humanDate(p.dates[idx]);
+    document.getElementById('replaySnapName').textContent =
+      country === 'US' ? 'US Treasuries' : 'Gov of Canada';
+    document.getElementById('replaySnapDate').textContent = p.dates[idx];
+    document.getElementById('replaySnapFlag').innerHTML =
+      country === 'US'
+        ? '<svg width="14" height="10" viewBox="0 0 14 10"><rect width="14" height="10" fill="#b22234"/><g fill="#fff"><rect y="1" width="14" height="0.9"/><rect y="3" width="14" height="0.9"/><rect y="5" width="14" height="0.9"/><rect y="7" width="14" height="0.9"/><rect y="9" width="14" height="0.9"/></g><rect width="6" height="5" fill="#3c3b6e"/></svg>'
+        : '<svg width="14" height="10" viewBox="0 0 14 10"><rect width="3.5" height="10" fill="#d52b1e"/><rect x="3.5" width="7" height="10" fill="#fff"/><rect x="10.5" width="3.5" height="10" fill="#d52b1e"/><path d="M7,2.5 L7.5,4 L9,3.5 L8,5 L9,6.5 L7.5,6 L7,7.5 L6.5,6 L5,6.5 L6,5 L5,3.5 L6.5,4 Z" fill="#d52b1e"/></svg>';
+
+    const slider = document.getElementById('replaySlider');
+    slider.max = p.dates.length - 1;
+    slider.value = idx;
+    document.getElementById('replaySub').textContent =
+      `${country} · ghost history overlay`;
+    setScrubber('replay', idx, p);
+    fillSnapshot(idx, p, 'replay');
+  }
+
+  // ============================================================
+  // Tab 3 — Spreads & Compare
+  // ============================================================
+  function buildSpread(p, shortI, longI) {
+    const out = { x: [], y: [] };
+    if (!p?.dates) return out;
+    for (let i = 0; i < p.dates.length; i++) {
+      const r = p.matrix[i];
+      if (r[shortI] == null || r[longI] == null) continue;
+      out.x.push(p.dates[i]);
+      out.y.push(+((r[longI] - r[shortI]) * 100).toFixed(1));
+    }
+    return out;
+  }
+  function inversionBands(series) {
+    const bands = [];
+    if (!series.x.length) return bands;
+    let start = null;
+    for (let i = 0; i < series.y.length; i++) {
+      const v = series.y[i];
+      if (v < 0 && start == null) start = series.x[i];
+      if ((v >= 0 || i === series.y.length - 1) && start != null) {
+        const end = v < 0 ? series.x[i] : series.x[i - 1];
+        bands.push([start, end]); start = null;
+      }
+    }
+    return bands;
+  }
+
+  function renderSpreadChart(elId, kind) {
+    const us = DATA.countries.US, ca = DATA.countries.CA;
+    const shortI = kind === '2s10s' ? I_2Y : I_3M;
+    const usS = buildSpread(us, shortI, I_10Y);
+    const caS = buildSpread(ca, shortI, I_10Y);
+
+    const bands = inversionBands(usS);
+    const shapes = bands.map(([a, b]) => ({
+      type: 'rect', xref: 'x', yref: 'paper',
+      x0: a, x1: b, y0: 0, y1: 1,
+      fillcolor: cssVar('--rose'), opacity: 0.06, line: { width: 0 },
+    }));
+    shapes.push({ type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 0, y1: 0,
+                  line: { color: cssVar('--hairline-faint'), width: 1, dash: 'dot' } });
+
+    const layout = baseLayout({
+      xaxis: { gridcolor: cssVar('--border-soft'), color: cssVar('--dim'),
+               tickfont: { size: 10, color: cssVar('--dim') } },
+      yaxis: { title: { text: 'bps', font: { color: cssVar('--gold'),
+                        family: '"Cormorant Garamond", serif', size: 12 } },
+               gridcolor: cssVar('--border-soft'), zeroline: false,
+               color: cssVar('--very-dim'),
+               tickfont: { size: 10, color: cssVar('--very-dim') } },
+      shapes,
+      margin: { l: 56, r: 18, t: 10, b: 30 },
+    });
+
+    Plotly.react(elId, [
+      { type: 'scatter', mode: 'lines', x: caS.x, y: caS.y, name: 'CA',
+        line: { color: cssVar('--ca'), width: 1.2 }, opacity: 0.92,
+        hovertemplate: '%{x}<br>CA %{y:.0f} bps<extra></extra>' },
+      { type: 'scatter', mode: 'lines', x: usS.x, y: usS.y, name: 'US',
+        line: { color: cssVar('--us'), width: 1.2 }, opacity: 0.95,
+        hovertemplate: '%{x}<br>US %{y:.0f} bps<extra></extra>' },
+    ], layout, { displaylogo: false, responsive: true });
+
+    return {
+      usLast: usS.y.length ? usS.y[usS.y.length - 1] : null,
+      caLast: caS.y.length ? caS.y[caS.y.length - 1] : null,
+    };
+  }
+
+  function renderCompare() {
+    const us = DATA.countries.US, ca = DATA.countries.CA;
+    const usY = us.latest?.yields
+                ? TENORS.map(t => us.latest.yields[t])
+                : us.matrix[us.matrix.length - 1];
+    const caY = ca.latest?.yields
+                ? TENORS.map(t => ca.latest.yields[t])
+                : ca.matrix[ca.matrix.length - 1];
+
+    const layout = baseLayout({
+      xaxis: { title: '', type: 'log',
+               tickvals: TENOR_YEARS, ticktext: TENORS,
+               gridcolor: cssVar('--border-soft'),
+               color: cssVar('--gold'),
+               tickfont: { color: cssVar('--gold'), size: 10 } },
+      yaxis: { title: { text: '% yield', font: { color: cssVar('--gold'), size: 10 } },
+               gridcolor: cssVar('--border-soft'), color: cssVar('--very-dim'),
+               tickfont: { color: cssVar('--very-dim'), size: 10 } },
+      margin: { l: 56, r: 22, t: 14, b: 36 },
+    });
+
+    Plotly.react('comparePlot', [
+      { type: 'scatter', mode: 'lines+markers',
+        x: TENOR_YEARS, y: caY,
+        line: { color: cssVar('--ca'), width: 2.4, shape: 'spline' },
+        marker: { size: 7, color: cssVar('--ca'),
+                  line: { color: cssVar('--panel'), width: 1.5 } },
+        name: 'CA', hovertemplate: 'CA %{x:.2f}y · %{y:.2f}%<extra></extra>' },
+      { type: 'scatter', mode: 'lines+markers',
+        x: TENOR_YEARS, y: usY,
+        line: { color: cssVar('--us'), width: 2.4, shape: 'spline' },
+        marker: { size: 7, color: cssVar('--us'),
+                  line: { color: cssVar('--panel'), width: 1.5 } },
+        name: 'US', hovertemplate: 'US %{x:.2f}y · %{y:.2f}%<extra></extra>' },
+    ], layout, { displaylogo: false, responsive: true });
+
+    document.getElementById('compareSub').textContent = humanDate(us.last_date || '');
+  }
+
+  function renderSpreads() {
+    const a = renderSpreadChart('spread2s10sPlot', '2s10s');
+    const b = renderSpreadChart('spread3m10yPlot', '3m10y');
+    document.getElementById('us2s10s').textContent = fmtSpread(a.usLast);
+    document.getElementById('ca2s10s').textContent = fmtSpread(a.caLast);
+    document.getElementById('us3m10y').textContent = fmtSpread(b.usLast);
+    document.getElementById('ca3m10y').textContent = fmtSpread(b.caLast);
+    // sign class for the spread numbers
+    [['us2s10s', a.usLast], ['ca2s10s', a.caLast],
+     ['us3m10y', b.usLast], ['ca3m10y', b.caLast]].forEach(([id, v]) => {
+      const el = document.getElementById(id);
+      el.classList.toggle('pos', v != null && v >= 0);
+      el.classList.toggle('neg', v != null && v <  0);
+    });
+    renderCompare();
+  }
+
+  function fmtSpread(v) {
+    if (v == null || isNaN(v)) return '—';
+    return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(0);
+  }
+
+  // ============================================================
+  // Snapshot + tenor table
+  // ============================================================
+  function fillSnapshot(idx, p, which) {
+    const y = p.matrix[idx];
+    const lookback = which === 'surface' ? 1 : 4;   // 1 week vs ~4 weeks
+    const prev = p.matrix[Math.max(0, idx - lookback)] || y;
+
+    const s2s10s = ((y[I_10Y] - y[I_2Y]) * 100);
+    const s3m10y = ((y[I_10Y] - y[I_3M]) * 100);
+    const yShort = y[I_1Y];
+    const yLong  = y[I_10Y];
+
+    if (which === 'surface') {
+      document.getElementById('snapDate').textContent = p.dates[idx];
+      document.getElementById('snapDateLong').textContent = humanDate(p.dates[idx]);
+      document.getElementById('snapCountryName').textContent =
+        country === 'US' ? 'US Treasuries' : 'Government of Canada';
+      setStat('snap2s10s', s2s10s, ' bps', true, 'snap2s10sPill');
+      setStat('snap3m10y', s3m10y, ' bps', true, 'snap3m10yPill');
+      setStat('snapShort', yShort, '%', false);
+      setStat('snapLong',  yLong,  '%', false);
+      fillTenorTable('surfaceTenorTable', y, prev);
+    } else {
+      setStat('r_2s10s', s2s10s, ' bps', true, 'r_2s10s_p');
+      setStat('r_3m10y', s3m10y, ' bps', true, 'r_3m10y_p');
+      setStat('r_short', yShort, '%', false);
+      setStat('r_long',  yLong,  '%', false);
+      fillTenorTable('replayTenorTable', y, prev);
+    }
+  }
+
+  function setStat(id, v, unit, signed, pillId) {
+    const el = document.getElementById(id);
+    if (v == null || isNaN(v)) { el.textContent = '—'; return; }
+    const isBps = unit.trim() === 'bps';
+    const sign  = signed ? (v < 0 ? '−' : '+') : (v < 0 ? '−' : '');
+    const num   = Math.abs(v).toFixed(isBps ? 0 : 2);
+    el.innerHTML = `${sign}${num}<span class="unit">${unit.trim()}</span>`;
+    el.classList.toggle('pos', signed && v >= 0);
+    el.classList.toggle('neg', signed && v <  0);
+    if (pillId) {
+      const pill = document.getElementById(pillId);
+      pill.textContent = v < 0 ? '↓ Inverted' : '↑ Positive';
+      pill.className = 'pill ' + (v < 0 ? 'neg' : 'pos');
+    }
+  }
+
+  function fillTenorTable(tbodyId, row, prev) {
+    const tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = TENORS.map((t, i) => {
+      const y = row[i]; const p = prev[i];
+      if (y == null) return '';
+      const d = (y - (p ?? y)) * 100;
+      const up = d >= 0;
+      const barColor = surfaceRamp(y);
+      const altCls = i % 2 === 1 ? ' class="alt"' : '';
+      return `<tr${altCls}>
+        <td class="tn">${t}</td>
+        <td><div class="bar"><i style="width:${Math.min(100, (y / 9) * 100)}%;background:${barColor}"></i></div></td>
+        <td class="num">${y.toFixed(2)}</td>
+        <td class="delta ${up ? 'up' : 'down'}">${up ? '+' : '−'}${Math.abs(d).toFixed(1)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function surfaceRamp(v) {
+    // Matches colorRamp() above, expressed in absolute yield % stops.
+    const stops = [
+      [0,  [10,  31,  46]],   // #0a1f2e — deep ink
+      [4,  [31,  84,  104]],  // #1f5468 — teal-slate
+      [9,  [201, 168, 76]],   // #c9a84c — gold
+      [12, [196, 74,  98]],   // #c44a62 — rose
+      [17, [251, 232, 230]],  // #fbe8e6 — cream
+    ];
+    if (v <= stops[0][0]) return `rgb(${stops[0][1].join(',')})`;
+    if (v >= stops[stops.length - 1][0]) return `rgb(${stops[stops.length - 1][1].join(',')})`;
+    for (let i = 0; i < stops.length - 1; i++) {
+      if (v >= stops[i][0] && v <= stops[i + 1][0]) {
+        const f = (v - stops[i][0]) / (stops[i + 1][0] - stops[i][0]);
+        const r = Math.round(stops[i][1][0] + (stops[i + 1][1][0] - stops[i][1][0]) * f);
+        const g = Math.round(stops[i][1][1] + (stops[i + 1][1][1] - stops[i][1][1]) * f);
+        const b = Math.round(stops[i][1][2] + (stops[i + 1][1][2] - stops[i][1][2]) * f);
+        return `rgb(${r},${g},${b})`;
+      }
+    }
+    return '#888';
+  }
+
+  function humanDate(d) {
+    if (!d) return '—';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const dt = new Date(d);
+    if (isNaN(dt)) return d;
+    return `${months[dt.getMonth()]} ${dt.getDate()}, ${dt.getFullYear()}`;
+  }
+
+  // ============================================================
+  // Scrubber wiring
+  // ============================================================
+  const state = {
+    surfaceIdx: 0, replayIdx: 0,
+    playing: { surface: false, replay: false },
+    timers:  { surface: null, replay: null },
+  };
+
+  function setScrubber(which, idx, p) {
+    const pct = p.dates.length > 1 ? idx / (p.dates.length - 1) : 0;
+    document.getElementById(which + 'Fill').style.width = (pct * 100) + '%';
+    document.getElementById(which + 'Thumb').style.left = `calc(${pct * 100}% - 7px)`;
+    document.getElementById(which + 'Date').textContent = p.dates[idx];
+    // Axis ticks
+    const axis = document.getElementById(which + 'Axis');
+    if (axis && p.dates.length) {
+      const first = p.dates[0].slice(0, 4);
+      const mid1  = p.dates[Math.floor(p.dates.length * 0.25)].slice(0, 4);
+      const mid2  = p.dates[Math.floor(p.dates.length * 0.5)].slice(0, 4);
+      const mid3  = p.dates[Math.floor(p.dates.length * 0.75)].slice(0, 4);
+      const last  = p.dates[p.dates.length - 1].slice(0, 4);
+      axis.innerHTML = `<span>${first}</span><span>${mid1}</span><span>${mid2}</span><span>${mid3}</span><span>${last}</span>`;
+    }
+  }
+
+  function bindSlider(which, render) {
+    const slider = document.getElementById(which + 'Slider');
+    const playBtn = document.getElementById(which + 'Play');
+    slider.addEventListener('input', () => {
+      const p = payload(); if (!p) return;
+      state[which + 'Idx'] = +slider.value;
+      render();
+    });
+    playBtn.addEventListener('click', () => {
+      const playing = state.playing[which];
+      if (playing) {
+        clearInterval(state.timers[which]);
+        state.timers[which] = null;
+        state.playing[which] = false;
+        playBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 12 12"><polygon points="3,2 10,6 3,10" fill="#0a0a0f"/></svg>';
+      } else {
+        state.playing[which] = true;
+        playBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 12 12"><rect x="3" y="2" width="2.5" height="8" fill="#0a0a0f"/><rect x="6.5" y="2" width="2.5" height="8" fill="#0a0a0f"/></svg>';
+        state.timers[which] = setInterval(() => {
+          const p = payload(); if (!p) return;
+          let i = state[which + 'Idx'] + 1;
+          if (i > p.dates.length - 1) i = 0;
+          state[which + 'Idx'] = i;
+          slider.value = i;
+          render();
+        }, 60);
+      }
+    });
+  }
+
+  // ============================================================
+  // Tabs + country pills + theme toggle
+  // ============================================================
+  function showTab(name) {
+    tab = name;
+    document.querySelectorAll('nav.tab-bar button').forEach(b =>
+      b.classList.toggle('active', b.dataset.tab === name));
+    document.querySelectorAll('.tab-panel').forEach(p =>
+      p.classList.toggle('active', p.dataset.panel === name));
+    renderAll();
+  }
+  document.querySelectorAll('nav.tab-bar button').forEach(b => {
+    b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  document.querySelectorAll('.country-seg button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.country-seg button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      country = btn.dataset.c;
+      document.body.setAttribute('data-country', country);
+      initIdx();
+      renderAll();
+      renderRegime();
+    });
+  });
+
+  function setThemeIcon() {
+    const t = html.getAttribute('data-theme');
+    const ic = document.getElementById('themeIcon');
+    ic.innerHTML = t === 'dark'
+      ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+      : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
+  }
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('yc-theme', next);
+    setThemeIcon();
+    renderAll();
+    renderRegime();
+  });
+  setThemeIcon();
+
+  // ============================================================
+  // Boot
+  // ============================================================
+  function initIdx() {
+    const p = payload();
+    if (!p) return;
+    state.surfaceIdx = Math.max(0, p.dates.length - 1);
+    state.replayIdx  = Math.max(0, p.dates.length - 1);
+  }
+  function renderAll() {
+    if (tab === 'surface')      renderSurface();
+    else if (tab === 'replay')  renderReplay();
+    else if (tab === 'spreads') renderSpreads();
+  }
+
+  initIdx();
+  bindSlider('surface', renderSurface);
+  bindSlider('replay',  renderReplay);
+  renderRegime();
+  renderAll();
+
+  window.addEventListener('resize', () => {
+    ['surfacePlot','replayPlot','spread2s10sPlot','spread3m10yPlot','comparePlot']
+      .forEach(id => { const el = document.getElementById(id);
+                       if (el && el.data) Plotly.Plots.resize(el); });
+  });
+})();
+</script>
+
+</body>
+</html>
