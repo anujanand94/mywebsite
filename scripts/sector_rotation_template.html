@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -31,6 +31,46 @@
     --improving: #4a90e2;
     --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
   }
+  :root[data-theme="light"] {
+    --bg:        #f4efe1;
+    --ink:       #fbf8ee;
+    --card:      #ffffff;
+    --lift:      #fbf9f0;
+    --border:    rgba(31,28,20,0.10);
+    --hairline:  rgba(168,134,44,0.32);
+    --hairline-faint: rgba(168,134,44,0.14);
+    --text:      #1f1c14;
+    --muted:     #6a6358;
+    --dim:       #8a8273;
+    --teal:      #008873;
+    --teal-soft: rgba(0,136,115,0.18);
+    --gold:      #a8862c;
+    --gold-bright: #c9a84c;
+    --gold-soft: rgba(168,134,44,0.20);
+    --leading:   #008873;
+    --weakening: #a8862c;
+    --lagging:   #c44a62;
+    --improving: #3565b3;
+  }
+  /* Light-mode body radial glow is tuned for parchment */
+  :root[data-theme="light"] body {
+    background-image:
+      radial-gradient(ellipse 1200px 600px at 50% -20%, rgba(168,134,44,0.07), transparent 60%),
+      radial-gradient(ellipse 800px 400px at 100% 100%, rgba(0,136,115,0.04), transparent 60%) !important;
+  }
+  /* Theme toggle button (top-right) */
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 1100;
+    width: 36px; height: 36px;
+    border: 1px solid var(--gold);
+    background: var(--gold-soft);
+    color: var(--gold);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background .2s var(--ease), border-color .2s var(--ease);
+  }
+  .theme-toggle:hover { background: var(--hairline); }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
@@ -641,6 +681,8 @@
 </style>
 </head>
 <body>
+<script src="static/js/theme.js"></script>
+<button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
 
 {% if error %}
   <div class="error-screen">
@@ -859,6 +901,30 @@
     IMPROVING: '#4a90e2',
   };
   const TAIL_VALUES = [4, 8, 12, 26];
+
+  // Read CSS variables so chart colors follow the active theme.
+  function tc() {
+    const cs = getComputedStyle(document.documentElement);
+    const v  = (n, fb) => (cs.getPropertyValue(n).trim() || fb);
+    return {
+      text:  v('--text',   '#e8e6dc'),
+      muted: v('--muted',  '#8a8a9a'),
+      dim:   v('--dim',    '#5a5a6a'),
+      card:  v('--card',   '#12121a'),
+      grid:  v('--border', 'rgba(30,30,46,0.6)'),
+      gold:  v('--gold',   '#c9a84c'),
+      teal:  v('--teal',   '#00d4aa'),
+    };
+  }
+  // Re-render the active tab's chart when the theme flips.
+  window.addEventListener('site-theme-change', () => {
+    setTimeout(() => {
+      const chartActive   = document.getElementById('panel-chart')?.classList.contains('active');
+      const historyActive = document.getElementById('panel-history')?.classList.contains('active');
+      if (chartActive)   try { renderRRG(); }     catch (e) {}
+      if (historyActive) try { renderHistory(); } catch (e) {}
+    }, 30);
+  });
 
   function quadOf(r, m) {
     if (r >= 100 && m >= 100) return 'LEADING';
@@ -1192,21 +1258,21 @@
     const layout = {
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor:  'rgba(0,0,0,0)',
-      font: { color: '#e8e6dc', family: 'DM Mono', size: 10 },
+      font: { color: tc().text, family: 'DM Mono', size: 10 },
       margin: { l: 56, r: 26, t: 18, b: 56 },
       hoverlabel: {
-        bgcolor: '#12121a', bordercolor: '#c9a84c',
-        font: { color: '#e8e6dc', family: 'DM Mono', size: 11 },
+        bgcolor: tc().card, bordercolor: tc().gold,
+        font: { color: tc().text, family: 'DM Mono', size: 11 },
       },
       xaxis: {
-        title: { text: 'RS-RATIO →', font: { size: 10, color: '#8a8a9a' } },
-        range: xRange, gridcolor: 'rgba(30,30,46,0.6)', zeroline: false,
-        tickfont: { size: 9, color: '#5a5a6a' },
+        title: { text: 'RS-RATIO →', font: { size: 10, color: tc().muted } },
+        range: xRange, gridcolor: tc().grid, zeroline: false,
+        tickfont: { size: 9, color: tc().dim },
       },
       yaxis: {
-        title: { text: 'RS-MOMENTUM →', font: { size: 10, color: '#8a8a9a' } },
-        range: yRange, gridcolor: 'rgba(30,30,46,0.6)', zeroline: false,
-        tickfont: { size: 9, color: '#5a5a6a' },
+        title: { text: 'RS-MOMENTUM →', font: { size: 10, color: tc().muted } },
+        range: yRange, gridcolor: tc().grid, zeroline: false,
+        tickfont: { size: 9, color: tc().dim },
       },
       shapes: [
         { type: 'rect', x0: 100, x1: xRange[1], y0: 100, y1: yRange[1],
@@ -1345,22 +1411,22 @@
     }));
 
     const traces = [
-      { x: dates, y: ratios, name: 'RS-Ratio',    mode: 'lines', line: { color: '#00d4aa', width: 2 } },
-      { x: dates, y: moms,   name: 'RS-Momentum', mode: 'lines', line: { color: '#c9a84c', width: 2 } },
+      { x: dates, y: ratios, name: 'RS-Ratio',    mode: 'lines', line: { color: tc().teal, width: 2 } },
+      { x: dates, y: moms,   name: 'RS-Momentum', mode: 'lines', line: { color: tc().gold, width: 2 } },
     ];
     const layout = {
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor:  'rgba(0,0,0,0)',
-      font: { color: '#e8e6dc', family: 'DM Mono', size: 10 },
+      font: { color: tc().text, family: 'DM Mono', size: 10 },
       margin: { l: 56, r: 26, t: 32, b: 56 },
       hoverlabel: {
-        bgcolor: '#12121a', bordercolor: '#c9a84c',
-        font: { color: '#e8e6dc', family: 'DM Mono', size: 11 },
+        bgcolor: tc().card, bordercolor: tc().gold,
+        font: { color: tc().text, family: 'DM Mono', size: 11 },
       },
-      xaxis: { gridcolor: 'rgba(30,30,46,0.6)', tickfont: { size: 9, color: '#5a5a6a' } },
+      xaxis: { gridcolor: tc().grid, tickfont: { size: 9, color: tc().dim } },
       yaxis: {
-        gridcolor: 'rgba(30,30,46,0.6)', zeroline: false,
-        tickfont: { size: 9, color: '#5a5a6a' },
+        gridcolor: tc().grid, zeroline: false,
+        tickfont: { size: 9, color: tc().dim },
         range: (() => {
           const all = [...ratios, ...moms, 100];
           const lo = Math.min(...all), hi = Math.max(...all);
@@ -1374,7 +1440,7 @@
         ...transShapes,
       ],
       annotations: transAnnots,
-      legend: { orientation: 'h', y: -0.18, font: { size: 10, color: '#8a8a9a' } },
+      legend: { orientation: 'h', y: -0.18, font: { size: 10, color: tc().muted } },
     };
     Plotly.react('history-chart', traces, layout, { displaylogo: false, responsive: true });
 

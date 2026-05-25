@@ -1283,3 +1283,96 @@ footer {
   .gallery-photos { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .cert-grid { grid-template-columns: 1fr; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT MODE
+   Targets the my-portfolio.html surface (which uses style.css + inline styles
+   with hardcoded dark colors). The homepage stays dark — light mode is opt-in
+   per page via [data-theme="light"] on <html>.
+═══════════════════════════════════════════════════════════════════════════ */
+:root[data-theme="light"] {
+  --bg:          #f4efe1;          /* warm parchment */
+  --surface-1:   #fbf8ee;
+  --surface-2:   #ffffff;
+  --surface-3:   #f1ebda;
+  --gold:        #a8862c;
+  --gold-light:  #c9a84c;
+  --text:        #1f1c14;
+  --text-2:      rgba(31,28,20,0.62);
+}
+
+/* Soften the noise overlay on light surfaces */
+:root[data-theme="light"] body::before { opacity: 0.10; }
+
+/* Site-wide theme toggle button (top-right corner) */
+.theme-toggle {
+  position: fixed;
+  top: 24px; right: 60px;
+  z-index: 1100;
+  width: 38px; height: 38px;
+  border: 1px solid var(--gold);
+  background: rgba(201,168,76,0.06);
+  color: var(--gold);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background var(--transition), border-color var(--transition);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.theme-toggle:hover { background: rgba(201,168,76,0.16); }
+:root[data-theme="light"] .theme-toggle {
+  background: rgba(168,134,44,0.08);
+  border-color: var(--gold);
+}
+@media (max-width: 768px) {
+  .theme-toggle { top: 16px; right: 16px; width: 34px; height: 34px; }
+}
+
+/* ── my-portfolio.html overrides for light mode ────────────────────────────── */
+:root[data-theme="light"] .pf-hero {
+  background: radial-gradient(ellipse 80% 60% at 60% 30%, rgba(168,134,44,0.10) 0%, transparent 70%),
+              linear-gradient(160deg, #fbf8ee 0%, #f4efe1 100%);
+  border-bottom-color: rgba(168,134,44,0.22);
+}
+:root[data-theme="light"] .pf-hero-bg-num { color: rgba(168,134,44,0.10); }
+:root[data-theme="light"] .pf-card,
+:root[data-theme="light"] .pf-table-wrap,
+:root[data-theme="light"] .pf-perf {
+  background: rgba(168,134,44,0.05);
+  border-color: rgba(168,134,44,0.22);
+}
+:root[data-theme="light"] .pf-table thead th { background: rgba(168,134,44,0.10); }
+:root[data-theme="light"] .pf-table tbody tr { border-color: rgba(168,134,44,0.15); }
+:root[data-theme="light"] .pf-table tbody tr:hover { background: rgba(168,134,44,0.06); }
+:root[data-theme="light"] .pf-hero-eyebrow,
+:root[data-theme="light"] .pf-hero-sub,
+:root[data-theme="light"] .pf-section-eyebrow,
+:root[data-theme="light"] .pf-back { color: rgba(168,134,44,0.85); }
+:root[data-theme="light"] .pf-hero-stat-label,
+:root[data-theme="light"] .pf-table tbody td,
+:root[data-theme="light"] .pf-perf-label { color: rgba(31,28,20,0.78); }
+:root[data-theme="light"] .pf-tag {
+  color: rgba(168,134,44,0.95);
+  background: rgba(168,134,44,0.10);
+  border-color: rgba(168,134,44,0.28);
+}
+:root[data-theme="light"] .pf-perf .pf-perf-num.g { color: #0f7a3c; }
+:root[data-theme="light"] .pf-hero-stat-val.g     { color: #0f7a3c; }
+:root[data-theme="light"] .g                       { color: #0f7a3c !important; }
+:root[data-theme="light"] .pf-hero-stat-val.r,
+:root[data-theme="light"] .r                       { color: #b03030 !important; }
+
+/* Inline bar-fills inside the portfolio table — slightly muted for light mode */
+:root[data-theme="light"] .td-bar { background: rgba(31,28,20,0.08); }
+
+/* nav.scrolled blur — adapt for light */
+:root[data-theme="light"] nav.scrolled {
+  background: rgba(244,239,225,0.88);
+  border-bottom-color: rgba(168,134,44,0.28);
+}
+
+/* ── Disable custom cursor in light mode (it's optimized for dark photo bg) ── */
+:root[data-theme="light"] #cursor-dot,
+:root[data-theme="light"] #cursor-ring { display: none; }
+:root[data-theme="light"] body { cursor: auto; }
