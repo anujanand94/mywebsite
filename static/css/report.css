@@ -614,12 +614,13 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-ra
 /* Soften the grain on light surfaces */
 :root[data-theme="light"] body::before { opacity: 0.10; }
 
-/* Theme toggle button (small icon, top-right next to nav) */
+/* Theme toggle button — sits below the 62-px fixed nav so it never overlaps
+   the nav links (Portfolio, Contact, All Reports, …). */
 .theme-toggle {
   position: fixed;
-  top: 14px; right: 60px;
+  top: calc(var(--nav-h) + 18px); right: 32px;
   z-index: 1200;
-  width: 36px; height: 36px;
+  width: 38px; height: 38px;
   border: 1px solid var(--gold);
   background: var(--gold-dim);
   color: var(--gold);
@@ -629,10 +630,15 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-ra
   transition: background .25s var(--ease), border-color .25s var(--ease);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
 .theme-toggle:hover { background: var(--gold-glow-sm); }
+:root[data-theme="light"] .theme-toggle { box-shadow: 0 4px 12px rgba(80,60,20,0.10); }
 @media (max-width: 768px) {
-  .theme-toggle { top: 12px; right: 14px; width: 32px; height: 32px; }
+  .theme-toggle {
+    top: calc(var(--nav-h) + 12px); right: 14px;
+    width: 34px; height: 34px;
+  }
 }
 
 /* Inline-styled bg colors (rgba(8,8,8, …)) in the nav/scrolled bar */

@@ -1307,7 +1307,9 @@ footer {
 /* Site-wide theme toggle button (top-right corner) */
 .theme-toggle {
   position: fixed;
-  top: 24px; right: 60px;
+  /* Below the fixed nav (top: 36px + ~58px of padding+content) so it never
+     overlaps nav links. */
+  top: 116px; right: 32px;
   z-index: 1100;
   width: 38px; height: 38px;
   border: 1px solid var(--gold);
@@ -1316,17 +1318,19 @@ footer {
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer;
   border-radius: 50%;
-  transition: background var(--transition), border-color var(--transition);
+  transition: background var(--transition), border-color var(--transition), top var(--transition);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
 .theme-toggle:hover { background: rgba(201,168,76,0.16); }
 :root[data-theme="light"] .theme-toggle {
   background: rgba(168,134,44,0.08);
   border-color: var(--gold);
+  box-shadow: 0 4px 12px rgba(80,60,20,0.10);
 }
 @media (max-width: 768px) {
-  .theme-toggle { top: 16px; right: 16px; width: 34px; height: 34px; }
+  .theme-toggle { top: 88px; right: 16px; width: 34px; height: 34px; }
 }
 
 /* ── my-portfolio.html overrides for light mode ────────────────────────────── */
