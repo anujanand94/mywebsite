@@ -290,6 +290,171 @@
       .td-bar { width: 40px; }
       .ccy { font-size: 0.4rem; padding: 0px 3px; }
     }
+
+    /* ── Memo row hint ── */
+    .pf-table tbody tr { cursor: pointer; }
+    .td-memo-hint {
+      display: inline-block;
+      font-family: var(--font-body);
+      font-size: 0.46rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: transparent; transition: color 0.2s;
+      margin-left: 8px; vertical-align: middle;
+    }
+    .pf-table tbody tr:hover .td-memo-hint { color: rgba(201,168,76,0.65); }
+
+    /* ── Memo Overlay ── */
+    #memo-overlay {
+      position: fixed; inset: 0; z-index: 900;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    #memo-overlay.open { opacity: 1; pointer-events: auto; }
+
+    /* ── Memo Drawer ── */
+    #memo-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: min(680px, 100vw);
+      background: #0d0d0d;
+      border-left: 1px solid rgba(201,168,76,0.2);
+      z-index: 901; overflow-y: auto;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      display: flex; flex-direction: column;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201,168,76,0.15) transparent;
+    }
+    #memo-drawer.open { transform: translateX(0); }
+    #memo-drawer::-webkit-scrollbar { width: 4px; }
+    #memo-drawer::-webkit-scrollbar-track { background: transparent; }
+    #memo-drawer::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.15); border-radius: 2px; }
+
+    .memo-closebar {
+      position: sticky; top: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 28px;
+      background: rgba(13,13,13,0.97);
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+      backdrop-filter: blur(8px);
+      z-index: 2; flex-shrink: 0;
+    }
+    .memo-closebar-label {
+      font-family: var(--font-body);
+      font-size: 0.55rem; font-weight: 600;
+      letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--gold);
+    }
+    .memo-close-btn {
+      background: none; border: none;
+      color: rgba(244,239,230,0.4); font-size: 1.1rem;
+      cursor: pointer; padding: 4px 8px;
+      transition: color 0.2s; line-height: 1;
+    }
+    .memo-close-btn:hover { color: var(--gold); }
+
+    .memo-body { padding: 32px 28px 72px; flex: 1; }
+
+    .memo-ticker {
+      font-family: var(--font-display);
+      font-size: 2.8rem; font-weight: 600;
+      color: var(--text); letter-spacing: -0.02em; line-height: 1;
+    }
+    .memo-company {
+      font-family: var(--font-body);
+      font-size: 0.63rem; color: var(--text-2);
+      font-weight: 300; margin: 6px 0 14px; letter-spacing: 0.02em;
+    }
+    .memo-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .mbadge {
+      font-family: var(--font-body);
+      font-size: 0.47rem; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 2px;
+    }
+    .mbadge-high { background:rgba(201,168,76,0.15); color:var(--gold);             border:1px solid rgba(201,168,76,0.4); }
+    .mbadge-mh   { background:rgba(201,168,76,0.07); color:rgba(201,168,76,0.82);   border:1px solid rgba(201,168,76,0.22); }
+    .mbadge-med  { background:rgba(244,239,230,0.04); color:rgba(244,239,230,0.5);  border:1px solid rgba(244,239,230,0.14); }
+    .mbadge-low  { background:rgba(224,82,82,0.08); color:#e05252;                  border:1px solid rgba(224,82,82,0.3); }
+    .mbadge-exit { background:rgba(255,165,60,0.07); color:#e08440;                 border:1px solid rgba(255,165,60,0.28); }
+
+    .memo-stats-row {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 1px; background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.1);
+      margin: 20px 0 28px;
+    }
+    .memo-stat { background: rgba(201,168,76,0.025); padding: 14px 16px; }
+    .memo-stat-val {
+      font-family: var(--font-display);
+      font-size: 1.3rem; font-weight: 600;
+      color: var(--text); line-height: 1; margin-bottom: 4px;
+    }
+    .memo-stat-val.g { color: #4ec97a; }
+    .memo-stat-val.r { color: #e05252; }
+    .memo-stat-lbl {
+      font-family: var(--font-body);
+      font-size: 0.46rem; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-2);
+    }
+
+    .memo-divider { height:1px; background:rgba(201,168,76,0.08); margin:24px 0; }
+
+    .memo-section { margin-bottom: 26px; }
+    .memo-section-ttl {
+      font-family: var(--font-body);
+      font-size: 0.5rem; font-weight: 600;
+      letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .memo-section-ttl::after { content:''; flex:1; height:1px; background:rgba(201,168,76,0.1); }
+    .memo-section-body {
+      font-family: var(--font-body);
+      font-size: 0.7rem; color: rgba(244,239,230,0.72);
+      line-height: 1.85; font-weight: 300;
+    }
+    .memo-bullets { list-style:none; padding:0; margin:0; }
+    .memo-bullets li {
+      font-family: var(--font-body);
+      font-size: 0.7rem; color: rgba(244,239,230,0.72);
+      line-height: 1.85; font-weight: 300;
+      padding-left: 16px; position: relative; margin-bottom: 2px;
+    }
+    .memo-bullets li::before { content:'·'; position:absolute; left:0; color:var(--gold); }
+
+    .memo-radar {
+      background: rgba(255,165,60,0.035);
+      border: 1px solid rgba(255,165,60,0.15);
+      border-radius: 2px; padding: 20px; margin-top: 8px;
+    }
+    .memo-radar-ttl {
+      font-family: var(--font-body);
+      font-size: 0.48rem; font-weight: 600;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: #e08440; margin-bottom: 16px;
+    }
+    .radar-row { margin-bottom: 14px; }
+    .radar-row:last-child { margin-bottom: 0; }
+    .radar-t {
+      font-family: var(--font-body);
+      font-size: 0.63rem; font-weight: 600;
+      color: rgba(244,239,230,0.9); letter-spacing: 0.04em; margin-bottom: 3px;
+    }
+    .radar-d {
+      font-family: var(--font-body);
+      font-size: 0.63rem; color: rgba(244,239,230,0.48);
+      font-weight: 300; line-height: 1.65;
+    }
+
+    @media (max-width: 768px) {
+      #memo-drawer { width: 100vw; border-left: none; }
+      .memo-body { padding: 24px 20px 60px; }
+      .memo-ticker { font-size: 2.2rem; }
+      .memo-stats-row { grid-template-columns: repeat(2,1fr); }
+    }
   </style>
 </head>
 <body>
@@ -494,6 +659,18 @@
 
 </div>
 
+<!-- ═══ MEMO OVERLAY ═══ -->
+<div id="memo-overlay"></div>
+
+<!-- ═══ MEMO DRAWER ═══ -->
+<aside id="memo-drawer" role="dialog" aria-modal="true" aria-label="Investment Memo">
+  <div class="memo-closebar">
+    <span class="memo-closebar-label">Investment Memo</span>
+    <button class="memo-close-btn" id="memo-close-btn" aria-label="Close">&#x2715;</button>
+  </div>
+  <div class="memo-body" id="memo-body"></div>
+</aside>
+
 <script src="static/js/main.js"></script>
 
 <script>
@@ -570,6 +747,590 @@
       rows.forEach(row => tbody.appendChild(row));
     });
   });
+})();
+</script>
+
+
+<script>
+/* ═══ INVESTMENT MEMO DRAWER ═══ */
+(function initMemoDrawer() {
+
+  /* ── Memo data for all 10 holdings ── */
+  const MEMOS = {
+
+    'BIP.UN': {
+      name: 'Brookfield Infrastructure Partners L.P.',
+      exchange: 'TSX · CAD',
+      conviction: 'Medium-High',
+      convClass: 'mh',
+      status: null,
+      cost: '~$50.11 CAD',
+      ret: '+8.6%',
+      retDir: 'g',
+      sections: [
+        {
+          t: 'Investment Thesis',
+          b: `Brookfield Infrastructure Partners owns a globally diversified portfolio of infrastructure assets spanning utilities, transport, midstream energy, and data. The thesis rests on two durable structural trends: the AI data center buildout and long-term infrastructure scarcity. As hyperscalers race to add compute capacity, BIP stands to benefit directly through its growing data center segment. Contracted, inflation-linked cash flows provide downside protection, and interest rate normalization should re-rate the unit price higher over time.`
+        },
+        {
+          t: 'Competitive Moat',
+          list: [
+            'Brookfield brand and global sourcing advantages in acquiring infrastructure assets at scale',
+            'Long-term contracted cash flows with inflation escalators reduce earnings volatility',
+            'Diversification across asset classes and geographies limits single-sector risk',
+            'Regulated return profile on utilities and midstream assets provides predictable distributions'
+          ]
+        },
+        {
+          t: 'Key Catalysts',
+          list: [
+            'AI data center expansion driving incremental demand for digital infrastructure assets',
+            'Interest rate cuts reducing cost of capital and re-rating yield-oriented infrastructure',
+            'Continued asset recycling at higher multiples than acquisition cost',
+            'Growth in renewables and energy transition infrastructure globally'
+          ]
+        },
+        {
+          t: 'Key Risks',
+          list: [
+            'High leverage typical of infrastructure assets amplifies interest rate sensitivity',
+            'Distribution sustainability depends on cash flow from underlying assets',
+            'Geopolitical risk across multi-country asset base',
+            'Slower-than-expected AI infrastructure buildout could delay digital segment growth'
+          ]
+        },
+        {
+          t: 'Conviction Note',
+          b: `Medium-High. AI data center infrastructure is a structural tailwind that benefits BIP directly. The yield profile and contracted cash flow base make this a core infrastructure hold. Would add on meaningful pullbacks.`
+        }
+      ]
+    },
+
+    'CMI': {
+      name: 'Cummins Inc.',
+      exchange: 'NYSE · USD',
+      conviction: 'High',
+      convClass: 'high',
+      status: null,
+      cost: '~$395 USD',
+      ret: '+67.5%',
+      retDir: 'g',
+      sections: [
+        {
+          t: 'Investment Thesis',
+          b: `Cummins is the world leader in diesel and alternative-power engines for commercial vehicles, industrial equipment, and power generation. The thesis is built around exceptional industrial products growth combined with a long-term pivot toward hydrogen and clean power. Cummins is not just a legacy diesel company. It is actively repositioning as a hydrogen economy enabler through its Accelera zero-emissions segment. The freight cycle recovery and reshoring of North American industrial capacity add near-term tailwinds on top of the long-term structural story.`
+        },
+        {
+          t: 'Competitive Moat',
+          list: [
+            'Market-leading brand and distribution network across 190 countries',
+            'Deep OEM relationships with truck and equipment manufacturers lock in recurring demand',
+            'Heavy investment in hydrogen fuel cell and electrolyzer technology positions for the next energy cycle',
+            'Spun off Atmus Filtration to unlock value and sharpen focus on core powertrains'
+          ]
+        },
+        {
+          t: 'Key Catalysts',
+          list: [
+            'Freight cycle recovery driving replacement demand for Class 8 truck engines',
+            'North American reshoring and industrial capital expenditure expansion',
+            'Hydrogen infrastructure buildout creating demand for Accelera fuel cells and electrolyzers',
+            'Share buybacks and dividend growth supporting shareholder returns'
+          ]
+        },
+        {
+          t: 'Key Risks',
+          list: [
+            'Long-term electrification of heavy trucks could shrink diesel engine addressable market',
+            'Tariffs on imported industrial components could compress margins',
+            'Cyclical freight downturn reducing near-term engine orders',
+            'Hydrogen economy slower to scale than projected'
+          ]
+        },
+        {
+          t: 'Conviction Note',
+          b: `High. This is the top performer in the portfolio at +67.5% and the thesis remains fully intact. Industrial products growth has been robust and the hydrogen transition positioning is underappreciated by the market. No plans to trim.`
+        }
+      ]
+    },
+
+    'CRM': {
+      name: 'Salesforce CDR (CAD Hedged)',
+      exchange: 'TSX · CAD (CDR)',
+      conviction: 'High',
+      convClass: 'high',
+      status: null,
+      cost: '~$12.97 CAD',
+      ret: '+6.2%',
+      retDir: 'g',
+      sections: [
+        {
+          t: 'Investment Thesis',
+          b: `Salesforce was punished by the market on fears that AI would commoditize CRM software and erode switching costs. That thesis is too simplistic. Enterprise CRM is deeply embedded in business workflows, and replacing Salesforce involves years of data migration, retraining, and integration work. Meanwhile, Salesforce is leaning into AI through its Agentforce platform, which turns the AI threat into an upsell opportunity. Management has also demonstrated capital discipline with aggressive buybacks. Earnings remain strong.`
+        },
+        {
+          t: 'Competitive Moat',
+          list: [
+            'Dominant position in enterprise CRM with deep workflow integrations across sales, service, and marketing clouds',
+            'High switching costs from years of data accumulation and custom workflow configurations',
+            'Agentforce AI platform converts the AI disruption narrative into a revenue upsell opportunity',
+            'Large and growing ecosystem of partners and ISVs increases platform stickiness'
+          ]
+        },
+        {
+          t: 'Key Catalysts',
+          list: [
+            'Agentforce AI agent adoption driving incremental seat revenue and upsell',
+            'Ongoing buyback program reducing share count and supporting EPS growth',
+            'Enterprise software spending recovery as IT budgets normalize post-cycle',
+            'CDR CAD hedge removes USD currency drag for Canadian investors'
+          ]
+        },
+        {
+          t: 'Key Risks',
+          list: [
+            'Microsoft Dynamics and HubSpot competition intensifying in the mid-market',
+            'If AI enables point solutions to replace Salesforce modules, switching costs erode',
+            'Revenue growth decelerating from pandemic-era highs',
+            'CDR wrapper introduces counterparty and tracking risks vs. direct equity ownership'
+          ]
+        },
+        {
+          t: 'Conviction Note',
+          b: `High. The AI disruption fear was overdone. Salesforce is using AI as a growth lever, not capitulating to it. Earnings are solid and management is returning capital aggressively. This is a core holding with room to add.`
+        }
+      ]
+    },
+
+    'CSU': {
+      name: 'Constellation Software Inc.',
+      exchange: 'TSX · CAD',
+      conviction: 'Medium',
+      convClass: 'med',
+      status: null,
+      cost: '~$4,232 CAD',
+      ret: '-35.4%',
+      retDir: 'r',
+      sections: [
+        {
+          t: 'Investment Thesis',
+          b: `Constellation Software is a serial acquirer of vertical market software businesses. Each acquisition targets a niche market where Constellation can be the dominant provider with limited competition. The thesis is that enterprise software serving government agencies, healthcare workflows, and industry-specific operations is genuinely sticky. These are not applications AI can easily replace. A hospital scheduling system or a niche municipal software suite built over decades has deep regulatory and operational integration. AI will augment these tools over time, not displace them quickly. The software they acquire is too embedded to be replaced by whatever AI launches next.`
+        },
+        {
+          t: 'Competitive Moat',
+          list: [
+            'Decentralized acquisition model allows capital-efficient compounding across thousands of VMS niches',
+            'Vertical market software is often the sole provider in its niche, giving real pricing power',
+            'Long customer relationships and mission-critical status make switching extremely costly',
+            'Lumine Group and other subsidiaries replicate the model internationally, expanding the flywheel'
+          ]
+        },
+        {
+          t: 'Key Catalysts',
+          list: [
+            'Continued acquisition pipeline execution across global VMS markets',
+            'Lumine Group international expansion adding a second compounding vehicle',
+            'Free cash flow generation supporting accretive acquisitions without dilution',
+            'Potential re-rating if the market recognizes the AI resilience of niche VMS software'
+          ]
+        },
+        {
+          t: 'Key Risks',
+          list: [
+            'Valuation remains elevated even after the drawdown, limiting the margin of safety',
+            'AI-native vertical solutions could gradually encroach on legacy VMS niches over a long horizon',
+            'Acquisition pipeline could thin as competition for small software businesses intensifies',
+            'Succession and key-person risk from founder Mark Leonard'
+          ]
+        },
+        {
+          t: 'Conviction Note',
+          b: `Medium. The business model is exceptional and the compounding track record is among the best in Canadian markets. The position is underwater at -35% and the thesis remains valid. Monitoring closely. Not adding until valuation becomes more compelling.`
+        }
+      ]
+    },
+
+    'FDS': {
+      name: 'FactSet Research Systems Inc.',
+      exchange: 'NASDAQ · USD',
+      conviction: 'Medium-High',
+      convClass: 'mh',
+      status: null,
+      cost: '~$231 USD',
+      ret: '+4.4%',
+      retDir: 'g',
+      sections: [
+        {
+          t: 'Investment Thesis',
+          b: `FactSet shares the same core thesis as Salesforce in this portfolio: the company was punished on AI fears that are overstated. FactSet provides financial data, analytics, and workflow tools to buy-side and sell-side institutions. These are deeply embedded in analyst workstations. Switching from FactSet involves migrating models, templates, and years of institutional data. Management has responded to the AI threat by integrating AI directly into the platform while maintaining buyback discipline. Earnings and free cash flow remain strong. The market is pricing in disruption that has not materialized.`
+        },
+        {
+          t: 'Competitive Moat',
+          list: [
+            'Integrated financial data platform embedded into analyst workstations globally',
+            'High switching costs from institutional model templates, data feeds, and trained workflows',
+            'Differentiated content including private company data, earnings estimates, and ESG datasets',
+            'Buy-side client base is stickier than sell-side, providing recurring subscription revenue'
+          ]
+        },
+        {
+          t: 'Key Catalysts',
+          list: [
+            'Buy-side hiring recovery driving new seat additions after years of portfolio manager cuts',
+            'AI-native product features turning the disruption narrative into an upsell opportunity',
+            'Buyback program compressing share count and supporting EPS growth',
+            'International expansion of institutional client base'
+          ]
+        },
+        {
+          t: 'Key Risks',
+          list: [
+            'Bloomberg and Refinitiv (LSEG) have deeper data moats and larger installed bases',
+            'AI tools that aggregate financial data could commoditize parts of the FactSet offering',
+            'Buy-side asset manager consolidation reducing the total addressable market for seats',
+            'Slower professional hiring cycle could delay seat growth recovery'
+          ]
+        },
+        {
+          t: 'Conviction Note',
+          b: `Medium-High. The AI disruption discount embedded in the price is an opportunity. Financial data platforms with high switching costs are durable businesses. Expecting a re-rating as AI integration matures and earnings growth reaccelerates.`
+        }
+      ]
+    },
+
+    'HCA': {
+      name: 'HCA Healthcare Inc.',
+      exchange: 'NYSE · USD',
+      conviction: 'Medium',
+      convClass: 'med',
+      status: null,
+      cost: '~$527 USD',
+      ret: '-27.0%',
+      retDir: 'r',
+      sections: [
+        {
+          t: 'Investment Thesis',
+          b: `HCA Healthcare is the largest for-profit hospital operator in the United States. The position was initiated on the view that the company was underpriced relative to its earnings power due to negative market sentiment around Medicaid reimbursement policy and broader healthcare uncertainty. HCA generates strong free cash flow from its hospital network and has a consistent track record of returning capital through buybacks. The fundamental earnings quality is good. The market sold the stock on policy fear rather than operational deterioration.`
+        },
+        {
+          t: 'Competitive Moat',
+          list: [
+            'Largest for-profit hospital network in the US with scale advantages in purchasing, staffing, and technology',
+            'Significant capital requirements and regulatory barriers limit new hospital competition',
+            'Strong presence in fast-growing Sun Belt markets with favorable demographic tailwinds',
+            'Consistent free cash flow enables aggressive share repurchases, compounding per-share value'
+          ]
+        },
+        {
+          t: 'Key Catalysts',
+          list: [
+            'Medicaid policy clarity reducing the headline risk that drove the drawdown',
+            'Healthcare utilization normalization following post-pandemic disruptions',
+            'Sun Belt population growth driving organic volume increases in key markets',
+            'Share buybacks at depressed prices increasing per-share intrinsic value'
+          ]
+        },
+        {
+          t: 'Key Risks',
+          list: [
+            'Medicaid reimbursement cuts under current US policy directly reduce HCA revenue',
+            'Payer mix deterioration if the insured patient proportion declines',
+            'Labor cost inflation in hospital staffing compressing operating margins',
+            'Regulatory changes to hospital billing and reimbursement structures'
+          ]
+        },
+        {
+          t: 'Conviction Note',
+          b: `Medium. The fundamental business is sound but the policy environment creates real near-term risk. The thesis is a sentiment recovery once Medicaid policy becomes clearer. Watching closely. Not adding at current conviction level.`
+        }
+      ]
+    },
+
+    'IDCC': {
+      name: 'InterDigital Inc.',
+      exchange: 'NASDAQ · USD',
+      conviction: 'Low',
+      convClass: 'low',
+      status: 'Closing Position',
+      cost: '~$354 USD',
+      ret: '-27.7%',
+      retDir: 'r',
+      sections: [
+        {
+          t: 'Original Thesis',
+          b: `InterDigital was purchased on the thesis that the company represented an underappreciated AI codec play. InterDigital acquired a small AI company focused on building next-generation video codec technology. The bet was that AI-powered video compression would become critical infrastructure for streaming and video delivery, and that InterDigital's patent licensing model would monetize this through royalty streams layered on top of its existing wireless technology licensing business.`
+        },
+        {
+          t: 'Why the Thesis Failed',
+          list: [
+            'The AI codec thesis has not materialized into meaningful revenue or market recognition',
+            'Core wireless patent licensing revenue depends on renewal deal timing, creating earnings lumpiness',
+            'The company lacks the scale and distribution to compete with established codec consortium players',
+            'Management has not provided clear milestones on the AI codec strategy that allow tracking progress',
+            'At -27.7%, the position has destroyed capital without the original thesis developing'
+          ]
+        },
+        {
+          t: 'Exit Rationale',
+          b: `Low conviction and a failed original thesis justify exiting this position. Capital recycled from IDCC will be redeployed into a higher-conviction infrastructure or utility position where the thesis is clearer and the business model is more durable. Remaining in a position with a broken thesis compounds the opportunity cost of not owning better businesses.`
+        }
+      ],
+      radar: [
+        {
+          t: 'ENB — Enbridge Inc.',
+          d: 'North American pipeline and natural gas distribution. Regulated return profile, 7%+ dividend yield, and a massive LNG terminal buildout underway. Long-term contracted cash flows with inflation escalators.'
+        },
+        {
+          t: 'TRP — TC Energy Corp.',
+          d: 'Canadian and US natural gas pipelines. Recently completed NGTL system expansion. Dividend growth story with a clean energy transition component through Bruce Power nuclear partnership.'
+        },
+        {
+          t: 'AWK — American Water Works',
+          d: 'Largest US regulated water utility. Monopoly infrastructure, steady rate increases approved by regulators, recession-proof demand. Arguably the highest-quality pure-play utility in North America.'
+        },
+        {
+          t: 'ATO — Atmos Energy Corp.',
+          d: 'Largest pure-play natural gas distribution utility in the US. Rate base growth through infrastructure replacement drives consistent 6-8% EPS growth annually. Lower regulatory risk than electric utilities.'
+        }
+      ]
+    },
+
+    'TIH': {
+      name: 'Toromont Industries Ltd.',
+      exchange: 'TSX · CAD',
+      conviction: 'Medium',
+      convClass: 'med',
+      status: 'Planned Exit',
+      cost: '~$141 CAD',
+      ret: '+60.6%',
+      retDir: 'g',
+      sections: [
+        {
+          t: 'Investment Thesis',
+          b: `Toromont is the exclusive Caterpillar equipment dealer for Ontario, Manitoba, and large parts of Atlantic Canada. The original thesis was straightforward: a high-quality, capital-light distribution business with long-term CAT dealership exclusivity, recurring parts and service revenue, and strong free cash flow generation. The business has performed well and the position has returned +60.6% since purchase. The planned exit is not driven by business deterioration but by portfolio reallocation into a higher-conviction infrastructure or utility position.`
+        },
+        {
+          t: 'Why Planned Exit',
+          list: [
+            'Position has delivered strong returns and the original price appreciation thesis has largely played out',
+            'Capital can be recycled at a gain into a utility or infrastructure position with a clearer multi-year catalyst',
+            'Exposure to capital equipment cycles creates more earnings variability than a regulated utility',
+            'Portfolio already has industrial exposure through CMI, creating sector concentration'
+          ]
+        },
+        {
+          t: 'Business Quality Note',
+          b: `Toromont is an excellent business. This exit is purely a portfolio construction decision, not a negative view on the company. The CAT dealership model with recurring parts and service revenue is highly defensible. Any investor looking for Canadian industrial exposure should consider it seriously.`
+        }
+      ],
+      radar: [
+        {
+          t: 'ENB — Enbridge Inc.',
+          d: 'North American pipeline and natural gas distribution. Regulated return profile, 7%+ dividend yield, and a massive LNG terminal buildout underway. Long-term contracted cash flows with inflation escalators.'
+        },
+        {
+          t: 'TRP — TC Energy Corp.',
+          d: 'Canadian and US natural gas pipelines. Recently completed NGTL system expansion. Dividend growth story with a clean energy transition component through Bruce Power nuclear partnership.'
+        },
+        {
+          t: 'AWK — American Water Works',
+          d: 'Largest US regulated water utility. Monopoly infrastructure, steady rate increases approved by regulators, recession-proof demand. Arguably the highest-quality pure-play utility in North America.'
+        },
+        {
+          t: 'ATO — Atmos Energy Corp.',
+          d: 'Largest pure-play natural gas distribution utility in the US. Rate base growth through infrastructure replacement drives consistent 6-8% EPS growth annually. Lower regulatory risk than electric utilities.'
+        }
+      ]
+    },
+
+    'TTD': {
+      name: 'The Trade Desk Inc.',
+      exchange: 'NASDAQ · USD',
+      conviction: 'Medium',
+      convClass: 'med',
+      status: null,
+      cost: '~$20.00 USD',
+      ret: '+7.0%',
+      retDir: 'g',
+      sections: [
+        {
+          t: 'Investment Thesis',
+          b: `The Trade Desk was sold off heavily on fears that AI-generated content and walled garden platforms would eliminate the need for independent programmatic advertising. The counter-thesis is that the overall digital advertising market is clearly growing. Google, Meta, and Amazon are all reporting strong ad revenue, which signals advertiser budgets are expanding, not contracting. The Trade Desk is the largest independent demand-side platform and benefits directly from advertisers who want to diversify spend away from Google and Meta. The CTV advertising opportunity in streaming is material and still underpenetrated. Active reports of OpenAI discussions about building an ad-supported tier represent a meaningful potential catalyst for neutral programmatic inventory.`
+        },
+        {
+          t: 'Competitive Moat',
+          list: [
+            'Independent DSP positioning appeals to advertisers who want to avoid the Google walled garden',
+            'Unified ID 2.0 initiative positions TTD as a privacy-first identity solution for cookieless targeting',
+            'CTV advertising platform with direct integrations to major streaming services',
+            'Open internet access and data partnerships distinguish TTD from closed platform competitors'
+          ]
+        },
+        {
+          t: 'Key Catalysts',
+          list: [
+            'OpenAI ad-supported model launch creating new programmatic inventory on the open internet',
+            'CTV advertising shift from linear TV as cord-cutting accelerates globally',
+            'Earnings recovery after multiple quarters of investor disappointment resetting expectations low',
+            'Advertiser diversification away from Google and Meta increasing open internet spend share'
+          ]
+        },
+        {
+          t: 'Key Risks',
+          list: [
+            'Google and Meta continue to dominate digital ad budgets, limiting TTD share gains',
+            'AI-targeted advertising could reduce the need for programmatic platforms in the long run',
+            'If streaming platforms build proprietary ad tech stacks, TTD loses access to premium CTV inventory',
+            'OpenAI ad network may keep advertising in-house rather than route through TTD'
+          ]
+        },
+        {
+          t: 'Conviction Note',
+          b: `Medium. The thesis is contrarian and depends on the open internet ad market growing and TTD capturing share from Google and Meta. The OpenAI catalyst is speculative but meaningful if it materializes. Watching earnings closely for signs of reacceleration before adding.`
+        }
+      ]
+    },
+
+    'UNH': {
+      name: 'UnitedHealth Group Inc.',
+      exchange: 'NYSE · USD',
+      conviction: 'Medium-High',
+      convClass: 'mh',
+      status: null,
+      cost: '~$303 USD',
+      ret: '+26.6%',
+      retDir: 'g',
+      sections: [
+        {
+          t: 'Investment Thesis',
+          b: `UnitedHealth Group was acquired at a meaningful discount to intrinsic value after the stock was punished by extraordinary negative market sentiment in late 2024. The thesis was direct: the market oversold a fundamentally strong business on sentiment. UnitedHealth is the largest diversified health insurer in the United States, generating substantial free cash flow through its UnitedHealthcare insurance arm and its fast-growing Optum health services platform. The core earnings power of the business was not impaired by the events that drove the selloff. The position has already returned +26.6%, with further recovery likely.`
+        },
+        {
+          t: 'Competitive Moat',
+          list: [
+            'Largest US health insurer by membership with 50 million-plus covered lives creating network leverage',
+            'Optum health services (pharmacy benefits, care delivery, data analytics) creates vertical integration competitors cannot replicate quickly',
+            'Scale advantages in medical cost management, technology investment, and administrative efficiency',
+            'Massive distribution network across government programs (Medicare, Medicaid) and employer markets'
+          ]
+        },
+        {
+          t: 'Key Catalysts',
+          list: [
+            'Normalization of sentiment as the extraordinary negative news cycle fades from investor memory',
+            'Optum continued growth in care delivery and data analytics adding revenue diversification',
+            'Medicare Advantage enrollment growth as US demographics age into eligibility',
+            'Continued share buybacks and dividend growth supporting per-share value compounding'
+          ]
+        },
+        {
+          t: 'Key Risks',
+          list: [
+            'Government healthcare policy changes to Medicare Advantage reimbursement rates',
+            'Regulatory scrutiny of health insurer practices increasing compliance costs',
+            'Medical cost ratio creep reducing insurance segment profitability',
+            'Reputational risk from late 2024 events has not fully normalized with the general public'
+          ]
+        },
+        {
+          t: 'Conviction Note',
+          b: `Medium-High. The thesis has partially played out with a strong recovery from the purchase price. The business fundamentals remain excellent and Optum is a secular growth engine within a healthcare giant. Holding for continued recovery and long-term earnings compounding.`
+        }
+      ]
+    }
+
+  }; // end MEMOS
+
+  /* ── DOM references ── */
+  const overlay       = document.getElementById('memo-overlay');
+  const drawer        = document.getElementById('memo-drawer');
+  const memoBody      = document.getElementById('memo-body');
+  const closeBtn      = document.getElementById('memo-close-btn');
+  const closebarLabel = document.querySelector('.memo-closebar-label');
+
+  /* ── Open ── */
+  function openMemo(ticker) {
+    const m = MEMOS[ticker];
+    if (!m || !memoBody) return;
+
+    if (closebarLabel) closebarLabel.textContent = ticker + ' · Investment Memo';
+
+    let html = '';
+
+    // Header
+    html += `<div class="memo-ticker">${ticker}</div>`;
+    html += `<div class="memo-company">${m.name}</div>`;
+    html += `<div class="memo-badges">`;
+    html += `<span class="mbadge mbadge-${m.convClass}">Conviction: ${m.conviction}</span>`;
+    if (m.status) html += `<span class="mbadge mbadge-exit">${m.status}</span>`;
+    html += `</div>`;
+
+    // Stats row
+    html += `<div class="memo-stats-row">`;
+    html += `<div class="memo-stat"><div class="memo-stat-val">${m.cost}</div><div class="memo-stat-lbl">Avg Cost</div></div>`;
+    html += `<div class="memo-stat"><div class="memo-stat-val ${m.retDir}">${m.ret}</div><div class="memo-stat-lbl">Total Return</div></div>`;
+    html += `<div class="memo-stat"><div class="memo-stat-val" style="font-size:0.85rem;padding-top:4px;">${m.exchange}</div><div class="memo-stat-lbl">Exchange</div></div>`;
+    html += `</div>`;
+
+    // Sections
+    m.sections.forEach(sec => {
+      html += `<div class="memo-section">`;
+      html += `<div class="memo-section-ttl">${sec.t}</div>`;
+      if (sec.b) html += `<div class="memo-section-body">${sec.b}</div>`;
+      if (sec.list) {
+        html += `<ul class="memo-bullets">`;
+        sec.list.forEach(item => { html += `<li>${item}</li>`; });
+        html += `</ul>`;
+      }
+      html += `</div>`;
+    });
+
+    // Replacement radar
+    if (m.radar) {
+      html += `<div class="memo-divider"></div>`;
+      html += `<div class="memo-section">`;
+      html += `<div class="memo-section-ttl">Replacement Radar</div>`;
+      html += `<div class="memo-radar">`;
+      html += `<div class="memo-radar-ttl">Candidates to replace this position</div>`;
+      m.radar.forEach(r => {
+        html += `<div class="radar-row"><div class="radar-t">${r.t}</div><div class="radar-d">${r.d}</div></div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    memoBody.innerHTML = html;
+    drawer.scrollTop = 0;
+    overlay.classList.add('open');
+    drawer.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  /* ── Close ── */
+  function closeMemo() {
+    overlay.classList.remove('open');
+    drawer.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  /* ── Event listeners ── */
+  if (overlay) overlay.addEventListener('click', closeMemo);
+  if (closeBtn) closeBtn.addEventListener('click', closeMemo);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMemo(); });
+
+  /* ── Wire table rows ── */
+  document.querySelectorAll('.pf-table tbody tr').forEach(row => {
+    const symEl = row.querySelector('.td-sym');
+    if (!symEl) return;
+    const ticker = symEl.textContent.trim();
+    if (!MEMOS[ticker]) return;
+    // Add hover hint span
+    const hint = document.createElement('span');
+    hint.className = 'td-memo-hint';
+    hint.textContent = 'View Memo';
+    symEl.appendChild(hint);
+    row.addEventListener('click', () => openMemo(ticker));
+  });
+
 })();
 </script>
 
