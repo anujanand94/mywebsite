@@ -366,6 +366,14 @@ def update_index_html(pf_ytd, count):
         f'{ytd_s} YTD · {count} Holdings',
         html,
     )
+    # 5) About-section highlight-num — pinned to the "Personal Portfolio · YTD Return"
+    #    label so we never accidentally overwrite the "Top 10", "4.0", or "9"
+    #    highlights next to it.
+    html = re.sub(
+        r'(<div class="highlight-num">)[+\-−\d.]+%(</div>\s*<div class="highlight-label">Personal Portfolio · YTD Return</div>)',
+        rf'\g<1>{ytd_s}\g<2>',
+        html,
+    )
 
     with open(INDEX_HTML, "w", encoding="utf-8") as f:
         f.write(html)
