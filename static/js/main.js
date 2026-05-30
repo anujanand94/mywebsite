@@ -180,7 +180,7 @@
   const holdings = [
     { sym: 'BIP.UN', day: -1.05 },
     { sym: 'CMI',    day: -3.30 },
-    { sym: 'CRM',    day: 7.87 },
+    { sym: 'CRM',    day: 7.57 },
     { sym: 'CSU',    day: 2.56 },
     { sym: 'FDS',    day: 2.71 },
     { sym: 'HCA',    day: -1.65 },
