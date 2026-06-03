@@ -257,22 +257,65 @@ def render(data):
 
 
 # ── Main ────────────────────────────────────────────────────────────────────
+def _load_existing_payload(country):
+    """Pull a previously-saved country payload back out of yield-curve.html.
+    Used as a fallback when today's upstream fetch returns nothing — so an
+    API outage (e.g. FRED 504) can never wipe a working country off the page."""
+    if not os.path.exists(OUTPUT_HTML):
+        return None
+    try:
+        import re as _re
+        with open(OUTPUT_HTML, encoding="utf-8") as f:
+            html = f.read()
+        m = _re.search(r'<script id="yc-data" type="application/json">(.*?)</script>',
+                       html, _re.DOTALL)
+        if not m:
+            return None
+        d = json.loads(m.group(1))
+        p = d.get("countries", {}).get(country)
+        if p and p.get("n_dates", 0) > 0:
+            return p
+    except Exception as e:
+        print(f"  (could not read existing payload for {country}: {e})")
+    return None
+
+
 def main():
     us_dates, us_per_tenor = fetch_us()
     ca_dates, ca_per_tenor = fetch_ca()
 
-    if not us_dates and not ca_dates:
-        print("ERROR: both US and Canada fetches returned no data — aborting.")
+    # Build fresh payloads, then fall back to last-known-good for any country
+    # whose upstream fetch came back empty (FRED 504, BoC outage, etc).
+    us_payload = build_country_payload(us_dates, us_per_tenor)
+    ca_payload = build_country_payload(ca_dates, ca_per_tenor)
+
+    if us_payload["n_dates"] == 0:
+        prev = _load_existing_payload("US")
+        if prev:
+            print("⚠ US fetch returned no data — keeping previously deployed payload "
+                  f"({prev.get('n_dates')} rows, last={prev.get('last_date')}).")
+            us_payload = prev
+        else:
+            print("⚠ US fetch returned no data and no prior payload available.")
+    if ca_payload["n_dates"] == 0:
+        prev = _load_existing_payload("CA")
+        if prev:
+            print("⚠ Canada fetch returned no data — keeping previously deployed payload "
+                  f"({prev.get('n_dates')} rows, last={prev.get('last_date')}).")
+            ca_payload = prev
+        else:
+            print("⚠ Canada fetch returned no data and no prior payload available.")
+
+    if us_payload["n_dates"] == 0 and ca_payload["n_dates"] == 0:
+        print("ERROR: both US and Canada have no data (live + cached) — "
+              "refusing to overwrite yield-curve.html with an empty page.")
         sys.exit(1)
 
     data = {
         "last_updated": date.today().isoformat(),
         "tenor_order": TENOR_ORDER,
         "tenor_years": {t: round(TENOR_YEARS[t], 4) for t in TENOR_ORDER},
-        "countries": {
-            "US": build_country_payload(us_dates, us_per_tenor),
-            "CA": build_country_payload(ca_dates, ca_per_tenor),
-        },
+        "countries": {"US": us_payload, "CA": ca_payload},
     }
 
     html = render(data)
