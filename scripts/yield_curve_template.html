@@ -1011,6 +1011,10 @@
     const layout = baseLayout({
       scene: {
         bgcolor: cssVar('--ink'),
+        // uirevision keeps the user's manual rotation/zoom intact when
+        // data changes (e.g. while the play button is animating).  The
+        // string is constant so Plotly never resets the camera.
+        uirevision: 'yield-surface',
         xaxis: { title: { text: 'Tenor', font: { color: cssVar('--gold') } },
                  type: 'log',
                  autorange: 'reversed',
@@ -1028,7 +1032,17 @@
                  gridcolor: cssVar('--hairline-faint'),
                  backgroundcolor: cssVar('--ink'),
                  color: cssVar('--dim') },
-        camera: { eye: { x: 1.55, y: -1.85, z: 0.85 } },
+        // Frontal-ish camera matching the angle in the reference screenshot:
+        //   yield axis squarely on the left
+        //   date axis sweeping from foreground to back-right
+        //   tenor running across the front
+        // Lower elevation than before so the curve reads more like a fabric
+        // drape than a peaked mountain range.
+        camera: {
+          eye:    { x: 1.45, y: -1.50, z: 0.55 },
+          center: { x: 0, y: 0, z: -0.05 },
+          up:     { x: 0, y: 0, z: 1 },
+        },
       },
       margin: { l: 0, r: 0, t: 0, b: 0 },
     });
