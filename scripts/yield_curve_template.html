@@ -323,7 +323,8 @@
   /* ---------- Yield ramp legend ---------- */
   .ramp { height: 12px; border: 1px solid var(--hairline);
           background: linear-gradient(to right,
-            #0a1f2e 0%, #1f5468 28%, #c9a84c 55%, #c44a62 78%, #fbe8e6 100%); }
+            #7f1d1d 0%, #dc2626 30%, #a8a29e 40%,
+            #7dd3fc 50%, #38bdf8 70%, #34d399 100%); }
   .ramp-ticks { display: flex; justify-content: space-between; margin-top: 6px;
                 font-size: 10px; color: var(--dim); font-variant-numeric: tabular-nums; }
 
@@ -522,11 +523,17 @@
           <div class="panel">
             <div class="panel-body">
               <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
-                <span class="upper">Yield Colour Ramp</span>
+                <span class="upper">Curve Slope · 2s10s</span>
                 <span style="font-size:9.5px;color:var(--very-dim)">%</span>
               </div>
               <div class="ramp"></div>
-              <div class="ramp-ticks"><span>0</span><span>4</span><span>8</span><span>12</span><span>16+</span></div>
+              <div class="ramp-ticks"><span>−2</span><span>−0.5</span><span>0</span><span>+0.5</span><span>+1.5</span><span>+3</span></div>
+              <div style="margin-top:8px;font-size:10px;color:var(--very-dim);letter-spacing:0.04em;line-height:1.4">
+                <span style="color:#dc2626">Red</span> = inverted ·
+                <span style="color:#a8a29e">Gray</span> = flat ·
+                <span style="color:#7dd3fc">Blue</span> = normal ·
+                <span style="color:#34d399">Green</span> = steep
+              </div>
             </div>
           </div>
 
@@ -739,15 +746,21 @@
 
   function cssVar(n) { return getComputedStyle(html).getPropertyValue(n).trim(); }
 
-  // Cool-to-warm 5-stop ramp tuned to the editorial palette.
-  // Semantically: cool = low yields, warm = high yields.
+  // Semantic colour ramp: 2s10s slope (10Y − 2Y in %, mapped to cmin=-2, cmax=3).
+  //   red    → curve is inverted   (recession signal)
+  //   gray   → flat
+  //   blue   → normal positive slope
+  //   green  → steep curve         (recovery / inflation premium)
+  // Replaces the older "colour = yield magnitude" scheme, which made the
+  // whole surface look monochrome dark whenever rates were uniformly low.
   function colorRamp() {
     return [
-      [0.00, '#0a1f2e'],   // deep ink (~0%)
-      [0.28, '#1f5468'],   // teal-slate  (~4%)
-      [0.55, '#c9a84c'],   // editorial gold (~9%)
-      [0.78, '#c44a62'],   // editorial rose (~12%)
-      [1.00, '#fbe8e6'],   // cream (peak 1981 highs)
+      [0.00, '#7f1d1d'],   // deep red    — −2.0 %  (1980 Volcker peak)
+      [0.30, '#dc2626'],   // red         — −0.5 %  (mild inversion)
+      [0.40, '#a8a29e'],   // warm gray   —  0 %    (flat)
+      [0.50, '#7dd3fc'],   // light blue  — +0.5 %
+      [0.70, '#38bdf8'],   // sky blue    — +1.5 %  (normal)
+      [1.00, '#34d399'],   // green       — +3.0 %  (steep)
     ];
   }
 
@@ -940,43 +953,57 @@
     const slicedMatrix = p.matrix.slice(s, e + 1);
     const sel          = e;                  // highlight = right end of window
 
+    // Per-row 2s10s slope (10Y − 2Y, in %).  Broadcast across all tenors so
+    // every cell on a given date carries the same colour — that day's regime.
+    const slopeMatrix = slicedMatrix.map(row => {
+      const ten = row[I_10Y], two = row[I_2Y];
+      const spread = (ten != null && two != null) ? (ten - two) : 0;
+      return TENOR_YEARS.map(() => spread);
+    });
+
     const surface = {
       type: 'surface',
       x: TENOR_YEARS,
       y: slicedDates,
       z: slicedMatrix,
-      cmin: 0, cmax: 16,
+      surfacecolor: slopeMatrix,    // decouples colour from elevation
+      cmin: -2.0, cmax: 3.0,        // % spread range — anchored to history
       colorscale: colorRamp(),
       showscale: true,
       opacity: 1.0,
-      // No contour overlay — keeps the surface reading as a smooth blanket
       contours: { x: { show: false }, y: { show: false }, z: { show: false } },
-      // Soft "fabric" lighting: matte, almost no specular hot-spots
       lighting: {
-        ambient:   0.72,
-        diffuse:   0.82,
-        specular:  0.08,
-        roughness: 0.95,
+        ambient:   0.78,
+        diffuse:   0.86,
+        specular:  0.10,
+        roughness: 0.92,
         fresnel:   0.15,
       },
       lightposition: { x: 100, y: -200, z: 120 },
       hidesurface: false,
-      hovertemplate: 'Tenor %{x:.2f}y<br>%{y}<br>Yield %{z:.2f}%<extra></extra>',
+      hovertemplate:
+        'Tenor %{x:.2f}y<br>%{y}<br>Yield %{z:.2f}%<br>2s10s %{surfacecolor:+.2f}%<extra></extra>',
       colorbar: {
-        title: { text: 'Yield %', font: { color: cssVar('--gold'), size: 10 } },
+        title: { text: '2s10s slope (%)', font: { color: cssVar('--gold'), size: 10 } },
         tickfont: { color: cssVar('--dim'), size: 10 },
+        tickvals: [-2, -0.5, 0, 0.5, 1.5, 3],
+        ticktext: ['−2', '−0.5', '0', '+0.5', '+1.5', '+3'],
         thickness: 10, len: 0.7, x: 1.02,
         outlinecolor: cssVar('--hairline'),
       },
     };
 
+    // Selected-date overlay drawn on top of the surface — light blue so it
+    // pops against any regime colour underneath (red / blue / green).
+    const HILITE = '#7dd3fc';
     const slice = {
       type: 'scatter3d', mode: 'lines+markers',
       x: TENOR_YEARS,
       y: TENOR_YEARS.map(() => p.dates[sel]),
       z: p.matrix[sel],
-      line: { color: cssVar('--text'), width: 6 },
-      marker: { size: 4, color: cssVar('--gold'), line: { color: cssVar('--text'), width: 1 } },
+      line:   { color: HILITE, width: 6 },
+      marker: { size: 5, color: HILITE,
+                line: { color: '#bae6fd', width: 1.5 } },
       hovertemplate: '%{y} · %{x:.2f}y · %{z:.2f}%<extra></extra>',
       showlegend: false,
     };
