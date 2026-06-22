@@ -493,8 +493,13 @@
 </nav>
 
 <!-- ═══ MOBILE MENU ═══ -->
-<div id="mob-menu" class="mob-menu" role="dialog" aria-label="Mobile navigation">
-  <a href="/">← Main Site</a>
+<div id="mob-menu-overlay" class="mob-menu-overlay"></div>
+<div id="mob-menu" class="mob-menu" role="navigation" aria-label="Mobile navigation">
+  <div class="mob-menu-head">
+    <span class="mob-menu-head-label">Menu</span>
+    <button class="mob-menu-close" id="mob-menu-close" aria-label="Close menu">&#x2715;</button>
+  </div>
+  <a href="/" style="color:var(--gold);">&larr; Main Site</a>
   <div class="mob-menu-divider"></div>
   <a href="index.html#about">About</a>
   <a href="index.html#experience">Experience</a>

@@ -41,7 +41,12 @@
 </nav>
 
 <!-- ═══ MOBILE MENU ═══ -->
-<div id="mob-menu" class="mob-menu" role="dialog" aria-label="Mobile navigation">
+<div id="mob-menu-overlay" class="mob-menu-overlay"></div>
+<div id="mob-menu" class="mob-menu" role="navigation" aria-label="Mobile navigation">
+  <div class="mob-menu-head">
+    <span class="mob-menu-head-label">Menu</span>
+    <button class="mob-menu-close" id="mob-menu-close" aria-label="Close menu">&#x2715;</button>
+  </div>
   <a href="#about">About</a>
   <a href="#experience">Experience</a>
   <a href="#projects">Projects</a>
@@ -49,7 +54,7 @@
   <a href="#skills">Skills</a>
   <a href="#contact">Contact</a>
   <div class="mob-menu-divider"></div>
-  <a href="my-portfolio.html" style="font-size:clamp(1rem,5vw,1.3rem);letter-spacing:0.12em;color:var(--gold);">My Portfolio →</a>
+  <a href="my-portfolio.html" style="color:var(--gold);">My Portfolio &rarr;</a>
 </div>
 
 <!-- ═══ TICKER TAPE ═══ -->

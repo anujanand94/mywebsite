@@ -236,37 +236,43 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
    MOBILE HAMBURGER MENU
 ═══════════════════════════════════════════ */
 (function initMobileMenu() {
-  const btn  = document.getElementById('mob-menu-btn');
-  const menu = document.getElementById('mob-menu');
+  const btn     = document.getElementById('mob-menu-btn');
+  const menu    = document.getElementById('mob-menu');
+  const overlay = document.getElementById('mob-menu-overlay');
+  const closeBt = document.getElementById('mob-menu-close');
   if (!btn || !menu) return;
 
   function openMenu() {
-    btn.classList.add('open');
     menu.classList.add('open');
+    btn.classList.add('open');
+    if (overlay) overlay.classList.add('open');
     btn.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
   }
 
   function closeMenu() {
-    btn.classList.remove('open');
     menu.classList.remove('open');
+    btn.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
     btn.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
   }
 
-  btn.addEventListener('click', () => {
-    btn.classList.contains('open') ? closeMenu() : openMenu();
+  // Hamburger only OPENS (idempotent). Closing is handled by the X button,
+  // backdrop, links, and Escape — so a stray double-tap can never close it.
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    openMenu();
   });
+
+  if (closeBt) closeBt.addEventListener('click', closeMenu);
+  if (overlay) overlay.addEventListener('click', closeMenu);
 
   // Close when any menu link is tapped
-  menu.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', closeMenu);
-  });
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
 
   // Close on Escape
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeMenu();
-  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
 })();
 
 /* ═══════════════════════════════════════════
