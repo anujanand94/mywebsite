@@ -1274,7 +1274,7 @@ footer {
 }
 @media (max-width: 520px) {
   .nav-links { display: none; }
-  .hero-content { padding: 8vh 5vw 0; gap: 14px; }
+  .hero-content { padding: max(110px, 12vh) 5vw 0; gap: 14px; }
   .hero-name { font-size: clamp(2.8rem, 12vw, 4.5rem); }
   .hero-stats { gap: 14px; }
   .hero-ctas { flex-direction: column; }
@@ -1282,6 +1282,50 @@ footer {
   /* Gallery single column on small phones */
   .gallery-photos { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .cert-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOUCH / MOBILE FIXES
+   Targets touch screens (phones & tablets) via pointer media query.
+═══════════════════════════════════════════════════════════════════════════ */
+@media (hover: none) and (pointer: coarse) {
+
+  /* 1. Custom cursor — not needed on touch, reset to default */
+  body { cursor: auto !important; }
+  #cursor-dot, #cursor-ring { display: none !important; }
+
+  /* 2. Hero text — show immediately without scroll-driven fade.
+        The scroll-scrub video animation is a desktop-only feature;
+        on mobile the text must always be readable. */
+  .hero-eyebrow, .hero-name, .hero-tagline,
+  .hero-stats, .hero-summary, .hero-ctas {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    transition: none !important;
+  }
+
+  /* 3. Darken the hero gradient at the top so text over the
+        video is readable even when the portrait/face is light. */
+  .hero-gradient {
+    background: linear-gradient(
+      to top,
+      rgba(8,8,8,0.92) 0%,
+      rgba(8,8,8,0.55) 30%,
+      rgba(8,8,8,0.38) 65%,
+      rgba(8,8,8,0.30) 100%
+    );
+  }
+
+  /* 4. Heavier text-shadow for contrast against skin tones on mobile */
+  .hero-name {
+    text-shadow: 0 2px 20px rgba(0,0,0,1),
+                 0 0 50px rgba(0,0,0,0.95),
+                 0 0 80px rgba(0,0,0,0.8);
+  }
+  .hero-eyebrow, .hero-tagline, .hero-summary {
+    text-shadow: 0 1px 12px rgba(0,0,0,0.98),
+                 0 0 30px rgba(0,0,0,0.9);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
