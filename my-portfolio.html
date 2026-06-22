@@ -272,8 +272,11 @@
 
     /* ── Mobile ── */
     @media (max-width: 768px) {
-      .pf-hero { padding: 0 24px 60px; min-height: 90vh; }
-      .pf-back { left: 24px; top: 95px; }
+      /* Push hero content below the fixed nav + back link so the big
+         title no longer overlaps the A·A logo and "Back to main site". */
+      .pf-hero { padding: 150px 24px 60px; min-height: auto; justify-content: flex-start; }
+      .pf-hero-title { margin-bottom: 36px; }
+      .pf-back { left: 24px; top: 110px; }
       .pf-hero-stats { grid-template-columns: repeat(2, 1fr); }
       .pf-content { padding: 48px 24px 80px; }
       .pf-perf-grid { grid-template-columns: 1fr; }
@@ -448,6 +451,30 @@
       font-size: 0.63rem; color: rgba(244,239,230,0.48);
       font-weight: 300; line-height: 1.65;
     }
+
+    /* ── Light-mode overrides for the memo drawer ──
+       Elements using var(--text)/var(--text-2) flip automatically; these
+       rules fix the hardcoded dark backgrounds and hardcoded light text. */
+    :root[data-theme="light"] #memo-drawer {
+      background: #fbf8ee;
+      border-left-color: rgba(168,134,44,0.28);
+      scrollbar-color: rgba(168,134,44,0.25) transparent;
+    }
+    :root[data-theme="light"] #memo-drawer::-webkit-scrollbar-thumb { background: rgba(168,134,44,0.25); }
+    :root[data-theme="light"] .memo-closebar {
+      background: rgba(251,248,238,0.97);
+      border-bottom-color: rgba(168,134,44,0.18);
+    }
+    :root[data-theme="light"] .memo-close-btn { color: rgba(31,28,20,0.5); }
+    :root[data-theme="light"] .memo-section-body,
+    :root[data-theme="light"] .memo-bullets li { color: rgba(31,28,20,0.78); }
+    :root[data-theme="light"] .radar-t { color: rgba(31,28,20,0.92); }
+    :root[data-theme="light"] .radar-d { color: rgba(31,28,20,0.6); }
+    :root[data-theme="light"] .mbadge-med {
+      background: rgba(31,28,20,0.05); color: rgba(31,28,20,0.6); border-color: rgba(31,28,20,0.18);
+    }
+    :root[data-theme="light"] .memo-stat-val.g { color: #0f7a3c; }
+    :root[data-theme="light"] .memo-stat-val.r { color: #b03030; }
 
     @media (max-width: 768px) {
       #memo-drawer { width: 100vw; border-left: none; }
