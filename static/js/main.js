@@ -233,6 +233,43 @@ function closeLightbox() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
 /* ═══════════════════════════════════════════
+   MOBILE HAMBURGER MENU
+═══════════════════════════════════════════ */
+(function initMobileMenu() {
+  const btn  = document.getElementById('mob-menu-btn');
+  const menu = document.getElementById('mob-menu');
+  if (!btn || !menu) return;
+
+  function openMenu() {
+    btn.classList.add('open');
+    menu.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    btn.classList.remove('open');
+    menu.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  btn.addEventListener('click', () => {
+    btn.classList.contains('open') ? closeMenu() : openMenu();
+  });
+
+  // Close when any menu link is tapped
+  menu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', closeMenu);
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeMenu();
+  });
+})();
+
+/* ═══════════════════════════════════════════
    SMOOTH SCROLL for nav links
 ═══════════════════════════════════════════ */
 document.querySelectorAll('a[href^="#"]').forEach(a => {

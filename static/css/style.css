@@ -1272,8 +1272,67 @@ footer {
   .profile-strip { padding: 24px 6vw; }
   .profile-strip-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
 }
+/* ── Hamburger button (hidden on desktop, shown on mobile) ── */
+.mob-menu-btn {
+  display: none;
+  background: none; border: none;
+  flex-direction: column; align-items: center;
+  justify-content: center; gap: 5px;
+  padding: 8px; cursor: pointer; flex-shrink: 0;
+}
+.mob-menu-btn span {
+  display: block;
+  width: 22px; height: 1.5px;
+  background: var(--gold); border-radius: 1px;
+  transition: transform 0.25s ease, opacity 0.2s, width 0.2s;
+  transform-origin: center;
+}
+.mob-menu-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.mob-menu-btn.open span:nth-child(2) { opacity: 0; width: 0; }
+.mob-menu-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* ── Mobile full-screen menu ── */
+.mob-menu {
+  position: fixed;
+  top: 36px; left: 0; right: 0; bottom: 0;
+  background: rgba(6,6,6,0.97);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  z-index: 9997;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 36px;
+  opacity: 0; pointer-events: none; visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0s 0.25s;
+}
+.mob-menu.open {
+  opacity: 1; pointer-events: auto; visibility: visible;
+  transition: opacity 0.25s ease, visibility 0s;
+}
+.mob-menu a {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 9vw, 2.8rem); font-weight: 300;
+  color: var(--text); text-decoration: none;
+  letter-spacing: 0.04em; line-height: 1;
+  position: relative; padding-bottom: 3px;
+  transition: color 0.2s;
+}
+.mob-menu a::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; width: 0; height: 1px;
+  background: var(--gold); transition: width 0.25s ease;
+}
+.mob-menu a:active,
+.mob-menu a:focus { color: var(--gold); outline: none; }
+.mob-menu a:active::after,
+.mob-menu a:focus::after { width: 100%; }
+.mob-menu-divider {
+  width: 40px; height: 1px;
+  background: rgba(201,168,76,0.25);
+}
+
 @media (max-width: 520px) {
   .nav-links { display: none; }
+  .mob-menu-btn { display: flex; }
   .hero-content { padding: max(110px, 12vh) 5vw 0; gap: 14px; }
   .hero-name { font-size: clamp(2.8rem, 12vw, 4.5rem); }
   .hero-stats { gap: 14px; }

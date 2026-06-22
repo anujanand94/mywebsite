@@ -305,7 +305,7 @@
 
     /* ── Memo Overlay ── */
     #memo-overlay {
-      position: fixed; inset: 0; z-index: 1100;
+      position: fixed; inset: 0; z-index: 10001;
       background: rgba(0,0,0,0.65);
       backdrop-filter: blur(4px);
       opacity: 0; pointer-events: none;
@@ -319,7 +319,7 @@
       width: min(680px, 100vw);
       background: #0d0d0d;
       border-left: 1px solid rgba(201,168,76,0.2);
-      z-index: 1101; overflow-y: auto;
+      z-index: 10002; overflow-y: auto;
       transform: translateX(100%);
       transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
       display: flex; flex-direction: column;
@@ -454,6 +454,13 @@
       .memo-body { padding: 24px 20px 60px; }
       .memo-ticker { font-size: 2.2rem; }
       .memo-stats-row { grid-template-columns: repeat(2,1fr); }
+      /* Larger tap target for close button */
+      .memo-closebar { padding: 14px 20px; }
+      .memo-close-btn {
+        min-width: 44px; min-height: 44px;
+        font-size: 1.4rem;
+        display: flex; align-items: center; justify-content: center;
+      }
     }
   </style>
 </head>
@@ -480,7 +487,21 @@
     <li><a href="index.html#contact">Contact</a></li>
     <li class="theme-toggle-li"><button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button></li>
   </ul>
+  <button class="mob-menu-btn" id="mob-menu-btn" aria-label="Open navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- ═══ MOBILE MENU ═══ -->
+<div id="mob-menu" class="mob-menu" role="dialog" aria-label="Mobile navigation">
+  <a href="/">← Main Site</a>
+  <div class="mob-menu-divider"></div>
+  <a href="index.html#about">About</a>
+  <a href="index.html#experience">Experience</a>
+  <a href="index.html#projects">Projects</a>
+  <a href="index.html#skills">Skills</a>
+  <a href="index.html#contact">Contact</a>
+</div>
 
 <!-- ═══ HERO ═══ -->
 <div class="pf-hero">
