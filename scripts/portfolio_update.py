@@ -25,32 +25,15 @@ except ImportError:
 
 # ── Holdings config ───────────────────────────────────────────────────────────
 # Update avg_cost if you average down / add to a position.
-# CRM is a CI CDR on NEO/CBOE Canada — may not be in yfinance (see fallback below).
 H = {
-    # sym        yf_ticker    qty       avg_cost    ccy
-    'BIP.UN': ('BIP-UN.TO',  2.0499,   50.11,   'CAD'),
-    'CMI':    ('CMI',        0.2532,   395.22,  'USD'),
-    'CRM':    ('CRM.NE',     21.2027,  12.97,   'CAD'),  # CI CDR (hedged)
-    'CSU':    ('CSU.TO',     0.0474,   4232.0,  'CAD'),
-    'FDS':    ('FDS',        0.6474,   231.30,  'USD'),
-    'HCA':    ('HCA',        0.2850,   527.00,  'USD'),
-    'IDCC':   ('IDCC',       0.2268,   353.88,  'USD'),
-    'TIH':    ('TIH.TO',     1.0091,   141.29,  'CAD'),
-    'TTD':    ('TTD',        5.0000,   20.00,   'USD'),
-    'UNH':    ('UNH',        0.3358,   303.21,  'USD'),
+    # sym     yf_ticker   qty        avg_cost   ccy
+    'ESEA': ('ESEA',     4.3545,    68.89,   'USD'),
+    'GNTX': ('GNTX',    11.0325,   24.02,   'USD'),
 }
 
 NAMES = {
-    'BIP.UN': 'Brookfield Infrastructure Partners L.P.',
-    'CMI':    'Cummins Inc.',
-    'CRM':    'Salesforce CDR (CAD Hedged)',
-    'CSU':    'Constellation Software Inc.',
-    'FDS':    'FactSet Research Systems Inc.',
-    'HCA':    'HCA Healthcare Inc.',
-    'IDCC':   'InterDigital Inc.',
-    'TIH':    'Toromont Industries Ltd.',
-    'TTD':    'The Trade Desk Inc.',
-    'UNH':    'UnitedHealth Group Inc.',
+    'ESEA': 'Euroseas Ltd.',
+    'GNTX': 'Gentex Corp.',
 }
 
 PORTFOLIO = 'my-portfolio.html'
@@ -168,20 +151,22 @@ else:
 
 # 3. Date tags
 html = re.sub(r'As of [A-Z][a-z]+ \d+, \d{4}',           f'As of {today}',           html)
-html = re.sub(r'10 positions · [A-Z][a-z]+ \d+, \d{4}',   f'10 positions · {today}',  html)
+html = re.sub(r'\d+ positions · [A-Z][a-z]+ \d+, \d{4}', f'{len(D)} positions · {today}', html)
 html = re.sub(r'Data as of [A-Z][a-z]+ \d+, \d{4}',       f'Data as of {today}',      html)
 
 # 4. Hero stat values
-ytd_str  = f'+{abs(prt):.1f}%'
-best_str = f'+{D[best]["rp"]:.0f}%'
-lag_str  = f'{MINUS}{abs(D[lag]["rp"]):.0f}%'
+ytd_str  = fr(prt)
+best_str = f'+{D[best]["rp"]:.1f}%'
+lag_str  = f'{MINUS}{abs(D[lag]["rp"]):.1f}%'
 bg_num   = f'{abs(prt):.1f}'
+ret_cls  = 'g' if prt >= 0 else 'r'
 
+# Return stat (handles positive or negative, "Return" label)
 html = re.sub(
-    r'(<div class="pf-hero-stat-val g">)\+[\d\.]+%(<\/div>\s*<div class="pf-hero-stat-label">YTD)',
-    lambda m: m.group(1) + ytd_str + m.group(2), html)
+    r'<div class="pf-hero-stat-val [gr]">[^<]*?<\/div>(\s*<div class="pf-hero-stat-label">Return<\/div>)',
+    f'<div class="pf-hero-stat-val {ret_cls}">{ytd_str}</div>\\1', html)
 html = re.sub(
-    r'(<div class="pf-hero-stat-val g">)\+[\d]+%(<\/div>\s*<div class="pf-hero-stat-label">Best)',
+    r'(<div class="pf-hero-stat-val g">)\+[\d\.]+%(<\/div>\s*<div class="pf-hero-stat-label">Best)',
     lambda m: m.group(1) + best_str + m.group(2), html)
 html = re.sub(
     r'(<div class="pf-hero-stat-val r">)[^<]*?(<\/div>\s*<div class="pf-hero-stat-label">Laggard)',
@@ -189,12 +174,11 @@ html = re.sub(
 html = re.sub(
     r'(<div class="pf-hero-bg-num">)[\d\.]+(<\/div>)',
     lambda m: m.group(1) + bg_num + m.group(2), html)
-# Best/Laggard labels (e.g. "Best · CMI")
+# Best/Laggard labels (e.g. "Best · ESEA")
 html = re.sub(r'(Best · )[A-Z\.]+', rf'\g<1>{best}', html)
 html = re.sub(r'(Laggard · )[A-Z\.]+', rf'\g<1>{lag}', html)
-# YTD in disclaimer
-html = re.sub(r'YTD return \(\+[\d\.]+%\)', f'YTD return ({ytd_str})', html)
-html = re.sub(r'\+[\d\.]+% YTD return',     f'{ytd_str} YTD return', html)
+# Portfolio return in disclaimer
+html = re.sub(r'Portfolio return \([^)]+\)', f'Portfolio return ({ytd_str})', html)
 
 with open(PORTFOLIO, 'w', encoding='utf-8') as f:
     f.write(html)

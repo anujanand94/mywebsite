@@ -178,16 +178,8 @@
 (function initTicker() {
   // ↓ Update these values daily (or via Python script)
   const holdings = [
-    { sym: 'BIP.UN', day: -1.05 },
-    { sym: 'CMI',    day: -3.30 },
-    { sym: 'CRM',    day: 7.57 },
-    { sym: 'CSU',    day: 2.56 },
-    { sym: 'FDS',    day: 2.71 },
-    { sym: 'HCA',    day: -1.65 },
-    { sym: 'IDCC',   day: -1.37 },
-    { sym: 'TIH',    day: 0.25 },
-    { sym: 'TTD',    day: 1.55 },
-    { sym: 'UNH',    day: -0.30 },
+    { sym: 'ESEA', day:  0.00 },
+    { sym: 'GNTX', day:  0.56 },
   ];
 
   const track = document.getElementById('ticker-track');
