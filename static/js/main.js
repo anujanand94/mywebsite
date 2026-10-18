@@ -178,8 +178,8 @@
 (function initTicker() {
   // ↓ Update these values daily (or via Python script)
   const holdings = [
+    { sym: 'ALH',  day:  0.00 },
     { sym: 'ESEA', day:  0.00 },
-    { sym: 'GNTX', day:  0.56 },
   ];
 
   const track = document.getElementById('ticker-track');

@@ -27,13 +27,13 @@ except ImportError:
 # Update avg_cost if you average down / add to a position.
 H = {
     # sym     yf_ticker   qty        avg_cost   ccy
-    'ESEA': ('ESEA',     4.3545,    68.89,   'USD'),
-    'GNTX': ('GNTX',    11.0325,   24.02,   'USD'),
+    'ALH':  ('ALH',     11,        22.75,   'USD'),
+    'ESEA': ('ESEA',     4.4001,    68.9524, 'USD'),
 }
 
 NAMES = {
+    'ALH':  'Alliance Laundry Holdings Inc.',
     'ESEA': 'Euroseas Ltd.',
-    'GNTX': 'Gentex Corp.',
 }
 
 PORTFOLIO = 'my-portfolio.html'
@@ -156,18 +156,18 @@ html = re.sub(r'Data as of [A-Z][a-z]+ \d+, \d{4}',       f'Data as of {today}',
 
 # 4. Hero stat values
 ytd_str  = fr(prt)
-best_str = f'+{D[best]["rp"]:.1f}%'
+best_str = fr(D[best]['rp'])
 lag_str  = f'{MINUS}{abs(D[lag]["rp"]):.1f}%'
 bg_num   = f'{abs(prt):.1f}'
 ret_cls  = 'g' if prt >= 0 else 'r'
 
 # Return stat (handles positive or negative, "Return" label)
 html = re.sub(
-    r'<div class="pf-hero-stat-val [gr]">[^<]*?<\/div>(\s*<div class="pf-hero-stat-label">Return<\/div>)',
+    r'<div class="pf-hero-stat-val [gr]">[^<]*?<\/div>(\s*<div class="pf-hero-stat-label">(?:YTD )?Return<\/div>)',
     f'<div class="pf-hero-stat-val {ret_cls}">{ytd_str}</div>\\1', html)
 html = re.sub(
-    r'(<div class="pf-hero-stat-val g">)\+[\d\.]+%(<\/div>\s*<div class="pf-hero-stat-label">Best)',
-    lambda m: m.group(1) + best_str + m.group(2), html)
+    r'<div class="pf-hero-stat-val [gr]">[^<]*?%(<\/div>\s*<div class="pf-hero-stat-label">Best)',
+    lambda m: f'<div class="pf-hero-stat-val {gc(D[best]["rp"])}">' + best_str + m.group(1), html)
 html = re.sub(
     r'(<div class="pf-hero-stat-val r">)[^<]*?(<\/div>\s*<div class="pf-hero-stat-label">Laggard)',
     lambda m: m.group(1) + lag_str + m.group(2), html)
